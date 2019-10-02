@@ -1,55 +1,43 @@
-# PSoC 6 Device Firmware Update (DFU) Middleware Library
+### PSoC 6 Device Firmware Update (DFU) Middleware Library 4.0
+ 
+### What's Included?
 
-### Overview
+For a complete description of the DFU middleware, refer to [README.md](./README.md)
+and the [DFU API Reference](https://cypresssemiconductorco.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html).
+The revision history of the DFU middleware is also available in the [API Reference Changelog](https://cypresssemiconductorco.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html#group_dfu_changelog).
+New in this release:
 
- The purpose of the DFU middleware library is to provide an SDK for updating
- firmware images. The middleware allows creating two types of projects:
+* Updated the linker scripts to use the single pre-compiled CM0p image.
+  The upgradeable part of the image is the CM4 application.
+* Added the ModusToolbox 2.0 flow support.
+* Added the ARM compiler version 6 support.
+* Added the USB interface (virtual COM) transport.
 
-1. An application loader receives the program and switch to
-   the new application.
-2. A loadable application to be transferred and programmed.
+### Defect Fixes
 
- A project can contain features of both first and second type.
+* Fixed the return value for the SYNC command processing.
 
-### Features
+### Known Issues
 
-* Read firmware images from a host through a number of transport interfaces,
-  e.g. BLE, USB, UART, I2C, SPI.
-* Program a firmware image to the specified address in internal flash,
-  XIP region, or any external memory that supports the DFU API.
-* Copy applications.
-* Validate applications.
-* Safe Update: updates at a temporary location, validates, and if valid,
-  overwrites a working image.
-* Switches applications. Passes parameters in RAM when switching
-  applications.
-* Supports encrypted image files.
-  Transfers encrypted images without decrypting in the middle.
-* Supports many application images, the number of which is limited by 
-  the metadata size. Each image can be an application loader. For example, 
-  512-byte metadata supports up to 63 applications.
-* Supports customization.
-* Supports the CRC-32 checksum to validate data.
+No known issues
 
-### DFU Specific Instructions
+### Supported Software and Tools
 
-The DFU middleware requires configuration files located in the /config
-directory. The directory /config is skipped from a build process, so
-copy the configuration files manually. The application loader requires
-dfu_user.h/c, transport files (e.g. for loading with UART - transport_uart.c/h).
-The loadable application requires dfu_user.h file. 
-For a build, use the dfu linker scripts located in the linker_script directory.
+This version of the DFU middleware was validated for compatibility with the following Software and Tools (add and remove information as needed):
 
-### Quick Start
-
-The [Quick Start section of the DFU Middleware API Reference Guide](https://cypresssemiconductorco.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html#section_dfu_quick_start)
-describes step-by-step instructions to set up a DFU application.
+| Software and Tools                        | Version |
+| :---                                      | :----:  |
+| ModusToolbox Software Environment         | 2.0     |
+| - ModusToolbox Device Configurator        | 2.0     |
+| - Device Firmware Update Host Tool        | 1.1     |
+| - CyMCUElfTool                            | 1.0     |
+| GCC Compiler                              | 7.2.1   |
+| IAR Compiler                              | 8.32    |
+| ARM Compiler 6                            | 6.11    |
 
 ### More information
 
-For more information, refer to the following links:
-
-* [Cypress DFU Middleware Library Release Notes](./RELEASE.md)
+* [README.md](./README.md)
 * [DFU Middleware API Reference Guide](https://cypresssemiconductorco.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html)
 * [AN213924](http://www.cypress.com/an213924) DFU SDK User Guide
 * [CE213903](http://www.cypress.com/ce213903) DFU SDK Basic Communication Code Examples
