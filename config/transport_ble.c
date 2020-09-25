@@ -285,7 +285,8 @@ void DFUCallBack(uint32 event, void* eventParam)
     (void)eventParam;
 
     static uint16_t cyBle_btsDataPacketSize = 0u;
-    static uint8_t  cyBle_btsDataBuffer[CY_FLASH_SIZEOF_ROW + CYBLE_BTS_COMMAND_CONTROL_BYTES_NUM];
+    // Program Data Packet: data (row_size) + address (4 bytes) + crc-32c (4 bytes) + cmd_ctrl_bytes
+    static uint8_t  cyBle_btsDataBuffer[CY_FLASH_SIZEOF_ROW + 8 + CYBLE_BTS_COMMAND_CONTROL_BYTES_NUM];
     
     switch ((cy_en_ble_evt_t)event)
     {
