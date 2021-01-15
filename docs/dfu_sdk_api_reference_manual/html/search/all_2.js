@@ -53,6 +53,7 @@ var searchData=
   ['cy_5fdfu_5frsp_5fsize_5fverify_5fapp',['CY_DFU_RSP_SIZE_VERIFY_APP',['../group__group__dfu__macro__response__size.html#gac4aae8982692f775949c290d5987cb3c',1,'cy_dfu.h']]],
   ['cy_5fdfu_5fsdk_5fmw_5fversion_5fmajor',['CY_DFU_SDK_MW_VERSION_MAJOR',['../group__group__dfu__macro.html#ga70e30cc482773f5a3694dafc21cbe0b6',1,'cy_dfu.h']]],
   ['cy_5fdfu_5fsdk_5fmw_5fversion_5fminor',['CY_DFU_SDK_MW_VERSION_MINOR',['../group__group__dfu__macro.html#gae963703086143c107ae909273bd6d18b',1,'cy_dfu.h']]],
+  ['cy_5fdfu_5fsetappmetadata',['Cy_DFU_SetAppMetadata',['../group__group__dfu__functions.html#gabcdc75d72e323577e207eca9a105f7dd',1,'Cy_DFU_SetAppMetadata(uint32_t appId, uint32_t verifyAddress, uint32_t verifySize, cy_stc_dfu_params_t *params):&#160;cy_dfu.c'],['../group__group__dfu__functions.html#gabcdc75d72e323577e207eca9a105f7dd',1,'Cy_DFU_SetAppMetadata(uint32_t appId, uint32_t verifyAddress, uint32_t verifySize, cy_stc_dfu_params_t *params):&#160;cy_dfu.c']]],
   ['cy_5fdfu_5fsizeof_5fcmd_5fbuffer',['CY_DFU_SIZEOF_CMD_BUFFER',['../group__group__dfu__macro__config.html#ga21b70d16eb321a6d2010b92c8584b782',1,'dfu_user.h']]],
   ['cy_5fdfu_5fsizeof_5fdata_5fbuffer',['CY_DFU_SIZEOF_DATA_BUFFER',['../group__group__dfu__macro__config.html#ga01f0e598d60b05879166f93ef38cecee',1,'dfu_user.h']]],
   ['cy_5fdfu_5fstate_5ffailed',['CY_DFU_STATE_FAILED',['../group__group__dfu__macro__state.html#gab0ee6f2a05184dcf2ded6f3e1c6ff74b',1,'cy_dfu.h']]],
@@ -72,5 +73,5 @@ var searchData=
   ['cy_5fen_5fdfu_5fstatus_5ft',['cy_en_dfu_status_t',['../group__group__dfu__enums.html#gafcff247e9cb8dc6c1282873b0d2dae1b',1,'cy_dfu.h']]],
   ['cy_5fstc_5fdfu_5fenter_5ft',['cy_stc_dfu_enter_t',['../structcy__stc__dfu__enter__t.html',1,'']]],
   ['cy_5fstc_5fdfu_5fparams_5ft',['cy_stc_dfu_params_t',['../structcy__stc__dfu__params__t.html',1,'']]],
-  ['cypress_20device_20firmware_20update_20_28dfu_29_20middleware_20library_204_2e0',['Cypress Device Firmware Update (DFU) Middleware Library 4.0',['../index.html',1,'']]]
+  ['cypress_20device_20firmware_20update_20_28dfu_29_20middleware_20library',['Cypress Device Firmware Update (DFU) Middleware Library',['../index.html',1,'']]]
 ];

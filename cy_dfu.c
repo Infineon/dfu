@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cy_dfu.c
-* \version 4.0
+* \version 4.10
 *
 *  This file provides the implementation of Cypress DFU SDK.
 *
@@ -22,69 +22,69 @@
 CY_SECTION(".cy_boot_noinit.appId") __USED static uint8_t cy_dfu_appId;
 
 /* The timeout for Cy_DFU_Continue(), in milliseconds */
-#define UPDATE_TIMEOUT                      (20u)
+#define UPDATE_TIMEOUT                      (20U)
 /* The timeout for the default Cy_DFU__TransportWrite() call in milliseconds */
-#define TRANSPORT_WRITE_TIMEOUT             (150u)   
+#define TRANSPORT_WRITE_TIMEOUT             (150U)
 /* The number of bytes per app in the metadata section */
-#define METADATA_BYTES_PER_APP              (8u)
+#define METADATA_BYTES_PER_APP              (8U)
 
-#define UINT16_SIZE                         (2u)
-#define UINT32_SIZE                         (4u)
+#define UINT16_SIZE                         (2U)
+#define UINT32_SIZE                         (4U)
 
-#define NIBBLE_POS                          (4u)
-#define NIBBLE_MSK                          (0xFu)
+#define NIBBLE_POS                          (4U)
+#define NIBBLE_MSK                          (0xFU)
 
-#define SHA1_CHECKSUM_LENGTH                (20u)   /* The SHA1 length is 20 bytes */
+#define SHA1_CHECKSUM_LENGTH                (20U)   /* The SHA1 length is 20 bytes */
 /* A number of uint32_t elements in the SHA1 buffer */
 #define SHA1_BUF_SIZE_UINT32                (SHA1_CHECKSUM_LENGTH/UINT32_SIZE)
 
-#define RSA_CHECKSUM_LENGTH                 (256u)  /* The RSA public key modulo length is 2048 bits = 256 bytes */
+#define RSA_CHECKSUM_LENGTH                 (256U)  /* The RSA public key modulo length is 2048 bits = 256 bytes */
 
-#define CRC_CHECKSUM_LENGTH                 (4u)    /* The size of metadata flash row CRC in bytes */
-#define CRC_POLYNOMIAL                      (0x1EDC6F41u) /* The CRC 32 polynomial */
-#define CRC_LFSR_SEED                       (0xFFFFFFFFu)
-#define CRC_DATA_REVERSE                    (1u)
-#define CRC_DATA_XOR                        (0u)
-#define CRC_REM_REVERSE                     (1u)
-#define CRC_REM_XOR                         (0xFFFFFFFFu)
-#define CRC_TABLE_SIZE                      (16u)           /* A number of uint32_t elements in the CRC32 table */
-#define CRC_INIT                            (0xFFFFFFFFu)
+#define CRC_CHECKSUM_LENGTH                 (4U)    /* The size of metadata flash row CRC in bytes */
+#define CRC_POLYNOMIAL                      (0x1EDC6F41U) /* The CRC 32 polynomial */
+#define CRC_LFSR_SEED                       (0xFFFFFFFFU)
+#define CRC_DATA_REVERSE                    (1U)
+#define CRC_DATA_XOR                        (0U)
+#define CRC_REM_REVERSE                     (1U)
+#define CRC_REM_XOR                         (0xFFFFFFFFU)
+#define CRC_TABLE_SIZE                      (16U)           /* A number of uint32_t elements in the CRC32 table */
+#define CRC_INIT                            (0xFFFFFFFFU)
 
-#define CRC_CCITT_INIT                      (0xFFFFu)
-#define CRC_CCITT_POLYNOMIAL                (0x8408u)
+#define CRC_CCITT_INIT                      (0xFFFFU)
+#define CRC_CCITT_POLYNOMIAL                (0x8408U)
 
-#define STATUS_BYTE_MSK                     (0xFFu)
+#define STATUS_BYTE_MSK                     (0xFFU)
 
 /* The size in bytes of the DFU command parameters */
-#define PARAMS_SIZE                         (8u) 
+#define PARAMS_SIZE                         (8U)
 /* The length in bytes of data in the "Set App Metadata" DFU command */
-#define DATA_LENGTH                         (9u) 
+#define DATA_LENGTH                         (9U)
 /* Possible sizes of the data field in the DFU packets */
-#define DATA_PACKET_SIZE_4BYTES             (4u)
-#define DATA_PACKET_SIZE_6BYTES             (6u)
-#define DATA_PACKET_SIZE_8BYTES             (8u)
-#define DATA_PACKET_SIZE_16BYTES            (16u)
+#define DATA_PACKET_SIZE_4BYTES             (4U)
+#define DATA_PACKET_SIZE_6BYTES             (6U)
+#define DATA_PACKET_SIZE_8BYTES             (8U)
+#define DATA_PACKET_SIZE_16BYTES            (16U)
 
-#define PACKET_DATA_NO_OFFSET               (0u) 
-#define PROGRAM_DATA_CRC_OFFSET             (4u) /* The offset in bytes to the CRC field in the Program Data command */
-#define VERIFY_DATA_CRC_OFFSET              (4u) /* The offset in bytes to the CRC field in the Verify Data command */
+#define PACKET_DATA_NO_OFFSET               (0U)
+#define PROGRAM_DATA_CRC_OFFSET             (4U) /* The offset in bytes to the CRC field in the Program Data command */
+#define VERIFY_DATA_CRC_OFFSET              (4U) /* The offset in bytes to the CRC field in the Verify Data command */
 
 /* The size in bytes of the data field in the Verify Application command */
-#define VERIFY_APP_DATA_SIZE                (1u) 
+#define VERIFY_APP_DATA_SIZE                (1U)
 /* The offset in bytes to the Application Length in the application metadata */
-#define METADATA_APP_LENGTH_OFFSET          (4u) 
+#define METADATA_APP_LENGTH_OFFSET          (4U)
 /* The offset in bytes to the application length in the data field of the Set Application Metadata command packet*/
-#define SET_APP_METADATA_OFFSET             (1u) 
+#define SET_APP_METADATA_OFFSET             (1U)
 /* The offset to the application start address in the data field of the Set Application Metadata command packet */
-#define SET_APP_METADATA_LENGTH_OFFSET      (5u) 
+#define SET_APP_METADATA_LENGTH_OFFSET      (5U)
 /* The offset to  the "to" part of the data field in the Get Metadata packet */
-#define GET_METADATA_TO_OFFSET              (2u) 
-  
-/* The size in bytes of the App Size field in Cypress Simplified User Application Object */ 
-#define SIMPLIFIED_APP_APPSIZE_SIZE         (4u)        
+#define GET_METADATA_TO_OFFSET              (2U)
+
+/* The size in bytes of the App Size field in Cypress Simplified User Application Object */
+#define SIMPLIFIED_APP_APPSIZE_SIZE         (4U)
 
 /* The offset in bytes to the VT offset in the Cypress Standard User Application Object */
-#define CYPRESS_APP_VTOFFSET_OFFSET_BYTES   (0x10u) 
+#define CYPRESS_APP_VTOFFSET_OFFSET_BYTES   (0x10U)
 /* The offset in uint32 to the VT offset in the Cypress Standard User Application Object */
 #define CYPRESS_APP_VTOFFSET_OFFSET_UINT32  (CYPRESS_APP_VTOFFSET_OFFSET_BYTES/UINT32_SIZE)
 #define TOC_EMPTY                           (0UL) /* Both TOC2 and RTOC2 are empty */
@@ -93,20 +93,20 @@ CY_SECTION(".cy_boot_noinit.appId") __USED static uint8_t cy_dfu_appId;
 #define PUBLIC_KEY_OFFSET                   (8UL) /* The Public Key offset in the Public key Object */
 
 /* The address of the the verify application function entry in the Flash Boot shared functions table */
-#define VERIFY_APP_TABLE_ADDR               (0x16002040UL) 
+#define VERIFY_APP_TABLE_ADDR               (0x16002040UL)
 /* The address of the the verify key function entry in the Flash Boot shared functions table */
 #define IS_VALID_KEY_TABLE_ADDR             (0x16002044UL)
 /* The address of the the verify TOC function entry in the Flash Boot shared functions table */
 #define VALIDATE_TOC_TABLE_ADDR             (0x1600204CUL)
 
 /* For the DFU packet */
-#define PACKET_SOP_VALUE                    (0x01u)
-#define PACKET_EOP_VALUE                    (0x17u)
-#define PACKET_SOP_IDX                      (0x00u)
-#define PACKET_CMD_IDX                      (0x01u)
-#define PACKET_SIZE_IDX                     (0x02u)
-#define PACKET_DATA_IDX                     (0x04u)
-#define PACKET_CHECKSUM_LENGTH              (2u)    /* The length in bytes of a packet checksum field */
+#define PACKET_SOP_VALUE                    (0x01U)
+#define PACKET_EOP_VALUE                    (0x17U)
+#define PACKET_SOP_IDX                      (0x00U)
+#define PACKET_CMD_IDX                      (0x01U)
+#define PACKET_SIZE_IDX                     (0x02U)
+#define PACKET_DATA_IDX                     (0x04U)
+#define PACKET_CHECKSUM_LENGTH              (2U)    /* The length in bytes of a packet checksum field */
 
 
 /* The Flash Boot verification functions*/
@@ -156,17 +156,17 @@ static cy_en_dfu_status_t ReadVerifyPacket(uint8_t packet[], bool *noResponse, u
 static cy_en_dfu_status_t WritePacket(cy_en_dfu_status_t status, uint8_t *packet, uint32_t rspSize);
 static void EnterResponse(uint8_t *packet, uint32_t *rspSize, uint32_t *state);
 
-static cy_en_dfu_status_t CopyToDataBuffer(uint8_t dataBuffer[], uint32_t *dataOffset, uint8_t const packet[], 
+static cy_en_dfu_status_t CopyToDataBuffer(uint8_t dataBuffer[], uint32_t *dataOffset, uint8_t const packet[],
                                                 uint32_t packetSize);
 
-static cy_en_dfu_status_t CommandEnter(uint8_t *packet, uint32_t *rspSize, uint32_t *state, 
+static cy_en_dfu_status_t CommandEnter(uint8_t *packet, uint32_t *rspSize, uint32_t *state,
                                             cy_stc_dfu_params_t *params);
 static cy_en_dfu_status_t CommandProgramData(uint8_t *packet, uint32_t *rspSize, cy_stc_dfu_params_t *params);
 
 #if CY_DFU_OPT_ERASE_DATA != 0
 static cy_en_dfu_status_t CommandEraseData(uint8_t *packet, uint32_t *rspSize, cy_stc_dfu_params_t *params);
 #endif
-    
+
 #if CY_DFU_OPT_VERIFY_DATA != 0
 static cy_en_dfu_status_t CommandVerifyData(uint8_t *packet, uint32_t *rspSize, cy_stc_dfu_params_t *params);
 #endif /* CY_DFU_OPT_VERIFY_DATA != 0*/
@@ -179,7 +179,7 @@ static cy_en_dfu_status_t CommandSendData(uint8_t *packet, uint32_t *rspSize, cy
 static cy_en_dfu_status_t CommandVerifyApp(uint8_t *packet, uint32_t *rspSize, cy_stc_dfu_params_t *params);
 #endif /* CY_DFU_OPT_VERIFY_APP != 0 */
 
-static cy_en_dfu_status_t CommandSetAppMetadata(uint8_t *packet, uint32_t *rspSize, 
+static cy_en_dfu_status_t CommandSetAppMetadata(uint8_t *packet, uint32_t *rspSize,
                                                      cy_stc_dfu_params_t *params);
 
 #if CY_DFU_OPT_GET_METADATA != 0
@@ -191,7 +191,7 @@ static cy_en_dfu_status_t CommandGetMetadata(uint8_t *packet, uint32_t *rspSize,
                                                       cy_stc_dfu_params_t *params);
 #endif /* CY_DFU_OPT_SET_EIVECTOR != 0 */
 
-static cy_en_dfu_status_t CommandUnsupported(uint8_t *packet, uint32_t *rspSize, 
+static cy_en_dfu_status_t CommandUnsupported(uint8_t packet[], uint32_t *rspSize,
                                                               cy_stc_dfu_params_t *params );
 static cy_en_dfu_status_t ContinueHelper(uint32_t command, uint8_t *packet, uint32_t *rspSize,
                                               cy_stc_dfu_params_t *params, bool *noResponse);
@@ -214,47 +214,47 @@ static cy_en_dfu_status_t ContinueHelper(uint32_t command, uint8_t *packet, uint
 * It does not return until the DFU operation is complete or an error
 * is detected.
 * This function provides an example of how to use the DFU SDK to quickly
-* design a DFU system. 
+* design a DFU system.
 * \note This function blocks, suspending all other tasks until the DFU operation
-*       is complete. To execute other tasks while updating, design your code to 
-*       call Cy_DFU_Init() and Cy_DFU_Continue() directly. Only one updating 
-*       operation can be done at a time - the user's code must ensure this. 
+*       is complete. To execute other tasks while updating, design your code to
+*       call Cy_DFU_Init() and Cy_DFU_Continue() directly. Only one updating
+*       operation can be done at a time - the user's code must ensure this.
 * \note The function set timeout field in \ref cy_stc_dfu_params_t.timeout
 *       to 20 ms - enough for UART (at 115200 bps), I2C, SPI, USB-HID,
 *       and BLE OTA in most cases.
 * \note The function enables global interrupts.
 *
-* \param state      The pointer to a state variable, that is updated by 
+* \param state      The pointer to a state variable, that is updated by
 *                   the function. See \ref group_dfu_macro_state.
-* \param timeout    The max amount of time (in milliseconds) for which the 
+* \param timeout    The max amount of time (in milliseconds) for which the
 *                   function is waiting for receiving of the Enter DFU command.
 *
 * \return See \ref cy_en_dfu_status_t.
 *
 *******************************************************************************/
 cy_en_dfu_status_t  Cy_DFU_Complete(uint32_t *state, uint32_t timeout)
-{   
+{
     /* The DFU parameters, used to configure a DFU */
     cy_stc_dfu_params_t params;
-    
+
     /* The status code for the DFU SDK API */
     cy_en_dfu_status_t status;
-    
+
     /*
     * Used to count seconds, to convert counts to seconds use
     * counterTimeoutSeconds(SECONDS, DFU_DO_TIMEOUT)
     */
-    uint32_t count = 0u;
+    uint32_t count = 0U;
     bool finished = false; /* To exit do {} while () loop */
-    
+
     /* The buffer to save DFU commands to */
     CY_ALIGN(4) uint8_t buffer[CY_DFU_SIZEOF_DATA_BUFFER];
     /* The buffer for packets sent and received with the Transport API */
     CY_ALIGN(4) uint8_t packet[CY_DFU_SIZEOF_CMD_BUFFER ];
-    
+
     /* Enable the global interrupts */
     __enable_irq();
-    
+
     params.dataBuffer =   &buffer[0];
     params.packetBuffer = &packet[0];
 
@@ -262,22 +262,23 @@ cy_en_dfu_status_t  Cy_DFU_Complete(uint32_t *state, uint32_t timeout)
     uint8_t elVectorBuffer[DATA_PACKET_SIZE_16BYTES];
     params.encryptionVector = &elVectorBuffer[0];
 #endif /* CY_DFU_OPT_SET_EIVECTOR != 0 */
-    
+
     status = Cy_DFU_Init(state, &params);
 
 
     if (status != CY_DFU_SUCCESS)
     {
-        Cy_SysLib_Halt(0x00u);
+        CY_HALT();
     }
-    
+
     /* Run the DFU */
     params.timeout = UPDATE_TIMEOUT;
+CY_MISRA_FP_BLOCK_START('MISRA C-2012 Rule 2.2',2,'The function is valid as it is replaced with strong function.');
     Cy_DFU_TransportStart();
 
     do
     {
-        
+
         status = Cy_DFU_Continue(state, &params);
         if (*state == CY_DFU_STATE_FINISHED)
         {
@@ -291,7 +292,7 @@ cy_en_dfu_status_t  Cy_DFU_Complete(uint32_t *state, uint32_t timeout)
         }
         else if (*state == CY_DFU_STATE_UPDATING)
         {
-            count = 0u;
+            count = 0U;
         }
         else
         {
@@ -307,8 +308,9 @@ cy_en_dfu_status_t  Cy_DFU_Complete(uint32_t *state, uint32_t timeout)
         }
     }
     while (!finished);
-        
+
     Cy_DFU_TransportStop();
+CY_MISRA_BLOCK_END('MISRA C-2012 Rule 2.2');
     return (status);
 }
 
@@ -324,7 +326,7 @@ cy_en_dfu_status_t  Cy_DFU_Complete(uint32_t *state, uint32_t timeout)
 * Only one updating operation can be done at a time - the user's code must
 * ensure this.
 *
-* \param state      The pointer to a state variable, that is updated by 
+* \param state      The pointer to a state variable, that is updated by
 *                   the function. See \ref group_dfu_macro_state
 * \param params     The pointer to a DFU parameters structure
 *                   See \ref cy_stc_dfu_params_t
@@ -333,7 +335,7 @@ cy_en_dfu_status_t  Cy_DFU_Complete(uint32_t *state, uint32_t timeout)
 * - \ref CY_DFU_SUCCESS if successful.
 * - \ref CY_DFU_ERROR_UNKNOWN either parameter is a NULL pointer.
 *
-* \snippet dfu/snippet/main.c snipped_cy_dfu_init 
+* \snippet dfu/snippet/main.c snipped_cy_dfu_init
 *
 *******************************************************************************/
 cy_en_dfu_status_t Cy_DFU_Init(uint32_t *state, cy_stc_dfu_params_t *params)
@@ -348,7 +350,7 @@ cy_en_dfu_status_t Cy_DFU_Init(uint32_t *state, cy_stc_dfu_params_t *params)
     if (status == CY_DFU_SUCCESS)
     {
         *state = CY_DFU_STATE_NONE;
-        params->dataOffset = 0u;
+        params->dataOffset = 0U;
     }
     return (status);
 }
@@ -357,12 +359,12 @@ cy_en_dfu_status_t Cy_DFU_Init(uint32_t *state, cy_stc_dfu_params_t *params)
 * Function Name: Cy_DFU_ExecuteApp
 ****************************************************************************//**
 *
-* This function transfers control from the current application to another 
+* This function transfers control from the current application to another
 * application. The function performs switching via software reset. In case if
-* application need to switch without reset, for example if it needs to enable 
-* some peripheral during and after the application switching, 
-* use \ref Cy_DFU_SwitchToApp(). 
-* The function does not return. 
+* application need to switch without reset, for example if it needs to enable
+* some peripheral during and after the application switching,
+* use \ref Cy_DFU_SwitchToApp().
+* The function does not return.
 * \note It is assumed appId is a valid application number.
 *
 * \param appId  An application number of the application to switch to.
@@ -391,6 +393,7 @@ void Cy_DFU_ExecuteApp(uint32_t appId)
 static void SwitchToApp(uint32_t stackPointer, uint32_t address)
 {
     __set_MSP(stackPointer);
+CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.1','Casting int to a function pointer is safe as it is guaranteed to have a valid address.');
     ((cy_fn_dfu_jump_ptr_t) address) ();
 
     /* This function does not return */
@@ -406,8 +409,8 @@ static void SwitchToApp(uint32_t stackPointer, uint32_t address)
 *
 * This function switches to the application through the jump instruction.
 * The function should be used when an application switching must be done without
-* a software reset. Possible reason is a need to enable some peripheral during 
-* and after the application switching. In other case use \ref Cy_DFU_ExecuteApp(). 
+* a software reset. Possible reason is a need to enable some peripheral during
+* and after the application switching. In other case use \ref Cy_DFU_ExecuteApp().
 *
 * Before calling this function, ensure all the peripherals and bus masters are
 * in a known state. User is responsible to disable peripherals and to set MCU
@@ -417,27 +420,27 @@ static void SwitchToApp(uint32_t stackPointer, uint32_t address)
 *
 * \param appId      An application number of the application to switch to.
 *
-* \return It doesn't return if succeeds. If failed, returns the status code. 
+* \return It doesn't return if succeeds. If failed, returns the status code.
 *         See \ref cy_en_dfu_status_t.
-* 
+*
 *******************************************************************************/
 cy_en_dfu_status_t Cy_DFU_SwitchToApp(uint32_t appId)
 {
     uint32_t startAddress;
     cy_en_dfu_status_t status;
-    
+
     CY_ASSERT(appId < CY_DFU_MAX_APPS);
-    
+
     status = Cy_DFU_GetAppMetadata(appId, &startAddress, NULL);
 
     if (status == CY_DFU_SUCCESS)
     {
     #if(CY_DFU_APP_FORMAT == CY_DFU_SIMPLIFIED_APP)
         uint32_t offsetVt = ((uint32_t *)(startAddress + SIMPLIFIED_APP_APPSIZE_SIZE))[0];
-        startAddress += SIMPLIFIED_APP_APPSIZE_SIZE + offsetVt; 
+        startAddress += SIMPLIFIED_APP_APPSIZE_SIZE + offsetVt;
     #elif(CY_DFU_APP_FORMAT == CY_DFU_CYPRESS_APP)
         uint32_t offsetVt = ((uint32_t *)startAddress)[CYPRESS_APP_VTOFFSET_OFFSET_UINT32];
-        startAddress += CYPRESS_APP_VTOFFSET_OFFSET_BYTES + offsetVt; 
+        startAddress += CYPRESS_APP_VTOFFSET_OFFSET_BYTES + offsetVt;
     #else
         /* Cypress Basic Application Format (CyBAF) */
     #endif
@@ -452,11 +455,11 @@ cy_en_dfu_status_t Cy_DFU_SwitchToApp(uint32_t appId)
 /*******************************************************************************
 * Function Name: ElfSymbolToAddr
 ****************************************************************************//**
-* 
+*
 * This function is used to convert an ELF file symbol address to uint32_t. \n
-* This is safer than casting a symbol address to an integer because the 
+* This is safer than casting a symbol address to an integer because the
 * function does not produce a MISRA warning at the call side.
-* Also, a function call is more readable and easier to search with the text 
+* Also, a function call is more readable and easier to search with the text
 * editor.
 *
 * \param symbol The address of the ELF file symbol to get the uint32_t value for.
@@ -466,6 +469,7 @@ cy_en_dfu_status_t Cy_DFU_SwitchToApp(uint32_t appId)
 *******************************************************************************/
 static uint32_t ElfSymbolToAddr(void volatile const *symbol)
 {
+CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.6','Casting pointer to a int is safe as symbol must be valid 4-byte value.');
     return (uint32_t) symbol;
 }
 
@@ -477,7 +481,7 @@ static uint32_t ElfSymbolToAddr(void volatile const *symbol)
 * Reads application metadata to \c verifyAddress and \c verifySize.
 * The metadata is supposed to be located in internal flash.
 *
-* This is a weak function and the user may override it in the user's code by 
+* This is a weak function and the user may override it in the user's code by
 * providing a function with the same name.
 * This allows the user to place metadata in any NVM.
 *
@@ -485,21 +489,21 @@ static uint32_t ElfSymbolToAddr(void volatile const *symbol)
 *
 * \param appId          The application number.
 * \param verifyAddress  The pointer to a variable where an application
-*                       verified area start address is stored. 
-* \param verifySize     The pointer to a variable where a size of verified  
+*                       verified area start address is stored.
+* \param verifySize     The pointer to a variable where a size of verified
 *                       application area is stored.
 *
 * \return See \ref cy_en_dfu_status_t.
-* 
+*
 *******************************************************************************/
 __WEAK cy_en_dfu_status_t Cy_DFU_GetAppMetadata(uint32_t appId, uint32_t *verifyAddress, uint32_t *verifySize)
 {
-    cy_en_dfu_status_t status = CY_DFU_SUCCESS; 
-    
+    cy_en_dfu_status_t status = CY_DFU_SUCCESS;
+
     CY_ASSERT(appId < CY_DFU_MAX_APPS);
-    
+
     uint32_t *ptr = (uint32_t*) ( ElfSymbolToAddr(&__cy_boot_metadata_addr) + (appId * METADATA_BYTES_PER_APP) );
-    
+
     if (verifyAddress != NULL)
     {
         *verifyAddress = ptr[0];
@@ -523,7 +527,7 @@ __WEAK cy_en_dfu_status_t Cy_DFU_GetAppMetadata(uint32_t appId, uint32_t *verify
 *
 * \note Ensure the Crypto block is properly initialized
 * and \ref CY_DFU_OPT_CRYPTO_HW is set.
-* 
+*
 * \param address    The pointer to a buffer containing data to compute
 *                   the checksum for. \n
 *                   It must be 4-byte aligned.
@@ -534,18 +538,19 @@ __WEAK cy_en_dfu_status_t Cy_DFU_GetAppMetadata(uint32_t appId, uint32_t *verify
 * \return
 * - true  - If calculation is successful.
 * - false - If calculation is unsuccessful.
-* 
+*
 *******************************************************************************/
 static bool ComputeSha1(uint32_t address, uint32_t length, uint8_t *result)
 {
 
     cy_stc_crypto_context_sha_t cryptoShaContext;
     cy_en_crypto_status_t cryptoStatus;
-    bool statusOk = true; 
-    
+    bool statusOk = true;
+
     cryptoStatus = Cy_Crypto_Enable();
     if (cryptoStatus == CY_CRYPTO_SUCCESS)
     {
+CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.3','Casting result operand to uint32_t is safe as calling function use uint32_t pointer.');
         cryptoStatus = Cy_Crypto_Sha_Run((uint32_t *)address, length, (uint32_t *)result, CY_CRYPTO_MODE_SHA1,
                                           &cryptoShaContext);
         if (cryptoStatus == CY_CRYPTO_SUCCESS)
@@ -594,7 +599,7 @@ static bool VerifySecureAppShort(uint32_t verifyStartAddr, uint32_t verifyLength
 * Function Name: VerifySecureAppFull
 ****************************************************************************//**
 *
-* This function reports whether or not the specified application, TOC, and key 
+* This function reports whether or not the specified application, TOC, and key
 * are valid.
 *
 * \param verifyStartAddr The start address of the application to verify.
@@ -612,9 +617,9 @@ static bool VerifySecureAppFull(uint32_t verifyStartAddr, uint32_t verifyLength,
     Cy_FB_VerifyApp_t   Cy_FB_VerifyApp   = (Cy_FB_VerifyApp_t)   (*(uint32_t *) VERIFY_APP_TABLE_ADDR  );
     Cy_FB_IsValidKey_t  Cy_FB_IsValidKey  = (Cy_FB_IsValidKey_t)  (*(uint32_t *) IS_VALID_KEY_TABLE_ADDR);
     bool status = true;
-    
+
     uint32_t tocAddr = Cy_FB_ValidateToc((uint32_t)& SFLASH->TOC2_OBJECT_SIZE);
-    
+
     if ((tocAddr == TOC_EMPTY) || (tocAddr == TOC_INVALID))
     {
         status = false;
@@ -665,11 +670,11 @@ static bool VerifySecureApp(uint32_t verifyStartAddr, uint32_t verifyLength, uin
 ****************************************************************************//**
 *
 * This function reports whether or not metadata and the specified application is
-* valid. It checks: 
+* valid. It checks:
 * - checksum for applications without format;
 * - application signature for Cypress Standard User Application format.
-* 
-* This is a weak function and the user may override it in the user's code by 
+*
+* This is a weak function and the user may override it in the user's code by
 * providing a function with the same name.
 *
 * \note It is assumed appId is a valid application number.
@@ -677,40 +682,41 @@ static bool VerifySecureApp(uint32_t verifyStartAddr, uint32_t verifyLength, uin
 * \param appId      The application number of the application to be validated.
 * \param params     The pointer to a DFU parameters structure.
 *                   See \ref cy_stc_dfu_params_t .
-* 
+*
 * \return See \ref cy_en_dfu_status_t.
 * - \ref CY_DFU_SUCCESS If the application is valid.
 * - \ref CY_DFU_ERROR_VERIFY If the application is invalid.
-* 
+*
 *******************************************************************************/
 __WEAK cy_en_dfu_status_t Cy_DFU_ValidateApp(uint32_t appId, cy_stc_dfu_params_t *params)
 {
-    
+
     uint32_t appVerifyStartAddress;
     uint32_t appVerifySize;
-    
+
     (void)params;
-    
+
     CY_ASSERT(appId < CY_DFU_MAX_APPS);
-    
+
     cy_en_dfu_status_t status = Cy_DFU_GetAppMetadata(appId, &appVerifyStartAddress, &appVerifySize);
-    
+
 
     if (status == CY_DFU_SUCCESS)
     {
     #if(CY_DFU_APP_FORMAT == CY_DFU_CYPRESS_APP)
-        status = (VerifySecureApp(appVerifyStartAddress, appVerifySize, appVerifyStartAddress + appVerifySize))? 
+        status = (VerifySecureApp(appVerifyStartAddress, appVerifySize, appVerifyStartAddress + appVerifySize))?
                                   CY_DFU_SUCCESS : CY_DFU_ERROR_VERIFY;
     #elif (CY_DFU_APP_FORMAT == CY_DFU_SIMPLIFIED_APP)
         status = (VerifySecureApp(appVerifyStartAddress, appVerifySize, appVerifyStartAddress - RSA_CHECKSUM_LENGTH))?
                                   CY_DFU_SUCCESS : CY_DFU_ERROR_VERIFY;
     #else
         #if(CY_DFU_OPT_CRYPTO_HW != 0)
-            uint32_t sha1buf[SHA1_BUF_SIZE_UINT32]; 
+            uint32_t sha1buf[SHA1_BUF_SIZE_UINT32];
             uint32_t appFooterAddress = appVerifyStartAddress + appVerifySize;
             if (ComputeSha1(appVerifyStartAddress, appVerifySize, (uint8_t*)&sha1buf))
-            { 
-                status = (memcmp((const void *)sha1buf, (const void *)appFooterAddress, SHA1_CHECKSUM_LENGTH) == 0)? 
+            {
+CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.6','Casting int to pointer is safe as it has valid address defined in linker script.');
+                status = (memcmp((const void *)sha1buf, (const void *)appFooterAddress, SHA1_CHECKSUM_LENGTH) == 0)?
                                                                         CY_DFU_SUCCESS : CY_DFU_ERROR_VERIFY;
             }
             else
@@ -733,11 +739,11 @@ __WEAK cy_en_dfu_status_t Cy_DFU_ValidateApp(uint32_t appId, cy_stc_dfu_params_t
 * Function Name: Cy_DFU_GetRunningApp
 ****************************************************************************//**
 *
-* This function reports the application number of the currently running 
+* This function reports the application number of the currently running
 * application.
 *
 * \return application number
-* 
+*
 *******************************************************************************/
 uint32_t Cy_DFU_GetRunningApp(void)
 {
@@ -749,16 +755,16 @@ uint32_t Cy_DFU_GetRunningApp(void)
 * Function Name: Cy_DFU_CopyApp
 ****************************************************************************//**
 *
-* This function copies an application from a temporary location in flash to its 
-* destination location in flash. This function is typically called when updating 
+* This function copies an application from a temporary location in flash to its
+* destination location in flash. This function is typically called when updating
 * an application used as part of an update process, for example updating
 * a BLE stack.
-* \note This API is only for demonstration purpose, use it only when copying 
-* from internal flash to internal flash. For other user cases, implement a 
+* \note This API is only for demonstration purpose, use it only when copying
+* from internal flash to internal flash. For other user cases, implement a
 * custom, more general function.
 *
 * \param destAddress  The start address of the application to copy to.
-* \param srcAddress   The start address of the copy of the application to be 
+* \param srcAddress   The start address of the copy of the application to be
 *                     copied.
 * \param length       The number of bytes to copy.
 * \param rowSize      The size of a flash row in bytes.
@@ -766,7 +772,7 @@ uint32_t Cy_DFU_GetRunningApp(void)
 *                     See \ref cy_stc_dfu_params_t .
 *
 * \return See \ref cy_en_dfu_status_t.
-* 
+*
 *******************************************************************************/
 cy_en_dfu_status_t Cy_DFU_CopyApp(uint32_t destAddress, uint32_t srcAddress, uint32_t length,
                                             uint32_t rowSize, cy_stc_dfu_params_t *params)
@@ -790,7 +796,7 @@ cy_en_dfu_status_t Cy_DFU_CopyApp(uint32_t destAddress, uint32_t srcAddress, uin
         writeAddr += rowSize;
         readAddr  += rowSize;
     }
-    
+
     return (status);
 }
 
@@ -811,14 +817,14 @@ void Cy_DFU_OnResetApp0(void)
     /* Set cy_dfu_appId to ZERO under a non-software reset. This means
      * that the DFU application is scheduled - the initial clean state.
      * The value of cy_dfu_appId is valid only under a software reset.
-     */    
+     */
     if (Cy_SysLib_GetResetReason() != CY_SYSLIB_RESET_SOFT)
     {
-        cy_dfu_appId = 0u;
+        cy_dfu_appId = 0U;
     }
     else
     {
-        if (cy_dfu_appId != 0u)
+        if (cy_dfu_appId != 0U)
         {
             (void) Cy_DFU_SwitchToApp((uint32_t) cy_dfu_appId);
         }
@@ -831,10 +837,10 @@ void Cy_DFU_OnResetApp0(void)
 ****************************************************************************//**
 *
 * This function must be implemented in the user's code.
-* 
+*
 * Reads \c buffer from flash, QSPI flash, or any other external memory type with
 * custom pre and post read commands.
-* 
+*
 * \param address    The address from where to read data, must be aligned to
 *                   a flash row, QSPI flash page, etc.
 * \param length     The length in bytes of data to read, must be multiple of
@@ -852,23 +858,23 @@ void Cy_DFU_OnResetApp0(void)
 * - CY_DFU_SUCCESS - If successful.
 * - CY_DFU_ERROR_LENGTH if \c The length value is invalid.
 * - CY_DFU_ERROR_ADDRESS if \c The address is invalid.
-* 
+*
 *******************************************************************************/
-__WEAK cy_en_dfu_status_t Cy_DFU_ReadData (uint32_t address, uint32_t length, uint32_t ctl, 
+__WEAK cy_en_dfu_status_t Cy_DFU_ReadData (uint32_t address, uint32_t length, uint32_t ctl,
                                                      cy_stc_dfu_params_t *params)
 {
     /*
     * This function does nothing, weak implementation.
     * The purpose of this code is to disable compiler warnings for Non-optimized
-    * builds which do not remove unused functions and require them for the 
+    * builds which do not remove unused functions and require them for the
     * completeness of the linking step.
     */
-    
+
     (void) address;
     (void) length;
     (void) ctl;
     (void) params;
-    
+
     return (CY_DFU_SUCCESS);
 }
 
@@ -878,15 +884,15 @@ __WEAK cy_en_dfu_status_t Cy_DFU_ReadData (uint32_t address, uint32_t length, ui
 ****************************************************************************//**
 *
 * This function must be implemented in the user's code.
-* 
+*
 * Writes the \c buffer to flash, QSPI flash, or any other external memory type
 * with custom pre and post write commands.
-* 
-* \param address    The address to write data to, must be aligned to a flash 
+*
+* \param address    The address to write data to, must be aligned to a flash
 *                   row, QSPI flash page, etc.
-* \param length     The length in bytes of data to be written, must be multiple 
+* \param length     The length in bytes of data to be written, must be multiple
 *                   of a flash row, QSPI flash page, etc.
-* \param ctl        Additional features of the write function: 
+* \param ctl        Additional features of the write function:
 * - CY_DFU_IOCTL_WRITE - Only write.
 * - CY_DFU_IOCTL_ERASE - Erase the sector, the sector size can be bigger
 *   than the size of the page to write.
@@ -898,23 +904,23 @@ __WEAK cy_en_dfu_status_t Cy_DFU_ReadData (uint32_t address, uint32_t length, ui
 * - CY_DFU_SUCCESS - If successful.
 * - CY_DFU_ERROR_LENGTH if \c The length value is invalid.
 * - CY_DFU_ERROR_ADDRESS if \c The address is invalid.
-* 
+*
 *******************************************************************************/
-__WEAK cy_en_dfu_status_t Cy_DFU_WriteData(uint32_t address, uint32_t length, uint32_t ctl, 
+__WEAK cy_en_dfu_status_t Cy_DFU_WriteData(uint32_t address, uint32_t length, uint32_t ctl,
                                                      cy_stc_dfu_params_t *params)
 {
     /*
     * This function does nothing, weak implementation.
     * The purpose of this code is to disable compiler warnings for Non-optimized
-    * builds which do not remove unused functions and require them for the 
+    * builds which do not remove unused functions and require them for the
     * completeness of the linking step.
     */
-    
+
     (void) address;
     (void) length;
     (void) ctl;
     (void) params;
-    
+
     return (CY_DFU_SUCCESS);
 }
 
@@ -923,7 +929,7 @@ __WEAK cy_en_dfu_status_t Cy_DFU_WriteData(uint32_t address, uint32_t length, ui
 * Function Name: Cy_DFU_TransportRead
 ****************************************************************************//**
 * This function must be implemented in the user's code.
-* 
+*
 * This function receives a command packet from the DFU Host via the
 * communication channel. The function waits for a timeout until all bytes are
 * received.
@@ -932,7 +938,7 @@ __WEAK cy_en_dfu_status_t Cy_DFU_WriteData(uint32_t address, uint32_t length, ui
 * \param size   The number of bytes to read.
 * \param count  The pointer to the variable that contains the number of received
 *               bytes.
-* \param timeout The time to wait before the function returns because of a 
+* \param timeout The time to wait before the function returns because of a
 *                timeout, in milliseconds.
 *
 * \return The status of the transmit operation:
@@ -941,21 +947,21 @@ __WEAK cy_en_dfu_status_t Cy_DFU_WriteData(uint32_t address, uint32_t length, ui
 * - See \ref cy_en_dfu_status_t.
 *
 *******************************************************************************/
-__WEAK cy_en_dfu_status_t Cy_DFU_TransportRead(uint8_t buffer[], uint32_t size, uint32_t *count, 
+__WEAK cy_en_dfu_status_t Cy_DFU_TransportRead(uint8_t buffer[], uint32_t size, uint32_t *count,
                                                          uint32_t timeout)
 {
     /*
     * This function does nothing, weak implementation.
     * The purpose of this code is to disable compiler warnings for Non-optimized
-    * builds which do not remove unused functions and require them for the 
+    * builds which do not remove unused functions and require them for the
     * completeness of the linking step.
     */
-    
+
     (void) buffer;
     (void) size;
     (void) count;
     (void) timeout;
-    
+
     return (CY_DFU_SUCCESS);
 }
 
@@ -972,30 +978,30 @@ __WEAK cy_en_dfu_status_t Cy_DFU_TransportRead(uint8_t buffer[], uint32_t size, 
 * \param buffer The pointer response packet buffer.
 * \param size   The number of bytes to transmit.
 * \param count  The pointer to the actual number of transmitted bytes.
-* \param timeout The time to wait before the function returns because of a 
+* \param timeout The time to wait before the function returns because of a
 *        timeout, in milliseconds
 *
 * \return See \ref cy_en_dfu_status_t.
 * The status of the transmit operation:
 * - CY_DFU_SUCCESS - If successful.
 * - CY_DFU_ERROR_TIMEOUT - If no data is transmitted.
-* 
+*
 *******************************************************************************/
-__WEAK cy_en_dfu_status_t Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size, uint32_t *count, 
+__WEAK cy_en_dfu_status_t Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size, uint32_t *count,
                                                           uint32_t timeout)
 {
     /*
     * This function does nothing, weak implementation.
     * The purpose of this code is to disable compiler warnings for Non-optimized
-    * builds which do not remove unused functions and require them for the 
+    * builds which do not remove unused functions and require them for the
     * completeness of the linking step.
     */
-    
+
     (void) buffer;
     (void) size;
     (void) count;
     (void) timeout;
-    
+
     return (CY_DFU_SUCCESS);
 }
 
@@ -1005,7 +1011,7 @@ __WEAK cy_en_dfu_status_t Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size,
 ****************************************************************************//**
 *
 * This function must be implemented in the user's code. \n
-* Resets the communication interface with clearing buffers, offsets, length, 
+* Resets the communication interface with clearing buffers, offsets, length,
 * etc.
 *
 *******************************************************************************/
@@ -1014,7 +1020,7 @@ __WEAK void Cy_DFU_TransportReset(void)
     /*
     * This function does nothing, weak implementation.
     * The purpose of this code is to disable compiler warnings for Non-optimized
-    * builds which do not remove unused functions and require them for the 
+    * builds which do not remove unused functions and require them for the
     * completeness of the linking step.
     */
 }
@@ -1033,7 +1039,7 @@ __WEAK void Cy_DFU_TransportStart(void)
     /*
     * This function does nothing, weak implementation.
     * The purpose of this code is to disable compiler warnings for Non-optimized
-    * builds which do not remove unused functions and require them for the 
+    * builds which do not remove unused functions and require them for the
     * completeness of the linking step.
     */
 }
@@ -1052,7 +1058,7 @@ __WEAK void Cy_DFU_TransportStop(void)
     /*
     * This function does nothing, weak implementation.
     * The purpose of this code is to disable compiler warnings for Non-optimized
-    * builds which do not remove unused functions and require them for the 
+    * builds which do not remove unused functions and require them for the
     * completeness of the linking step.
     */
 }
@@ -1068,17 +1074,17 @@ __WEAK void Cy_DFU_TransportStop(void)
 ****************************************************************************//**
 *
 * This function is used to read a uint16_t value from a byte array. \n
-* MISRA is informed with #pragma that the function has no side effects.
+* MISRA is informed with pragma that the function has no side effects.
 *
 * \param array      The pointer to the byte array to get data from.
 *
 * \return The uint16_t value from the \c array parameter.
-* 
+*
 *******************************************************************************/
 static uint16_t GetU16(uint8_t const array[])
 {
     uint16_t temp;
-    (void) memcpy( &temp, &array[0], UINT16_SIZE);
+    (void) memcpy( (void*)&temp, (const void*)&array[0], UINT16_SIZE);
     return (temp);
 }
 
@@ -1088,17 +1094,17 @@ static uint16_t GetU16(uint8_t const array[])
 ****************************************************************************//**
 *
 * This function is used to read an uint32_t value from a byte array. \n
-* MISRA is informed with #pragma that the function has no side effects.
+* MISRA is informed with pragma that the function has no side effects.
 *
 * \param array      The pointer to the byte array to get data from.
 *
 * \return The uint32_t value from the \c array parameter.
-* 
+*
 *******************************************************************************/
 static uint32_t GetU32(uint8_t const array[])
 {
     uint32_t temp;
-    (void) memcpy( &temp, &array[0], UINT32_SIZE);
+    (void) memcpy( (void*)&temp, (const void*)&array[0], UINT32_SIZE);
     return (temp);
 }
 
@@ -1116,7 +1122,7 @@ static uint32_t GetU32(uint8_t const array[])
 *******************************************************************************/
 static void PutU16(uint8_t array[], uint32_t offset, uint32_t value)
 {
-    (void) memcpy( &array[offset], &value, UINT16_SIZE);
+    (void) memcpy( (void*)&array[offset], (const void*)&value, UINT16_SIZE);
 }
 
 
@@ -1134,7 +1140,7 @@ static void PutU16(uint8_t array[], uint32_t offset, uint32_t value)
     *******************************************************************************/
     static void PutU32(uint8_t array[], uint32_t offset, uint32_t value)
     {
-        (void) memcpy( &array[offset], &value, UINT32_SIZE);
+        (void) memcpy( (void*)&array[offset], (const void*)&value, UINT32_SIZE);
     }
 #endif /* CY_DFU_METADATA_WRITABLE != 0 */
 
@@ -1143,12 +1149,12 @@ static void PutU16(uint8_t array[], uint32_t offset, uint32_t value)
 * Function Name: PacketChecksumIndex
 ****************************************************************************//**
 *
-* This function returns an index to the checksum field in a received packet 
+* This function returns an index to the checksum field in a received packet
 *
 * \param size The DFU packet size value.
 *
 * \return The index to the checksum.
-* 
+*
 *******************************************************************************/
 static uint32_t PacketChecksumIndex(uint32_t size)
 {
@@ -1160,16 +1166,16 @@ static uint32_t PacketChecksumIndex(uint32_t size)
 * Function Name: PacketEopIndex
 ****************************************************************************//**
 *
-* This function returns an index to the end of the packet field in a received 
+* This function returns an index to the end of the packet field in a received
 * packet.
 *
 * \param size  The DFU packet size value.
 *
 * \return Returns an index to the end of the packet.
-* 
+*
 *******************************************************************************/
 static uint32_t PacketEopIndex(uint32_t size)
-{ 
+{
     return (PACKET_DATA_IDX + size + PACKET_CHECKSUM_LENGTH);
 }
 
@@ -1184,7 +1190,7 @@ static uint32_t PacketEopIndex(uint32_t size)
 *                data.
 *
 * \return A DFU packet command value.
-* 
+*
 *******************************************************************************/
 static uint32_t GetPacketCommand(const uint8_t packet[])
 {
@@ -1203,7 +1209,7 @@ static uint32_t GetPacketCommand(const uint8_t packet[])
 *                data.
 *
 * \return A size of the data in bytes in the packet.
-* 
+*
 *******************************************************************************/
 static uint32_t GetPacketDSize(const uint8_t packet[])
 {
@@ -1221,7 +1227,7 @@ static uint32_t GetPacketDSize(const uint8_t packet[])
 *                data.
 * \param offset  The offset within the data bytes in the packet.
 *                E.g. 0 means the first byte of the data.
-* 
+*
 * \return A pointer to the data bytes with the offset in the packet.
 *
 *******************************************************************************/
@@ -1241,7 +1247,7 @@ static uint8_t* GetPacketData(uint8_t packet[], uint32_t offset)
 *                    DFU packet data.
 * \param packetSize  The offset within the data bytes in the packet. \n
 *                    E.g. 0 means the first byte of the data.
-* 
+*
 * \return The DFU packet checksum.
 *
 *******************************************************************************/
@@ -1257,7 +1263,7 @@ static uint32_t GetPacketChecksum(const uint8_t packet[], uint32_t packetSize)
 *
 * This function is used to validate a DFU packet footer.
 *
-* \param packet      The pointer to a byte array containing the 
+* \param packet      The pointer to a byte array containing the
 *                    DFU packet data.
 * \param packetSize  The offset within the data bytes in the packet. \n
 *                    E.g. 0 means the first byte of the data.
@@ -1268,7 +1274,7 @@ static uint32_t GetPacketChecksum(const uint8_t packet[], uint32_t packetSize)
 *******************************************************************************/
 static uint32_t ValidatePacketFooter(const uint8_t packet[], uint32_t packetSize)
 {
-    return ( (packet[PacketEopIndex(packetSize)] == PACKET_EOP_VALUE)? 1ul : 0ul );
+    return ( (packet[PacketEopIndex(packetSize)] == PACKET_EOP_VALUE)? 1UL : 0UL );
 }
 
 
@@ -1311,7 +1317,7 @@ static void SetPacketCmd(uint8_t packet[], uint32_t cmd)
 *
 * This function is used to set a DFU packet size value.
 *
-* \param packet     The pointer to a byte array containing the 
+* \param packet     The pointer to a byte array containing the
 *                   DFU packet data.
 * \param size       The value for the DFU packet size.
 *
@@ -1328,7 +1334,7 @@ static void SetPacketDSize(uint8_t packet[], uint32_t size)
 *
 * This function is used to set a DFU packet checksum value.
 *
-* \param packet     The pointer to a byte array containing the 
+* \param packet     The pointer to a byte array containing the
 *                   DFU packet data.
 * \param size       The DFU packet size value.
 * \param checksum   The value for a DFU packet checksum.
@@ -1367,12 +1373,12 @@ static void SetPacketFooter(uint8_t packet[], uint32_t size)
 * \return See \ref cy_en_dfu_status_t
 * - \ref CY_DFU_SUCCESS - metadata is valid.
 * - \ref CY_DFU_ERROR_VERIFY - metadata is not valid.
-* 
+*
 *******************************************************************************/
 cy_en_dfu_status_t Cy_DFU_ValidateMetadata(uint32_t metadataAddress, cy_stc_dfu_params_t *params)
 {
     const uint32_t metadataLength = ElfSymbolToAddr(&__cy_boot_metadata_length);
-    
+
     uint32_t crc = Cy_DFU_DataChecksum( (uint8_t *)metadataAddress, metadataLength - CRC_CHECKSUM_LENGTH, params);
     uint32_t crcMeta = *(uint32_t *)(metadataAddress + (metadataLength - CRC_CHECKSUM_LENGTH) );
     cy_en_dfu_status_t status = (crc == crcMeta) ? CY_DFU_SUCCESS : CY_DFU_ERROR_VERIFY;
@@ -1388,7 +1394,7 @@ cy_en_dfu_status_t Cy_DFU_ValidateMetadata(uint32_t metadataAddress, cy_stc_dfu_
 * contained
 * in the provided buffer. \n
 * This function is used to calculate the checksum of DFU packets.
-* 
+*
 * MISRA requires this function have no side effects.
 *
 * \param buffer     The buffer containing the data to compute the checksum for.
@@ -1396,21 +1402,21 @@ cy_en_dfu_status_t Cy_DFU_ValidateMetadata(uint32_t metadataAddress, cy_stc_dfu_
 * for.
 *
 * \return A 16-bit checksum for the provided data
-* 
+*
 *******************************************************************************/
 static uint32_t PacketChecksum(const uint8_t buffer[], uint32_t size)
 {
-#if (CY_DFU_OPT_PACKET_CRC != 0u)
+#if (CY_DFU_OPT_PACKET_CRC != 0U)
     uint16_t crc = CRC_CCITT_INIT;
     uint16_t tmp;
     uint32_t i;
     uint16_t tmpIndex;
-    
+
     size += PACKET_DATA_IDX; /* 4 bytes before data in Cypress DFU packet */
-    
+
     tmpIndex = (uint16_t)size;
 
-    if(0u == size)
+    if(0U == size)
     {
         crc = ~crc;
     }
@@ -1420,42 +1426,42 @@ static uint32_t PacketChecksum(const uint8_t buffer[], uint32_t size)
         {
             tmp = buffer[tmpIndex - size];
 
-            for (i = 0u; i < 8u; i++)
+            for (i = 0U; i < 8U; i++)
             {
-                if (0u != ((crc & 0x0001u) ^ (tmp & 0x0001u)))
+                if (0U != ((crc & 0x0001U) ^ (tmp & 0x0001U)))
                 {
-                    crc = (crc >> 1u) ^ CRC_CCITT_POLYNOMIAL;
+                    crc = (crc >> 1U) ^ CRC_CCITT_POLYNOMIAL;
                 }
                 else
                 {
-                    crc >>= 1u;
+                    crc >>= 1U;
                 }
 
-                tmp >>= 1u;
+                tmp >>= 1U;
             }
 
             size--;
         }
-        while(0u != size);
+        while(0U != size);
 
         crc = ~crc;
         tmp = crc;
-        crc = ((uint16_t)(crc << 8u) | (tmp >> 8u) ) & 0xFFFFu;
+        crc = ((uint16_t)(crc << 8U) | (tmp >> 8U) ) & 0xFFFFU;
     }
 
     return ((uint32_t)crc);
 #else
-    uint16_t sum = 0u;
+    uint16_t sum = 0U;
     size += PACKET_DATA_IDX; /* 4 bytes before data in Cypress DFU packet */
-    
-    while (size > 0u)
+
+    while (size > 0U)
     {
         size--;
         sum += buffer[size];
     }
 
-    return ( (uint32_t) (  (1u + ~(uint32_t)sum) & 0xFFFFu  ) );
-#endif /* CY_DFU_OPT_PACKET_CRC != 0u */
+    return ( (uint32_t) (  (1U + ~(uint32_t)sum) & 0xFFFFU  ) );
+#endif /* CY_DFU_OPT_PACKET_CRC != 0U */
 }
 
 
@@ -1469,7 +1475,7 @@ static uint32_t PacketChecksum(const uint8_t buffer[], uint32_t size)
 * commands and a metadata row.
 * \note Ensure the Crypto block is properly initialized
 * if \ref CY_DFU_OPT_CRYPTO_HW is set.
-* 
+*
 * \param address    The pointer to a buffer containing the data to compute
 *                   the checksum for.
 * \param length     The number of bytes in the buffer to compute the checksum
@@ -1478,22 +1484,23 @@ static uint32_t PacketChecksum(const uint8_t buffer[], uint32_t size)
 *                   See \ref cy_stc_dfu_params_t .
 *
 * \return CRC-32C for the provided data.
-* 
+*
 *******************************************************************************/
 uint32_t Cy_DFU_DataChecksum(const uint8_t *address, uint32_t length, cy_stc_dfu_params_t *params)
 {
+    /* Note: param is unused by the current implementation */
+    /* but it may be used in the future, if the Crypto API changes */
+    (void)params;
+
 #if CY_DFU_OPT_CRYPTO_HW != 0 /* Use PDL Hardware Crypto API */
     /* Note that the length will be < 64KB due to the hardware limitation in the Crypto Block. */
     /* If the block size is bigger, use software implementation instead. */
 
-    uint32_t crcOut = 0u;
-    /* Note: param is unused by the current implementation */
-    /* but it may be used in the future, if the Crypto API changes */
-    (void)params;
-    
+    uint32_t crcOut = 0U;
+
     cy_stc_crypto_context_crc_t cryptoCrcContext;
     cy_en_crypto_status_t cryptoStatus;
-    
+
     cryptoStatus = Cy_Crypto_Enable();
     if (cryptoStatus == CY_CRYPTO_SUCCESS)
     {
@@ -1506,11 +1513,13 @@ uint32_t Cy_DFU_DataChecksum(const uint8_t *address, uint32_t length, cy_stc_dfu
         }
         if (cryptoStatus == CY_CRYPTO_SUCCESS)
         {
+CY_MISRA_DEVIATE_BLOCK_START('MISRA C-2012 Rule 11.8',1,'Removing const does not have negative impact as function does not modify data.');
             cryptoStatus = Cy_Crypto_Crc_Run (
                 /* dataPtr */ (void *)address,          /* length        */ (uint16_t) length,
                 /* crcPtr  */ &crcOut,                  /* lfsrInitState */ CRC_LFSR_SEED,
                 /* cfContext     */ &cryptoCrcContext  );
         }
+CY_MISRA_BLOCK_END('MISRA C-2012 Rule 11.8');
         if (cryptoStatus == CY_CRYPTO_SUCCESS)
         {
             cryptoStatus = Cy_Crypto_Sync(CY_CRYPTO_SYNC_BLOCKING);
@@ -1520,22 +1529,22 @@ uint32_t Cy_DFU_DataChecksum(const uint8_t *address, uint32_t length, cy_stc_dfu
     }
     if (cryptoStatus != CY_CRYPTO_SUCCESS)
     {
-        Cy_SysLib_Halt(0x00u);
+        CY_HALT();
     }
-    
+
     return (crcOut);
 #else /* Use software implementation */
     /* Contains generated values to calculate CRC-32C by 4 bits per iteration*/
-    const static uint32_t crcTable[CRC_TABLE_SIZE] = 
+    static const uint32_t crcTable[CRC_TABLE_SIZE] =
     {
-        0x00000000u, 0x105ec76fu, 0x20bd8edeu, 0x30e349b1u,
-        0x417b1dbcu, 0x5125dad3u, 0x61c69362u, 0x7198540du,
-        0x82f63b78u, 0x92a8fc17u, 0xa24bb5a6u, 0xb21572c9u,
-        0xc38d26c4u, 0xd3d3e1abu, 0xe330a81au, 0xf36e6f75u,
+        0x00000000U, 0x105ec76fU, 0x20bd8edeU, 0x30e349b1U,
+        0x417b1dbcU, 0x5125dad3U, 0x61c69362U, 0x7198540dU,
+        0x82f63b78U, 0x92a8fc17U, 0xa24bb5a6U, 0xb21572c9U,
+        0xc38d26c4U, 0xd3d3e1abU, 0xe330a81aU, 0xf36e6f75U,
     };
-    
+
     uint32_t crc = CRC_INIT;
-    if (length != 0u)
+    if (length != 0U)
     {
         do
         {
@@ -1544,7 +1553,7 @@ uint32_t Cy_DFU_DataChecksum(const uint8_t *address, uint32_t length, cy_stc_dfu
             crc = (crc >> NIBBLE_POS) ^ crcTable[crc & NIBBLE_MSK];
             --length;
             ++address;
-        } while (length != 0u);
+        } while (length != 0U);
     }
     return (~crc);
 #endif /* CY_DFU_OPT_CRYPTO_HW != 0 */
@@ -1589,7 +1598,7 @@ static cy_en_dfu_status_t VerifyPacket(uint32_t numberRead, const uint8_t packet
         }
         else /* The packet length is OK */
         {
-            if ( ValidatePacketFooter(packet, packetSize) == 0u )
+            if ( ValidatePacketFooter(packet, packetSize) == 0U )
             {
                 status = CY_DFU_ERROR_DATA;
             }
@@ -1623,13 +1632,13 @@ static cy_en_dfu_status_t VerifyPacket(uint32_t numberRead, const uint8_t packet
 * - \ref CY_DFU_SUCCESS - If a packet is successfully received.
 * - \ref CY_DFU_ERROR_TIMEOUT - If no packet is received during
 *   the timeout period.
-* 
+*
 *******************************************************************************/
 static cy_en_dfu_status_t ReadVerifyPacket(uint8_t packet[], bool *noResponse, uint32_t timeout)
 {
     cy_en_dfu_status_t status;
     uint32_t numberRead = 0U;
-    
+
     status = Cy_DFU_TransportRead( packet, CY_DFU_SIZEOF_CMD_BUFFER, &numberRead, timeout );
 
     if (status == CY_DFU_ERROR_TIMEOUT)
@@ -1658,7 +1667,7 @@ static cy_en_dfu_status_t ReadVerifyPacket(uint8_t packet[], bool *noResponse, u
 *                   to pass back to a DFU Host.
 *
 * \return See \ref cy_en_dfu_status_t
-* 
+*
 *******************************************************************************/
 static cy_en_dfu_status_t WritePacket(cy_en_dfu_status_t status, uint8_t *packet, uint32_t rspSize)
 {
@@ -1678,7 +1687,7 @@ static cy_en_dfu_status_t WritePacket(cy_en_dfu_status_t status, uint8_t *packet
     SetPacketChecksum(packet, rspSize, checksum);
     SetPacketFooter  (packet, rspSize);
 
-    return ( Cy_DFU_TransportWrite(packet, rspSize + CY_DFU_PACKET_MIN_SIZE, &rspSize, 
+    return ( Cy_DFU_TransportWrite(packet, rspSize + CY_DFU_PACKET_MIN_SIZE, &rspSize,
                                         TRANSPORT_WRITE_TIMEOUT));
 }
 
@@ -1692,7 +1701,7 @@ static cy_en_dfu_status_t WritePacket(cy_en_dfu_status_t status, uint8_t *packet
 *
 * \param packet     The pointer to the DFU packet buffer.
 * \param rspSize    The pointer to a response packet size.
-* \param state      The pointer to a state variable, that is updated by 
+* \param state      The pointer to a state variable, that is updated by
 *                   the function. See \ref group_dfu_macro_state.
 *
 *******************************************************************************/
@@ -1705,12 +1714,13 @@ static void EnterResponse(uint8_t *packet, uint32_t *rspSize, uint32_t *state)
         {
             (uint8_t) CY_DFU_SDK_VERSION_MINOR,
             (uint8_t) CY_DFU_SDK_VERSION_MAJOR,
-            0x01u /* Used for BWC with the Bootloader component */
+            0x01U /* Used for BWC with the Bootloader component */
         }
     };
     *state = CY_DFU_STATE_UPDATING;
     *rspSize = sizeof(dfuVersion);
-    (void) memcpy( GetPacketData(packet, PACKET_DATA_NO_OFFSET), &dfuVersion, *rspSize);
+    (void) memcpy( (void*)GetPacketData(packet, PACKET_DATA_NO_OFFSET),
+                    (const void*)&dfuVersion, *rspSize);
 }
 
 
@@ -1725,25 +1735,25 @@ static void EnterResponse(uint8_t *packet, uint32_t *rspSize, uint32_t *state)
 *
 * \param packet     The pointer to the DFU packet buffer.
 * \param rspSize    The pointer to a response packet size.
-* \param state      The pointer to a state variable, that is updated by 
+* \param state      The pointer to a state variable, that is updated by
 *                   the function. See \ref group_dfu_macro_state.
 * \param params     The pointer to a DFU parameters structure.
 *                   See \ref cy_stc_dfu_params_t .
 *
 * \return See \ref cy_en_dfu_status_t.
-* 
+*
 *******************************************************************************/
-static cy_en_dfu_status_t CommandEnter(uint8_t *packet, uint32_t *rspSize, uint32_t *state, 
+static cy_en_dfu_status_t CommandEnter(uint8_t *packet, uint32_t *rspSize, uint32_t *state,
                                             cy_stc_dfu_params_t *params)
 {
     cy_en_dfu_status_t status = CY_DFU_ERROR_LENGTH;
     volatile uint32_t productId = ElfSymbolToAddr(&__cy_product_id);
     uint32_t packetSize = GetPacketDSize(packet);
     *rspSize = CY_DFU_RSP_SIZE_0;
-    
-    if (packetSize == 0u)  /* 'Product ID' not demanded */
+
+    if (packetSize == 0U)  /* 'Product ID' not demanded */
     {
-        status = (productId == 0u)? CY_DFU_SUCCESS : CY_DFU_ERROR_LENGTH;
+        status = (productId == 0U)? CY_DFU_SUCCESS : CY_DFU_ERROR_LENGTH;
         if (status == CY_DFU_SUCCESS)
         {
             EnterResponse(packet, rspSize, state);
@@ -1762,8 +1772,8 @@ static cy_en_dfu_status_t CommandEnter(uint8_t *packet, uint32_t *rspSize, uint3
     {
         /* Empty */
     }
-    
-    params->appId = params->appId; /* Remove the unused warning */
+
+    CY_UNUSED_PARAMETER(params); /* Remove the unused warning */
 
     return (status);
 }
@@ -1789,9 +1799,9 @@ static cy_en_dfu_status_t CommandEnter(uint8_t *packet, uint32_t *rspSize, uint3
 *                       packet buffer.
 *
 * \return See \ref cy_en_dfu_status_t
-* 
+*
 *******************************************************************************/
-static cy_en_dfu_status_t CopyToDataBuffer(uint8_t dataBuffer[], uint32_t *dataOffset, uint8_t const packet[], 
+static cy_en_dfu_status_t CopyToDataBuffer(uint8_t dataBuffer[], uint32_t *dataOffset, uint8_t const packet[],
                                                 uint32_t packetSize)
 {
     cy_en_dfu_status_t status = CY_DFU_ERROR_UNKNOWN;
@@ -1822,10 +1832,10 @@ static cy_en_dfu_status_t CopyToDataBuffer(uint8_t dataBuffer[], uint32_t *dataO
 *                   See \ref cy_stc_dfu_params_t .
 *
 * \return See \ref cy_en_dfu_status_t
-* 
+*
 *******************************************************************************/
 static cy_en_dfu_status_t CommandProgramData(uint8_t  *packet, uint32_t *rspSize, cy_stc_dfu_params_t *params)
-{   
+{
     cy_en_dfu_status_t status = CY_DFU_ERROR_LENGTH;
     uint8_t  *dataBufferLocal =  params->dataBuffer;
     uint32_t *dataOffsetLocal = &params->dataOffset;
@@ -1840,7 +1850,7 @@ static cy_en_dfu_status_t CommandProgramData(uint8_t  *packet, uint32_t *rspSize
         /* Data may be sent with the Program Data DFU command, so copy it to dataBuffer */
         status = CopyToDataBuffer(dataBufferLocal, dataOffsetLocal, GetPacketData(packet, PARAMS_SIZE),
                                   packetSize - PARAMS_SIZE );
-        
+
         if (status == CY_DFU_SUCCESS)
         {
             if (crc != Cy_DFU_DataChecksum(dataBufferLocal, *dataOffsetLocal, params) )
@@ -1857,7 +1867,7 @@ static cy_en_dfu_status_t CommandProgramData(uint8_t  *packet, uint32_t *rspSize
             status = Cy_DFU_ReadData (address, *dataOffsetLocal, CY_DFU_IOCTL_COMPARE, params);
         }
     } /* if (packetSize >= PARAMS_SIZE) */
-    *dataOffsetLocal = 0u;
+    *dataOffsetLocal = 0U;
     return (status);
 }
 
@@ -1876,7 +1886,7 @@ static cy_en_dfu_status_t CommandProgramData(uint8_t  *packet, uint32_t *rspSize
 *                   See \ref cy_stc_dfu_params_t .
 *
 * \return See \ref cy_en_dfu_status_t.
-* 
+*
 *******************************************************************************/
 static cy_en_dfu_status_t CommandEraseData(uint8_t  *packet, uint32_t *rspSize, cy_stc_dfu_params_t *params)
 {
@@ -1885,9 +1895,9 @@ static cy_en_dfu_status_t CommandEraseData(uint8_t  *packet, uint32_t *rspSize, 
     if (GetPacketDSize(packet) == DATA_PACKET_SIZE_4BYTES)
     {
         uint32_t address = GetU32( GetPacketData(packet, PACKET_DATA_NO_OFFSET) );
-        status = Cy_DFU_WriteData(address, 0u, CY_DFU_IOCTL_ERASE, params);
+        status = Cy_DFU_WriteData(address, 0U, CY_DFU_IOCTL_ERASE, params);
     }
-    params->dataOffset = 0u;
+    params->dataOffset = 0U;
     return (status);
 }
 #endif /* CY_DFU_OPT_ERASE_DATA != 0 */
@@ -1907,7 +1917,7 @@ static cy_en_dfu_status_t CommandEraseData(uint8_t  *packet, uint32_t *rspSize, 
 *                   See \ref cy_stc_dfu_params_t .
 *
 * \return See \ref cy_en_dfu_status_t
-* 
+*
 *******************************************************************************/
 static cy_en_dfu_status_t CommandVerifyData(uint8_t  *packet, uint32_t *rspSize, cy_stc_dfu_params_t *params)
 {
@@ -1925,7 +1935,7 @@ static cy_en_dfu_status_t CommandVerifyData(uint8_t  *packet, uint32_t *rspSize,
         /* Data may be sent with the Program Data DFU command, so copy it to dataBuffer */
         status = CopyToDataBuffer(dataBufferLocal, dataOffsetLocal, GetPacketData(packet, PARAMS_SIZE),
                                   packetSize - PARAMS_SIZE );
-        
+
         if (status == CY_DFU_SUCCESS)
         {
             if (crc != Cy_DFU_DataChecksum(dataBufferLocal, *dataOffsetLocal, params) )
@@ -1940,7 +1950,7 @@ static cy_en_dfu_status_t CommandVerifyData(uint8_t  *packet, uint32_t *rspSize,
             status = (status == CY_DFU_SUCCESS) ? CY_DFU_SUCCESS : CY_DFU_ERROR_VERIFY;
         }
     }
-    *dataOffsetLocal = 0u;
+    *dataOffsetLocal = 0U;
     return (status);
 }
 #endif /* CY_DFU_OPT_VERIFY_DATA != 0 */
@@ -1960,7 +1970,7 @@ static cy_en_dfu_status_t CommandVerifyData(uint8_t  *packet, uint32_t *rspSize,
 *                   See \ref cy_stc_dfu_params_t .
 *
 * \return See \ref cy_en_dfu_status_t.
-* 
+*
 *******************************************************************************/
 static cy_en_dfu_status_t CommandSendData(uint8_t  *packet, uint32_t *rspSize, cy_stc_dfu_params_t *params)
 {
@@ -1969,12 +1979,12 @@ static cy_en_dfu_status_t CommandSendData(uint8_t  *packet, uint32_t *rspSize, c
     uint8_t  *dataBufferLocal =  params->dataBuffer;
     uint32_t *dataOffsetLocal = &params->dataOffset;
     *rspSize = CY_DFU_RSP_SIZE_0;
-    
+
     /* Data may be sent with the Program Data DFU command, so copy it to dataBuffer */
-    status = CopyToDataBuffer(dataBufferLocal, dataOffsetLocal, 
-                                GetPacketData(packet, PACKET_DATA_NO_OFFSET), 
+    status = CopyToDataBuffer(dataBufferLocal, dataOffsetLocal,
+                                GetPacketData(packet, PACKET_DATA_NO_OFFSET),
                                 packetSize);
-    
+
     return (status);
 }
 #endif /* CY_DFU_OPT_SEND_DATA != 0 */
@@ -1994,14 +2004,14 @@ static cy_en_dfu_status_t CommandSendData(uint8_t  *packet, uint32_t *rspSize, c
 *                   See \ref cy_stc_dfu_params_t .
 *
 * \return See \ref cy_en_dfu_status_t.
-* 
+*
 *******************************************************************************/
 static cy_en_dfu_status_t CommandVerifyApp(uint8_t *packet, uint32_t *rspSize, cy_stc_dfu_params_t *params)
 {
     cy_en_dfu_status_t status  = CY_DFU_ERROR_LENGTH;
     uint32_t packetSize = GetPacketDSize(packet);
     *rspSize = CY_DFU_RSP_SIZE_0;
-    
+
 
     if ( (packetSize == sizeof(uint32_t) ) || (packetSize == VERIFY_APP_DATA_SIZE) )
     {
@@ -2019,7 +2029,7 @@ static cy_en_dfu_status_t CommandVerifyApp(uint8_t *packet, uint32_t *rspSize, c
     if ( (status == CY_DFU_SUCCESS) || (status == CY_DFU_ERROR_VERIFY) )
     {
         uint8_t *valid = GetPacketData(packet, PACKET_DATA_NO_OFFSET);
-        *valid = (status == CY_DFU_SUCCESS) ? 1u : 0u;
+        *valid = (status == CY_DFU_SUCCESS) ? 1U : 0U;
         status = CY_DFU_SUCCESS;
         *rspSize = CY_DFU_RSP_SIZE_VERIFY_APP;
     }
@@ -2027,7 +2037,7 @@ static cy_en_dfu_status_t CommandVerifyApp(uint8_t *packet, uint32_t *rspSize, c
 }
 #endif /* CY_DFU_OPT_VERIFY_APP != 0 */
 
-#if CY_DFU_METADATA_WRITABLE != 0
+#if (CY_DFU_METADATA_WRITABLE != 0) || defined(CY_DOXYGEN)
 /*******************************************************************************
 * Function Name: Cy_DFU_SetAppMetadata
 ****************************************************************************//**
@@ -2039,20 +2049,20 @@ static cy_en_dfu_status_t CommandVerifyApp(uint8_t *packet, uint32_t *rspSize, c
 * \note This function uses params->dataBuffer for the read and write NVM.
 *
 * \param appId           The application number to update metadata for.
-* \param verifyAddress   An application verified area start address   
+* \param verifyAddress   An application verified area start address
 * \param verifySize      The size of verified application area
 * \param params          The pointer to a DFU parameters structure.
 *                        See \ref cy_stc_dfu_params_t.
-* 
+*
 * \return See \ref cy_en_dfu_status_t
-* 
+*
 *******************************************************************************/
-cy_en_dfu_status_t Cy_DFU_SetAppMetadata(uint32_t appId, uint32_t verifyAddress, uint32_t verifySize, 
+cy_en_dfu_status_t Cy_DFU_SetAppMetadata(uint32_t appId, uint32_t verifyAddress, uint32_t verifySize,
                                                    cy_stc_dfu_params_t *params)
 {
     cy_en_dfu_status_t status = CY_DFU_SUCCESS;
-    uint32_t metadataAddress = 0u;
-    uint32_t metadataLength  = 0u;
+    uint32_t metadataAddress = 0U;
+    uint32_t metadataLength  = 0U;
     if ((params == NULL) || (appId >= CY_DFU_MAX_APPS))
     {
         status = CY_DFU_ERROR_UNKNOWN;
@@ -2064,9 +2074,9 @@ cy_en_dfu_status_t Cy_DFU_SetAppMetadata(uint32_t appId, uint32_t verifyAddress,
         status = Cy_DFU_ReadData(metadataAddress, metadataLength, CY_DFU_IOCTL_READ, params);
     }
     if (status == CY_DFU_SUCCESS)
-    {    
+    {
         uint32_t getVerifyAddress = GetU32(params->dataBuffer + (appId * METADATA_BYTES_PER_APP));
-        uint32_t getVerifySize      = GetU32(params->dataBuffer + (appId * METADATA_BYTES_PER_APP) + 
+        uint32_t getVerifySize      = GetU32(params->dataBuffer + (appId * METADATA_BYTES_PER_APP) +
                                             METADATA_APP_LENGTH_OFFSET);
         if ( (getVerifyAddress != verifyAddress) || ( getVerifySize != verifySize) )
         {
@@ -2080,7 +2090,7 @@ cy_en_dfu_status_t Cy_DFU_SetAppMetadata(uint32_t appId, uint32_t verifyAddress,
     }
     return (status);
 }
-#endif /* CY_DFU_METADATA_WRITABLE != 0 */
+#endif /* (CY_DFU_METADATA_WRITABLE != 0) || defined(CY_DOXYGEN) */
 
 
 /*******************************************************************************
@@ -2095,9 +2105,9 @@ cy_en_dfu_status_t Cy_DFU_SetAppMetadata(uint32_t appId, uint32_t verifyAddress,
 *                   See \ref cy_stc_dfu_params_t .
 *
 * \return See \ref cy_en_dfu_status_t
-* 
+*
 *******************************************************************************/
-static cy_en_dfu_status_t CommandSetAppMetadata(uint8_t *packet, uint32_t *rspSize, 
+static cy_en_dfu_status_t CommandSetAppMetadata(uint8_t *packet, uint32_t *rspSize,
                                                      cy_stc_dfu_params_t *params)
 {
     cy_en_dfu_status_t status = CY_DFU_SUCCESS;
@@ -2108,19 +2118,19 @@ static cy_en_dfu_status_t CommandSetAppMetadata(uint8_t *packet, uint32_t *rspSi
     {
         status = CY_DFU_ERROR_LENGTH;
     }
-    
+
     if (status == CY_DFU_SUCCESS)
     {
         /* Data offsets 0, 1, 5 are defined in the DFU Packet Structure */
         uint32_t app       =      *( GetPacketData(packet, PACKET_DATA_NO_OFFSET) );
-        
+
     #if CY_DFU_METADATA_WRITABLE != 0
         uint32_t verifyAddress = GetU32( GetPacketData(packet, SET_APP_METADATA_OFFSET) );
         uint32_t verifySize   = GetU32( GetPacketData(packet, SET_APP_METADATA_LENGTH_OFFSET) );
-        
+
         status = Cy_DFU_SetAppMetadata(app, verifyAddress, verifySize, params);
     #endif
-        
+
         params->appId = app;
     }
     return (status);
@@ -2146,7 +2156,7 @@ static cy_en_dfu_status_t CommandGetMetadata(uint8_t *packet, uint32_t *rspSize,
 {
     cy_en_dfu_status_t status = CY_DFU_SUCCESS;
     uint32_t locRspSize = CY_DFU_RSP_SIZE_0;
-    
+
     if (packet == NULL)
     {
         status = CY_DFU_ERROR_UNKNOWN;
@@ -2180,14 +2190,14 @@ static cy_en_dfu_status_t CommandGetMetadata(uint8_t *packet, uint32_t *rspSize,
             if (status == CY_DFU_SUCCESS)
             {
                 locRspSize = (toAddr - fromAddr);
-                (void) memmove( GetPacketData(packet, PACKET_DATA_NO_OFFSET), 
-                                &(params->dataBuffer[fromAddr]), 
+                (void) memmove( GetPacketData(packet, PACKET_DATA_NO_OFFSET),
+                                &(params->dataBuffer[fromAddr]),
                                 locRspSize);
-                status = CY_DFU_SUCCESS;          
+                status = CY_DFU_SUCCESS;
             }
         }
     }
-    *rspSize = locRspSize; 
+    *rspSize = locRspSize;
     return (status);
 }
 #endif /* CY_DFU_OPT_GET_METADATA != 0 */
@@ -2200,7 +2210,7 @@ static cy_en_dfu_status_t CommandGetMetadata(uint8_t *packet, uint32_t *rspSize,
 *
 * This is a helper function for Cy_DFU_Continue().
 * This function copies the Encryption Initial Vector value from the DFU
-* command buffer to the buffer pointed by 
+* command buffer to the buffer pointed by
 * \code params->encryptionVector \endcode.
 *
 * \param packet     The pointer to the DFU packet buffer.
@@ -2209,25 +2219,26 @@ static cy_en_dfu_status_t CommandGetMetadata(uint8_t *packet, uint32_t *rspSize,
 *                   See \ref cy_stc_dfu_params_t .
 *
 * \return See \ref cy_en_dfu_status_t.
-* 
+*
 *******************************************************************************/
 static cy_en_dfu_status_t CommandSetEIVector(uint8_t *packet, uint32_t *rspSize, cy_stc_dfu_params_t *params)
 {
     cy_en_dfu_status_t status = CY_DFU_SUCCESS;
     *rspSize = CY_DFU_RSP_SIZE_0;
-    
+
     uint32_t size = GetPacketDSize(packet);
-    
-    if (( (size == 0u) ||  (size == DATA_PACKET_SIZE_8BYTES) 
+
+    if (( (size == 0U) ||  (size == DATA_PACKET_SIZE_8BYTES)
         || (size == DATA_PACKET_SIZE_16BYTES) ) && (params->encryptionVector != NULL))
     {
-        (void) memcpy(params->encryptionVector, GetPacketData(packet, PACKET_DATA_NO_OFFSET), size);
+CY_MISRA_FP_LINE('MISRA C-2012 Rule 21.18','Per C99 standard (7.21.1/2) 0 value is allowed with no undefined behaviour. ');
+        (void) memcpy((void*)params->encryptionVector, (const void*)GetPacketData(packet, PACKET_DATA_NO_OFFSET), size);
     }
     else
     {
         status = CY_DFU_ERROR_DATA;
     }
-    
+
     return (status);
 }
 #endif /* CY_DFU_OPT_SET_EIVECTOR != 0 */
@@ -2246,7 +2257,7 @@ static cy_en_dfu_status_t CommandSetEIVector(uint8_t *packet, uint32_t *rspSize,
 *                   See \ref cy_stc_dfu_params_t .
 *
 * \return See \ref cy_en_dfu_status_t
-* 
+*
 *******************************************************************************/
 static cy_en_dfu_status_t CommandUnsupported(uint8_t packet[], uint32_t *rspSize, cy_stc_dfu_params_t *params)
 {
@@ -2254,7 +2265,7 @@ static cy_en_dfu_status_t CommandUnsupported(uint8_t packet[], uint32_t *rspSize
 
     /* To remove the compiler warnings */
     (void)packet;
-    params->dataOffset = 0u;
+    params->dataOffset = 0U;
 
     *rspSize = CY_DFU_RSP_SIZE_0;
     return (status);
@@ -2267,19 +2278,22 @@ static cy_en_dfu_status_t CommandUnsupported(uint8_t packet[], uint32_t *rspSize
 * This is a helper function for Cy_DFU_Continue(). This function parses
 *  most of the DFU commands.
 *
+* \param command    The DFU packet command value.
 * \param packet     The pointer to the DFU packet buffer.
 * \param rspSize    The pointer to a response packet size.
 * \param params     The pointer to a DFU parameters structure.
 *                   See \ref cy_stc_dfu_params_t .
+* \param noResponse The pointer to a variable that states whether to send
+*                    a response back to a DFU Host or not.
 *
 * \return See \ref cy_en_dfu_status_t
-* 
+*
 *******************************************************************************/
 static cy_en_dfu_status_t ContinueHelper(uint32_t command, uint8_t *packet, uint32_t *rspSize,
                                               cy_stc_dfu_params_t *params, bool *noResponse)
 {
     /* Set to a close warning (status may be used uninitialized)*/
-    cy_en_dfu_status_t status = CY_DFU_ERROR_UNKNOWN; 
+    cy_en_dfu_status_t status = CY_DFU_ERROR_UNKNOWN;
     switch (command)
     {
     case CY_DFU_CMD_PROGRAM_DATA:
@@ -2309,14 +2323,14 @@ static cy_en_dfu_status_t ContinueHelper(uint32_t command, uint8_t *packet, uint
         *noResponse = true;
         status = CommandSendData(packet, rspSize, params);
         break;
-        
+
     case CY_DFU_CMD_SEND_DATA:
         status = CommandSendData(packet, rspSize, params);
         break;
 #endif /* CY_DFU_NO_CMD_SEND_DATA == 0 */
 
     case CY_DFU_CMD_SYNC: /* If something fails, then the Host sends this command to reset the DFU */
-        params->dataOffset = 0u;
+        params->dataOffset = 0U;
         *noResponse = true;
         status = CY_DFU_SUCCESS;
         break;
@@ -2349,34 +2363,34 @@ static cy_en_dfu_status_t ContinueHelper(uint32_t command, uint8_t *packet, uint
 * Function Name: Cy_DFU_Continue
 ****************************************************************************//**
 *
-* The function processes Host Commands according to Host Command/Response 
+* The function processes Host Commands according to Host Command/Response
 * Protocol.
 * The function waits for the Host data packet till timeout occurs. If valid
 * packet is received, it decodes received command, processes it and transfer
 * back a response if needed. See description of Host Command/Response Protocol
 * in [AN213924](http://www.cypress.com/an213924) DFU SDK User Guide.
 *
-* \param state      The pointer to a state variable, that is updated by 
+* \param state      The pointer to a state variable, that is updated by
 *                   the function. See \ref group_dfu_macro_state.
 * \param params     The pointer to a DFU parameters structure.
 *                   See \ref cy_stc_dfu_params_t.
 *
 * \return See \ref cy_en_dfu_status_t
-* 
+*
 *******************************************************************************/
 cy_en_dfu_status_t Cy_DFU_Continue(uint32_t *state, cy_stc_dfu_params_t *params)
 {
     cy_en_dfu_status_t status = CY_DFU_ERROR_UNKNOWN; /* Give a value to a close warning */
-    uint8_t *packet = params->packetBuffer; /* Receive/Transmit buffer */  
+    uint8_t *packet = params->packetBuffer; /* Receive/Transmit buffer */
 
     uint32_t rspSize = CY_DFU_RSP_SIZE_0;
     bool noResponse = false;        /* Indicates whether to send a response packet back to the Host */
 
-    CY_ASSERT(params->timeout != 0u);
+    CY_ASSERT(params->timeout != 0U);
     CY_ASSERT(params->dataBuffer != NULL);
-    CY_ASSERT(params->packetBuffer != 0);
+    CY_ASSERT(params->packetBuffer != NULL);
 
-    
+
     if ( (*state == CY_DFU_STATE_NONE) || (*state == CY_DFU_STATE_UPDATING) )
     {
         status = ReadVerifyPacket(packet, &noResponse, params->timeout);

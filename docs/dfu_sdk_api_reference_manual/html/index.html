@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Cypress Device Firmware Update (DFU) Middleware Library 4.0: Cypress Device Firmware Update (DFU) Middleware Library 4.0</title>
+<title>Cypress Device Firmware Update (DFU) Middleware Library 4.10: Cypress Device Firmware Update (DFU) Middleware Library</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -28,9 +28,9 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr style="height: 56px;">
-  <td id="projectlogo"><a href="http://www.cypress.com/"><img alt="Logo" src="cypress_logo.png"/></a></td>
+  <td id="projectlogo"><a href="http://www.cypress.com/"><img alt="Logo" src="IFXCYP_one-line.png"/></a></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Cypress Device Firmware Update (DFU) Middleware Library 4.0</div>
+   <div id="projectname">Cypress Device Firmware Update (DFU) Middleware Library 4.10</div>
   </td>
  </tr>
  </tbody>
@@ -81,7 +81,7 @@ $(document).ready(function(){initNavTree('index.html','');});
 
 <div class="header">
   <div class="headertitle">
-<div class="title">Cypress Device Firmware Update (DFU) Middleware Library 4.0 </div>  </div>
+<div class="title">Cypress Device Firmware Update (DFU) Middleware Library </div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="section_mainpage_overview"></a>
@@ -103,30 +103,57 @@ General Description</h1>
 <li>Safe Update: updates at a temporary location, validates, and if valid, overwrites a working image.</li>
 <li>Switches applications. Passes parameters in RAM when switching applications.</li>
 <li>Supports encrypted image files. Transfers encrypted images without decrypting in the middle.</li>
-<li>Supports many application images, the number of which is limited by the metadata size. Each image can be an application loader. For example, 512-byte metadata supports up to 63 applications.</li>
+<li>Supports many application images, the number of which is limited only by the metadata size. Each image can be an application loader. For example, 512-byte metadata supports up to 63 applications.</li>
 <li>Supports customization.</li>
 <li>Supports the CRC-32 checksum to validate data.</li>
 </ul>
 <h1><a class="anchor" id="section_dfu_quick_start"></a>
 Quick Start Guide</h1>
-<p>The DFU SDK is used to design updating applications of arbitrary flexibility and complexity. Cypress DFU middleware can be used in various software environments. Refer to the <a class="el" href="index.html#section_dfu_toolchain">Supported Software and Tools</a>. To quick start, use the Code Examples. Cypress Semiconductor continuously extends its portfolio of code examples at <a href="http://www.cypress.com"><b>Cypress Semiconductor website</b></a> and <a href="https://github.com/cypresssemiconductorco"><b>Cypress Semiconductor GitHub</b></a>.</p>
-<p>The Quick Start Guide (QSG) assumes ModusToolbox 2.0 is installed with all needed tools.</p>
-<p>The following steps are to set up and build a basic DFU loader and loadable applications. The DFU loader application uses I2C transport interface. The steps assume that the user builds an applications for CY8CKIT-062-WIFI-BT based on a starter Hello_World ModusToolbox project.</p>
+<p>The DFU SDK is used to design updating applications of arbitrary flexibility and complexity. Cypress DFU middleware can be used in various software environments. Refer to RELEASE.md file for details. To quick start, use the Code Examples. Cypress Semiconductor continuously extends its portfolio of code examples at <a href="http://www.cypress.com"><b>Cypress Semiconductor website</b></a> and <a href="https://github.com/cypresssemiconductorco"><b>Cypress Semiconductor GitHub</b></a>.</p>
+<p>The Quick Start Guide (QSG) assumes ModusToolbox 2.2 is installed with all needed tools.</p>
+<p>The following steps are to set up and build a basic DFU loader and loadable applications. The DFU loader application uses the I2C transport interface. The steps assume that the user builds an application for CY8CKIT-062-WIFI-BT or CY8CKIT-149 kits based on a starter Hello_World ModusToolbox project.</p>
 <h2><a class="anchor" id="ssection_dfu_step_0"></a>
 STEP 0: Projects preparation.</h2>
 <ol type="1">
-<li>Create a project for CY8CKIT-062-WIFI-BT with the DFU loader application using the Hello_World starter application. Name it QSG_DFU_App0_I2C. See the ModusToolbox 2.0 IDE Quick Start Guide for the detail steps.</li>
-<li>Create a project for the DFU loadable application in the same way and name it QSG_DFU_App1_Hello_World</li>
-<li>Include the DFU middleware into each project using the ModusToolbox Library Manager or download it from GitHub and copy it to the project manually.</li>
+<li>Create a project for CY8CKIT-062-WIFI-BT or CY8CKIT-149 with the DFU loader application using the Hello_World starter application. Name it QSG_DFU_App0_I2C. See the ModusToolbox 2.2 IDE Quick Start Guide for the detail steps.</li>
+<li>Create a project for the DFU loadable application in the same way and name it QSG_DFU_App1_Hello_World.</li>
+<li>Include the DFU middleware into each project using the ModusToolbox Library Manager or download it from GitHub and copy it to the project manually. When Library Manager is used, it is recommended to check <b>Shared</b> checkbox against DFU middleware, so it will be downloaded once and then shared between all applications in the workspace.</li>
 <li>Include a DFU header in main.c of each project to get access to DFU API: <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;cycfg.h&quot;</span></div><div class="line"><span class="preprocessor">#include &quot;cy_dfu.h&quot;</span></div></div><!-- fragment --> </li>
 </ol>
 <h2><a class="anchor" id="ssection_dfu_step_1"></a>
 STEP 1: Setup Loader Application QSG_DFU_App0_I2C</h2>
 <ol type="1">
-<li>Copy the configuration files <b>dfu_user.c</b> and <b>dfu_user.h</b> from the libs\dfu\config directory and put them near main.c.</li>
-<li>Copy the transport files from the \config directory and put them near main.c. In our case, I2C requires <b>transport_i2c.h</b> and <b>transport_i2c.c</b>.</li>
-<li>Copy the app0 linker script files from libs\dfu\linker_scripts\TOOLCHAIN_&lt;COMPILER&gt;\ in the project root. For the GCC ARM compiler, copy libs\dfu\linker_scripts\TOOLCHAIN_GCC_ARM\dfu_cm4_app0.ld</li>
-<li>Configure SCB for I2C communication using ModusToolbox Device Configurator. For CY8CKIT-062-WIFI-BT use SCB 3, which is connected to the KitProg. <table class="doxtable">
+<li>Copy the configuration files <b>dfu_user.c</b> and <b>dfu_user.h</b> from the DFU <b>config</b> folder and put them near main.c:<ul>
+<li>For CY8CKIT-062-WIFI-BT kit:<ul>
+<li>copy <b>dfu_user.h</b> file from ..\mtb_shared\dfu\[VERSION]\config</li>
+<li>copy <b>dfu_user.c</b> file from ..\mtb_shared\dfu\[VERSION]\config\CAT1A</li>
+</ul>
+</li>
+<li>For CY8CKIT-149 kit:<ul>
+<li>copy <b>dfu_user.h</b> file from ..\mtb_shared\dfu\[VERSION]\config</li>
+<li>copy <b>dfu_user.c</b> file from ..\mtb_shared\dfu\[VERSION]\config\CAT2</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Copy the transport files from the <b>config</b> directory and put them near main.c. In our case, I2C requires <b>transport_i2c.h</b> and <b>transport_i2c.c</b>, which are located in the following directories:<ul>
+<li>For CY8CKIT-062-WIFI-BT kit: ..\mtb_shared\dfu\[VERSION]\config\CAT1A</li>
+<li>For CY8CKIT-149 kit: ..\mtb_shared\dfu\[VERSION]\config\CAT2</li>
+</ul>
+</li>
+<li><p class="startli">Copy the app0 linker script files and put them near main.c:</p><ul>
+<li>For CY8CKIT-062-WIFI-BT kit: <br />
+ ..\mtb_shared\dfu\[VERSION]\linker_scripts\CAT1A\TOOLCHAIN_&lt;COMPILER&gt;\dfu_cm4_app0.[ext]</li>
+<li>For CY8CKIT-149 kit: <br />
+ ..\mtb_shared\dfu\[VERSION]\linker_scripts\CAT2\TOOLCHAIN_&lt;COMPILER&gt;\dfu_cm0p_app0.[ext]</li>
+</ul>
+<p class="startli">For example, for CY8CKIT-062-WIFI-BT kit and GCC ARM compiler, copy ..\mtb_shared\dfu\[VERSION]\linker_scripts\CAT1A\TOOLCHAIN_GCC_ARM\dfu_cm4_app0.ld file.</p>
+<dl class="section note"><dt>Note</dt><dd>For ARM compiler, copy additional <b>dfu_common.h</b> and <b>dfu_elf_symbols.c</b> files to the project. Those files are located in the same folder as the selected linker file.</dd></dl>
+</li>
+<li>Copy folder from ..\mtb_shared\TARGET_[KIT_NAME]\[VERSION]\COMPONENT_BSP_DESIGN_MODUS to the project root and rename it to DFU_DESIGN_MODUS.</li>
+<li>Update project's Makefile to use Generated sources, created in DFU_DESIGN_MODUS folder: locate <b>DISABLE_COMPONENTS</b> variable and add <b>BSP_DESIGN_MODUS</b>: <div class="fragment"><div class="line">DISABLE_COMPONENTS=BSP_DESIGN_MODUS </div></div><!-- fragment --></li>
+<li><p class="startli">Open DFU_DESIGN_MODUS\design.modus file and configure SCB for I2C communication using ModusToolbox Device Configurator.</p>
+<p class="startli">For CY8CKIT-062-WIFI-BT use SCB 3, which is connected to the KitProg. For CY8CKIT-149, SCB 1 is connected to the KitProg. </p><table class="doxtable">
 <tr>
 <th>SCB parameter name </th><th>value  </th></tr>
 <tr>
@@ -144,21 +171,22 @@ STEP 1: Setup Loader Application QSG_DFU_App0_I2C</h2>
 <div class="image">
 <img src="dfu_basic_i2c.png" alt="dfu_basic_i2c.png"/>
 </div>
- See <a class="el" href="index.html#group_dfu_mtb_cfg">Use of ModusToolbox's tools for HW initialization</a></li>
+<p> See <a class="el" href="index.html#group_dfu_mtb_cfg">Use of ModusToolbox's tools for HW initialization</a></p>
+</li>
 </ol>
 <h2><a class="anchor" id="ssection_dfu_step_2"></a>
 STEP 2: Update Loader QSG_DFU_App0_I2C main.c</h2>
 <ol type="1">
 <li>Include a DFU reset handler to start the appropriate application after a reset: <div class="fragment"><div class="line"><span class="comment">/*******************************************************************************</span></div><div class="line"><span class="comment">* Function Name: Cy_OnResetUser</span></div><div class="line"><span class="comment">********************************************************************************</span></div><div class="line"><span class="comment">*</span></div><div class="line"><span class="comment">*  This function is called at the start of Reset_Handler(). </span></div><div class="line"><span class="comment">*  DFU requires it to call Cy_DFU_OnResetApp0() in app#0.</span></div><div class="line"><span class="comment">*</span></div><div class="line"><span class="comment">*******************************************************************************/</span></div><div class="line"><span class="keywordtype">void</span> Cy_OnResetUser(<span class="keywordtype">void</span>)</div><div class="line">{</div><div class="line">    <a class="code" href="group__group__dfu__functions.html#ga6e0defdaf9adb2e5663dc6144dc6823a">Cy_DFU_OnResetApp0</a>();</div><div class="line">}</div></div><!-- fragment --></li>
-<li>Initialize the variables and call the DFU initialization function: <div class="fragment"><div class="line">    <span class="comment">/*</span></div><div class="line"><span class="comment">    * Used to count seconds</span></div><div class="line"><span class="comment">    */</span></div><div class="line">    uint32_t count = 0;</div><div class="line"></div><div class="line">    <span class="comment">/* Status codes for DFU API */</span></div><div class="line">    <a class="code" href="group__group__dfu__enums.html#gafcff247e9cb8dc6c1282873b0d2dae1b">cy_en_dfu_status_t</a> status;</div><div class="line"></div><div class="line">    <span class="comment">/*</span></div><div class="line"><span class="comment">    * DFU state, one of the:</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_NONE</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_UPDATING</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_FINISHED</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_FAILED</span></div><div class="line"><span class="comment">    */</span></div><div class="line">    uint32_t state;</div><div class="line"></div><div class="line">    <span class="comment">/* Timeout for Cy_DFU_Continue(), in milliseconds */</span></div><div class="line">    <span class="keyword">const</span> uint32_t paramsTimeout = 20u;</div><div class="line">    </div><div class="line">    <span class="comment">/* Buffer to store DFU commands */</span></div><div class="line">    CY_ALIGN(4) static uint8_t buffer[CY_DFU_SIZEOF_DATA_BUFFER];</div><div class="line"></div><div class="line">    <span class="comment">/* Buffer for DFU data packets for transport API */</span></div><div class="line">    CY_ALIGN(4) static uint8_t packet[CY_DFU_SIZEOF_CMD_BUFFER ];</div><div class="line"></div><div class="line">    <span class="comment">/* DFU params, used to configure DFU */</span></div><div class="line">    <a class="code" href="structcy__stc__dfu__params__t.html">cy_stc_dfu_params_t</a> dfuParams;</div><div class="line"></div><div class="line">    <span class="comment">/* Initialize dfuParams structure */</span></div><div class="line">    dfuParams.timeout          = paramsTimeout;</div><div class="line">    dfuParams.dataBuffer       = &amp;buffer[0];</div><div class="line">    dfuParams.packetBuffer     = &amp;packet[0];</div><div class="line"></div><div class="line">    status = <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line"></div><div class="line">    <span class="comment">/* Set up the device based on configurator selections */</span></div><div class="line">    init_cycfg_all();</div><div class="line"></div><div class="line">    <span class="comment">/* enable interrupts */</span></div><div class="line">    __enable_irq();</div></div><!-- fragment --></li>
+<li>Initialize the variables and call the DFU initialization function: <div class="fragment"><div class="line">    <span class="comment">/*</span></div><div class="line"><span class="comment">    * Used to count seconds</span></div><div class="line"><span class="comment">    */</span></div><div class="line">    uint32_t count = 0;</div><div class="line"></div><div class="line">    <span class="comment">/* Status codes for DFU API */</span></div><div class="line">    <a class="code" href="group__group__dfu__enums.html#gafcff247e9cb8dc6c1282873b0d2dae1b">cy_en_dfu_status_t</a> status;</div><div class="line"></div><div class="line">    <span class="comment">/*</span></div><div class="line"><span class="comment">    * DFU state, one of the:</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_NONE</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_UPDATING</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_FINISHED</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_FAILED</span></div><div class="line"><span class="comment">    */</span></div><div class="line">    uint32_t state;</div><div class="line"></div><div class="line">    <span class="comment">/* Timeout for Cy_DFU_Continue(), in milliseconds */</span></div><div class="line">    <span class="keyword">const</span> uint32_t paramsTimeout = 20u;</div><div class="line">    </div><div class="line">    <span class="comment">/* Buffer to store DFU commands */</span></div><div class="line">    CY_ALIGN(4) static uint8_t buffer[CY_DFU_SIZEOF_DATA_BUFFER];</div><div class="line"></div><div class="line">    <span class="comment">/* Buffer for DFU data packets for transport API */</span></div><div class="line">    CY_ALIGN(4) static uint8_t packet[CY_DFU_SIZEOF_CMD_BUFFER ];</div><div class="line"></div><div class="line">    <span class="comment">/* DFU params, used to configure DFU */</span></div><div class="line">    <a class="code" href="structcy__stc__dfu__params__t.html">cy_stc_dfu_params_t</a> dfuParams;</div><div class="line"></div><div class="line">    <span class="comment">/* Initialize dfuParams structure */</span></div><div class="line">    dfuParams.timeout          = paramsTimeout;</div><div class="line">    dfuParams.dataBuffer       = &amp;buffer[0];</div><div class="line">    dfuParams.packetBuffer     = &amp;packet[0];</div><div class="line"></div><div class="line">    status = <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line">    </div><div class="line">    <span class="comment">/* Stop program execution if DFU init failed */</span></div><div class="line">    CY_ASSERT(<a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23">CY_DFU_SUCCESS</a> == status);</div><div class="line">    </div><div class="line">    <span class="comment">/* Set up the device based on configurator selections */</span></div><div class="line">    init_cycfg_all();</div><div class="line"></div><div class="line">    <span class="comment">/* enable interrupts */</span></div><div class="line">    __enable_irq();</div></div><!-- fragment --></li>
 <li>Initialize the DFU transport layer: <div class="fragment"><div class="line">    <span class="comment">/* Initialize DFU communication */</span></div><div class="line">    <a class="code" href="group__group__dfu__functions.html#ga0e7830c2493ba3b3798412ddbd826ff8">Cy_DFU_TransportStart</a>();</div></div><!-- fragment --></li>
 <li>Update the main loop with the Host Command/Response protocol processing: <div class="fragment"><div class="line">        status = <a class="code" href="group__group__dfu__functions.html#ga6514a9d999be746edc406fcf764d07f5">Cy_DFU_Continue</a>(&amp;state, &amp;dfuParams);</div><div class="line">        ++count;</div><div class="line"></div><div class="line">        <span class="keywordflow">if</span> (state == <a class="code" href="group__group__dfu__macro__state.html#ga75352e8101b5fe7c4de37f86b06f1d18">CY_DFU_STATE_FINISHED</a>)</div><div class="line">        {</div><div class="line">           <span class="comment">/* Finished loading the application image */</span></div><div class="line"></div><div class="line">           <span class="comment">/* Validate DFU application, if it is valid then switch to it */</span></div><div class="line">           status = <a class="code" href="group__group__dfu__functions.html#gae4eed95b94cdb006c79e2036f01d7fc4">Cy_DFU_ValidateApp</a>(1u, &amp;dfuParams);</div><div class="line">           <span class="keywordflow">if</span> (status == <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23">CY_DFU_SUCCESS</a>)</div><div class="line">           {</div><div class="line">               <a class="code" href="group__group__dfu__functions.html#gaa979bcdabc0bb7dc392be24a25986ca9">Cy_DFU_TransportStop</a>();</div><div class="line">               <a class="code" href="group__group__dfu__functions.html#ga462d2b960d0a1420bd365cbb12173266">Cy_DFU_ExecuteApp</a>(1u);</div><div class="line">           }</div><div class="line">           <span class="keywordflow">else</span> <span class="keywordflow">if</span> (status == <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba5ec17ddd14f6e0a3ac1ad893d3cef065">CY_DFU_ERROR_VERIFY</a>)</div><div class="line">           {</div><div class="line">               <span class="comment">/*</span></div><div class="line"><span class="comment">               * Restarts loading, an alternatives are to Halt MCU here</span></div><div class="line"><span class="comment">               * or switch to the other app if it is valid.</span></div><div class="line"><span class="comment">               * Error code may be handled here, i.e. print to debug UART.</span></div><div class="line"><span class="comment">               */</span></div><div class="line">               status = <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line">               <a class="code" href="group__group__dfu__functions.html#gaf440cbe4ded2f8090c51fe7c23a00e8c">Cy_DFU_TransportReset</a>();</div><div class="line">           }</div><div class="line">        }</div><div class="line">        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (state == <a class="code" href="group__group__dfu__macro__state.html#gab0ee6f2a05184dcf2ded6f3e1c6ff74b">CY_DFU_STATE_FAILED</a>)</div><div class="line">        {</div><div class="line">           <span class="comment">/* An error has happened during the loading process */</span></div><div class="line">           <span class="comment">/* Handle it here */</span></div><div class="line"></div><div class="line">           <span class="comment">/* In this Code Example just restart loading process */</span></div><div class="line">           status = <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line">           <a class="code" href="group__group__dfu__functions.html#gaf440cbe4ded2f8090c51fe7c23a00e8c">Cy_DFU_TransportReset</a>();</div><div class="line">        }</div><div class="line">        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (state == <a class="code" href="group__group__dfu__macro__state.html#gac52da0b4bc0d00ccef1726e7ab639817">CY_DFU_STATE_UPDATING</a>)</div><div class="line">        {</div><div class="line">           uint32_t passed5seconds = (count &gt;= (5000ul/paramsTimeout)) ? 1u : 0u;</div><div class="line">           <span class="comment">/*</span></div><div class="line"><span class="comment">           * if no command has been received during 5 seconds when the loading</span></div><div class="line"><span class="comment">           * has started then restart loading.</span></div><div class="line"><span class="comment">           */</span></div><div class="line">           <span class="keywordflow">if</span> (status == <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23">CY_DFU_SUCCESS</a>)</div><div class="line">           {</div><div class="line">               count = 0u;</div><div class="line">           }</div><div class="line">           <span class="keywordflow">else</span> <span class="keywordflow">if</span> (status == <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1badccb00d92664320cfae8448b0811eb09">CY_DFU_ERROR_TIMEOUT</a>)</div><div class="line">           {</div><div class="line">               <span class="keywordflow">if</span> (passed5seconds != 0u)</div><div class="line">               {</div><div class="line">                   count = 0u;</div><div class="line">                   <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line">                   <a class="code" href="group__group__dfu__functions.html#gaf440cbe4ded2f8090c51fe7c23a00e8c">Cy_DFU_TransportReset</a>();</div><div class="line">               }</div><div class="line">           }</div><div class="line">           <span class="keywordflow">else</span></div><div class="line">           {</div><div class="line">               count = 0u;</div><div class="line">               <span class="comment">/* Delay because Transport still may be sending error response to a host */</span></div><div class="line">               Cy_SysLib_Delay(paramsTimeout);</div><div class="line">               <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line">               <a class="code" href="group__group__dfu__functions.html#gaf440cbe4ded2f8090c51fe7c23a00e8c">Cy_DFU_TransportReset</a>();</div><div class="line">           }</div><div class="line">        }</div></div><!-- fragment --></li>
-<li><p class="startli">Update the main loop with a routine to switch to the loaded QSG_DFU_App1_Hello_World application.</p>
-<p class="startli">For example, to switch by pressing the CY8CKIT-062-WIFI-BT button SW2:</p><ul>
-<li>Enable pin 0[4] in Device Configurator with name <b>PIN_SW2</b></li>
-<li>Set/check pin configuration: <table class="doxtable">
+<li><p class="startli">Update the main loop with a routine to switch to the loaded QSG_DFU_App1_Hello_World application:</p>
+<p class="startli">For example, to switch by pressing the kit user button:</p><ul>
+<li>In the Device Configurator, enable pin 0[4] for CY8CKIT-062-WIFI-BT and pin 3[7] for CY8CKIT-149 and name it <b>PIN_SW</b></li>
+<li>Set/check the pin configuration: <table class="doxtable">
 <tr>
-<th>Parameter name </th><th>value  </th></tr>
+<th>Parameter name </th><th>Value  </th></tr>
 <tr>
 <td>Driver Mode </td><td>Resistive Pull-Up. Input buffer on </td></tr>
 <tr>
@@ -168,97 +196,115 @@ STEP 2: Update Loader QSG_DFU_App0_I2C main.c</h2>
 <img src="dfu_qsg_btn.png" alt="dfu_qsg_btn.png"/>
 </div>
 </li>
-<li>Add the following routine: <div class="fragment"><div class="line">        <span class="comment">/* If Button clicked - Switch to App1 if it is valid */</span></div><div class="line">        <span class="keywordflow">if</span> (Cy_GPIO_Read(PIN_SW2_PORT, PIN_SW2_PIN) == 0u)</div><div class="line">        {</div><div class="line">           <span class="comment">/* 50 ms delay for button debounce on button press */</span></div><div class="line">           Cy_SysLib_Delay(50u);</div><div class="line"></div><div class="line">           <span class="keywordflow">if</span> (Cy_GPIO_Read(PIN_SW2_PORT, PIN_SW2_PIN) == 0u)</div><div class="line">           {</div><div class="line">               <span class="keywordflow">while</span> (Cy_GPIO_Read(PIN_SW2_PORT, PIN_SW2_PIN) == 0u)</div><div class="line">               {   <span class="comment">/* 50 ms delay for button debounce on button release */</span></div><div class="line">                   Cy_SysLib_Delay(50u);</div><div class="line">               }</div><div class="line"></div><div class="line">               <span class="comment">/* Validate and switch to App1 */</span></div><div class="line">               status = <a class="code" href="group__group__dfu__functions.html#gae4eed95b94cdb006c79e2036f01d7fc4">Cy_DFU_ValidateApp</a>(1u, &amp;dfuParams);</div><div class="line"></div><div class="line">               <span class="keywordflow">if</span> (status == <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23">CY_DFU_SUCCESS</a>)</div><div class="line">               {</div><div class="line">                   <a class="code" href="group__group__dfu__functions.html#gaa979bcdabc0bb7dc392be24a25986ca9">Cy_DFU_TransportStop</a>();</div><div class="line">                   <a class="code" href="group__group__dfu__functions.html#ga462d2b960d0a1420bd365cbb12173266">Cy_DFU_ExecuteApp</a>(1u);</div><div class="line">               }</div><div class="line">           }</div><div class="line">        }</div></div><!-- fragment --> </li>
+<li>Add the following routine: <div class="fragment"><div class="line">        <span class="comment">/* If Button clicked - Switch to App1 if it is valid */</span></div><div class="line">        <span class="keywordflow">if</span> (Cy_GPIO_Read(PIN_SW_PORT, PIN_SW_PIN) == 0u)</div><div class="line">        {</div><div class="line">           <span class="comment">/* 50 ms delay for button debounce on button press */</span></div><div class="line">           Cy_SysLib_Delay(50u);</div><div class="line"></div><div class="line">           <span class="keywordflow">if</span> (Cy_GPIO_Read(PIN_SW_PORT, PIN_SW_PIN) == 0u)</div><div class="line">           {</div><div class="line">               <span class="keywordflow">while</span> (Cy_GPIO_Read(PIN_SW_PORT, PIN_SW_PIN) == 0u)</div><div class="line">               {   <span class="comment">/* 50 ms delay for button debounce on button release */</span></div><div class="line">                   Cy_SysLib_Delay(50u);</div><div class="line">               }</div><div class="line"></div><div class="line">               <span class="comment">/* Validate and switch to App1 */</span></div><div class="line">               status = <a class="code" href="group__group__dfu__functions.html#gae4eed95b94cdb006c79e2036f01d7fc4">Cy_DFU_ValidateApp</a>(1u, &amp;dfuParams);</div><div class="line"></div><div class="line">               <span class="keywordflow">if</span> (status == <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23">CY_DFU_SUCCESS</a>)</div><div class="line">               {</div><div class="line">                   <a class="code" href="group__group__dfu__functions.html#gaa979bcdabc0bb7dc392be24a25986ca9">Cy_DFU_TransportStop</a>();</div><div class="line">                   <a class="code" href="group__group__dfu__functions.html#ga462d2b960d0a1420bd365cbb12173266">Cy_DFU_ExecuteApp</a>(1u);</div><div class="line">               }</div><div class="line">           }</div><div class="line">        }</div></div><!-- fragment --></li>
+</ul>
+</li>
+<li>Update the application to turn on the kit blue LED to indicate successful DFU initialization:<ul>
+<li>In the Device Configurator, enable pin 11[1] for CY8CKIT-062-WIFI-BT and pin 3[4] for CY8CKIT-149 and name it <b>PIN_LED</b></li>
+<li>Set/check the pin configuration: <table class="doxtable">
+<tr>
+<th>Parameter name </th><th>Value  </th></tr>
+<tr>
+<td>Driver Mode </td><td>Strong Drive. Input buffer off </td></tr>
+<tr>
+<td>Initial Drive State </td><td>High(1) </td></tr>
+</table>
+</li>
+<li>Add the following code before the main loop: <div class="fragment"><div class="line">    Cy_GPIO_Write(PIN_LED_PORT, PIN_LED_PIN, 0U);</div></div><!-- fragment --> </li>
 </ul>
 </li>
 </ol>
 <h2><a class="anchor" id="ssection_dfu_step_3"></a>
 STEP 3: Build and Program Loader QSG_DFU_App0_I2C</h2>
 <ol type="1">
-<li>Update the project Makefile to use the DFU linker script for the appropriate toolchain dfu_cm4_app0.*. Set LINKER_SCRIPT to the linker script copied to the project root. <div class="fragment"><div class="line">LINKER_SCRIPT=dfu_cm4_app0.ld </div></div><!-- fragment --></li>
+<li>Update the project Makefile to use the previously copied DFU linker script by setting the LINKER_SCRIPT variable.<ul>
+<li>CY8CKIT-062-WIFI-BT + GCC_ARM: <div class="fragment"><div class="line">LINKER_SCRIPT=dfu_cm4_app0.ld </div></div><!-- fragment --></li>
+<li>CY8CKIT-149 + GCC_ARM: <div class="fragment"><div class="line">LINKER_SCRIPT=dfu_cm0p_app0.ld </div></div><!-- fragment --></li>
+</ul>
+</li>
 <li>Add a post-build step to sign the ELF file or sign it manually after the build: &lt;MCUELFTOOL&gt; &ndash;sign &lt;app&gt;.elf &ndash;output &lt;app_signed&gt;.elf &ndash;hex &lt;app_signed&gt;.hex.<br />
- For macOS/Linux platform: <div class="fragment"><div class="line">POSTBUILD=$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool --sign $(CY_CONFIG_DIR)/$(APPNAME).elf --hex $(CY_CONFIG_DIR)/$(APPNAME).hex</div></div><!-- fragment --> For Windows platform: <div class="fragment"><div class="line">POSTBUILD=<span class="stringliteral">&quot;$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool.exe&quot;</span> --sign $(CY_CONFIG_DIR)/$(APPNAME).elf --hex $(CY_CONFIG_DIR)/$(APPNAME).hex</div></div><!-- fragment --></li>
-<li>Connect DVK CY8CKIT-062-WIFI-BT. Build and program the device.</li>
-<li>Observe the device red LED blinking.</li>
+ For the macOS/Linux platform: <div class="fragment"><div class="line">POSTBUILD=$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool --sign $(CY_CONFIG_DIR)/$(APPNAME).elf --hex $(CY_CONFIG_DIR)/$(APPNAME).hex</div></div><!-- fragment --> For the Windows platform: <div class="fragment"><div class="line">POSTBUILD=<span class="stringliteral">&quot;$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool.exe&quot;</span> --sign $(CY_CONFIG_DIR)/$(APPNAME).elf --hex $(CY_CONFIG_DIR)/$(APPNAME).hex</div></div><!-- fragment --></li>
+<li>Connect your kit to the computer. Build and program the device.</li>
+<li>Observe the kit blue LED on.</li>
 </ol>
-<p><a class="anchor" id="loadable_DFU_app_steps"></a> </p>
+<p><a class="anchor" id="loadable_DFU_app_steps"></a></p>
 <h2><a class="anchor" id="ssection_dfu_step_4"></a>
 STEP 4: Setup Loadable QSG_DFU_App1_Hello_World</h2>
 <ol type="1">
-<li>Copy the configuration file <b>dfu_user.h</b> from the libs\dfu\config directory and put them near main.c in the project root. <dl class="section warning"><dt>Warning</dt><dd>Do not copy <b>dfu_user.c</b> to avoid duplication of the metadata structures</dd></dl>
+<li>Copy the configuration file <b>dfu_user.h</b> from the ..\mtb_shared\dfu\[VERSION]\config directory and put it near main.c in the project root. <dl class="section warning"><dt>Warning</dt><dd>Do not copy <b>dfu_user.c</b> to avoid duplication of the metadata structures.</dd></dl>
 </li>
-<li>Copy the app1 linker script files from \libs\dfu\linker_scripts\TOOLCHAIN_&lt;COMPILER&gt;\ in the project root. For GCC ARM compiler copy \libs\dfu\linker_scripts\TOOLCHAIN_GCC_ARM\dfu_cm4_app1.ld</li>
+<li>Copy the app1 linker script file and put them near the main.c. Linker script files are located at:<ul>
+<li>CY8CKIT-062-WIFI-BT kit: <br />
+ ..\mtb_shared\dfu\[VERSION]\linker_scripts\CAT1A\TOOLCHAIN_&lt;COMPILER&gt;\dfu_cm4_app1.[ext]</li>
+<li>CY8CKIT-149 kit: <br />
+ ..\mtb_shared\dfu\[VERSION]\linker_scripts\CAT2\TOOLCHAIN_&lt;COMPILER&gt;\dfu_cm0p_app1.[ext] For the GCC ARM compiler, copy dfu_cm4_app0.ld (CY8CKIT-062-WIFI-BT kit) of dfu_cm0p_app0.ld file (CY8CKIT-149 kit). <dl class="section note"><dt>Note</dt><dd>For the ARM compiler, copy additional <b>dfu_common.h</b> and <b>dfu_elf_symbols.c</b> files to the project. Those files are located in the same folder as the selected linker file.</dd></dl>
+</li>
+</ul>
+</li>
 </ol>
 <h2><a class="anchor" id="ssection_dfu_step_5"></a>
 STEP 5: Update Loadable QSG_DFU_App1_Hello_World main.c</h2>
 <ol type="1">
-<li>Update the main.c file with the .cy_app_signature section <div class="fragment"><div class="line">CY_SECTION(<span class="stringliteral">&quot;.cy_app_signature&quot;</span>) __USED static const uint32_t cy_dfu_appSignature[1];</div></div><!-- fragment --></li>
-<li>Initialize the peripheral in the main function: <div class="fragment"><div class="line">    init_cycfg_all();</div></div><!-- fragment --></li>
-<li>Change the behavior of the basic application. For example, change the Blinky LED to green or change the UART output.</li>
-<li><p class="startli">Update the main loop with a routine to switch to the loader QSG_DFU_App0_I2C application to load another application.</p>
-<p class="startli">For example, to switch by pressing the CY8CKIT-062-WIFI-BT button SW2:</p><ul>
-<li>Enable pin 0[4] in Device Configurator with name <b>PIN_SW2</b></li>
-<li>Set/check pin configuration: <table class="doxtable">
-<tr>
-<th>Parameter name </th><th>value  </th></tr>
-<tr>
-<td>Driver Mode </td><td>Resistive Pull-Up. Input buffer on </td></tr>
-<tr>
-<td>Initial Drive State </td><td>High(1) </td></tr>
-</table>
-<div class="image">
-<img src="dfu_qsg_btn.png" alt="dfu_qsg_btn.png"/>
-</div>
-</li>
-<li>Add the following routine: <div class="fragment"><div class="line">    <span class="comment">/* If Button clicked and switch to App0 */</span></div><div class="line">    <span class="keywordflow">if</span> (Cy_GPIO_Read(PIN_SW2_PORT, PIN_SW2_PIN) == 0u)</div><div class="line">    {</div><div class="line">        <span class="comment">/* 50 ms delay for button debounce on button press */</span></div><div class="line">        Cy_SysLib_Delay(50u);</div><div class="line"></div><div class="line">        <span class="keywordflow">if</span> (Cy_GPIO_Read(PIN_SW2_PORT, PIN_SW2_PIN) == 0u)</div><div class="line">        {</div><div class="line">            <span class="keywordflow">while</span> (Cy_GPIO_Read(PIN_SW2_PORT, PIN_SW2_PIN) == 0u)</div><div class="line">            {   <span class="comment">/* 50 ms delay for button debounce on button release */</span></div><div class="line">                Cy_SysLib_Delay(50u);</div><div class="line">            }</div><div class="line">            <a class="code" href="group__group__dfu__functions.html#ga462d2b960d0a1420bd365cbb12173266">Cy_DFU_ExecuteApp</a>(0u);</div><div class="line">        }</div><div class="line">    }</div></div><!-- fragment --> </li>
-</ul>
-</li>
+<li>Update the main.c file with the .cy_app_signature section <div class="fragment"><div class="line">CY_SECTION(<span class="stringliteral">&quot;.cy_app_signature&quot;</span>) __USED static const uint32_t cy_dfu_appSignature[1];</div></div><!-- fragment --> </li>
 </ol>
 <h2><a class="anchor" id="ssection_dfu_step_6"></a>
 STEP 6: Build and Program Patch</h2>
 <ol type="1">
-<li>Update the project Makefile to use the DFU linker script for the appropriate toolchain dfu_cm4_app1.*. Set the LINKER_SCRIPT variable with the path to the copied linker script. <div class="fragment"><div class="line">LINKER_SCRIPT=dfu_cm4_app1.ld </div></div><!-- fragment --></li>
+<li>Update the project Makefile to use previously copied DFU linker script by setting the LINKER_SCRIPT variable.<ul>
+<li>CY8CKIT-062-WIFI-BT + GCC_ARM: <div class="fragment"><div class="line">LINKER_SCRIPT=dfu_cm4_app1.ld </div></div><!-- fragment --></li>
+<li>CY8CKIT-149 + GCC_ARM: <div class="fragment"><div class="line">LINKER_SCRIPT=dfu_cm0p_app1.ld </div></div><!-- fragment --></li>
+</ul>
+</li>
 <li><p class="startli">Add the post build step to run CyMCUElfTool to generate a patch file in the *.cyacd2 format (see CyMCUElfTool User Guide):</p><ul>
 <li>Update the application ELF with a CRC checksum: &lt;MCUELFTOOL&gt; &ndash;sign app.elf CRC &ndash;output app_crc.elf</li>
 <li>Generate a patch file: &lt;MCUELFTOOL&gt; -P app_crc.elf &ndash;output app.cyacd2</li>
 </ul>
 <p class="startli">Generate a *.cyacd2 file in the project root.<br />
- For macOS/Linux platform: </p><div class="fragment"><div class="line">POSTBUILD=$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool --sign $(CY_CONFIG_DIR)/$(APPNAME).elf CRC --output $(APPNAME)_crc.elf &amp;&amp; \</div><div class="line">       $(CY_MCUELFTOOL_DIR)/bin/cymcuelftool -P $(APPNAME)_crc.elf --output $(APPNAME)_crc.cyacd2</div></div><!-- fragment --><p> For Windows platform: </p><div class="fragment"><div class="line">POSTBUILD=<span class="stringliteral">&quot;$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool.exe&quot;</span> --sign $(CY_CONFIG_DIR)/$(APPNAME).elf CRC --output $(APPNAME)_crc.elf &amp;&amp; \</div><div class="line">       <span class="stringliteral">&quot;$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool.exe&quot;</span> -P $(APPNAME)_crc.elf --output $(APPNAME)_crc.cyacd2</div></div><!-- fragment --></li>
+ For the macOS/Linux platform: </p><div class="fragment"><div class="line">POSTBUILD=$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool --sign $(CY_CONFIG_DIR)/$(APPNAME).elf CRC --output $(APPNAME)_crc.elf &amp;&amp; \</div><div class="line">       $(CY_MCUELFTOOL_DIR)/bin/cymcuelftool -P $(APPNAME)_crc.elf --output $(APPNAME)_crc.cyacd2</div></div><!-- fragment --><p> For the Windows platform: </p><div class="fragment"><div class="line">POSTBUILD=<span class="stringliteral">&quot;$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool.exe&quot;</span> --sign $(CY_CONFIG_DIR)/$(APPNAME).elf CRC --output $(APPNAME)_crc.elf &amp;&amp; \</div><div class="line">       <span class="stringliteral">&quot;$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool.exe&quot;</span> -P $(APPNAME)_crc.elf --output $(APPNAME)_crc.cyacd2</div></div><!-- fragment --></li>
 <li>Build a project.</li>
 <li>Open the DFU Host Tool. Connect to the device. Select the generated .cyacd2 in the project root and program it to the device. <div class="image">
 <img src="dfu_qsg_hti2c.png" alt="dfu_qsg_hti2c.png"/>
 </div>
 </li>
-<li>QSG_DFU_App1_Hello_World application should start after successful program. Observe the kit change behavior based on changes <a class="el" href="index.html#ssection_dfu_step_5">STEP 5: Update Loadable QSG_DFU_App1_Hello_World main.c</a> (green LED blinking, UART output). Also, switching to the QSG_DFU_App1_Hello_World application could be done manually by pressing PIN_SW2 (pin 0[4]).</li>
-<li>Switch back to the loader QSG_DFU_App0_I2C application. Press the kit button PIN_SW2 (pin 0[4]) and observe that the kit red LED blinking.</li>
+<li>QSG_DFU_App1_Hello_World application should start after successful programming. Observe the LED blinking and UART output.</li>
+<li>Update the QSG_DFU_App1_Hello_World application (e.g. change blinking led frequency or UART output) and build it.</li>
+<li>Press the kit reset button to return to the loader application and program the updated QSG_DFU_App1_Hello_World. Observe the project updated behavior. <dl class="section note"><dt>Note</dt><dd>Current application can be changed from the firmware by calling the <a class="el" href="group__group__dfu__functions.html#ga462d2b960d0a1420bd365cbb12173266">Cy_DFU_ExecuteApp</a> function.</dd></dl>
+</li>
 </ol>
 <h1><a class="anchor" id="section_dfu_configuration"></a>
 Configuration Considerations</h1>
 <h2><a class="anchor" id="group_dfu_config_linker_scripts"></a>
 Linker scripts</h2>
-<p>The DFU SDK projects linker scripts are a bit different from the default startup linker scripts.</p>
-<p>The DFU linker scripts are:</p>
-<ol type="1">
+<p>The DFU SDK projects linker scripts differ from the default startup linker scripts.</p>
+<p>The DFU middleware contains two sets of linker script files for the CAT1A and CAT2-based devices. The DFU linker scripts include the following files:</p><ul>
+<li>CAT1A:<ul>
 <li>dfu_cm4_app0.{ld, icf, scat}, dfu_cm4_app1.{ld, icf, scat} for ARM GCC, IAR, and ARM compilers.</li>
-<li><p class="startli">dfu_common.h and dfu_elf_symbols.c for the ARM compiler.</p>
-<p class="startli">These files define symbols for the memory layout for each application inside the device.</p>
+<li>dfu_common.h and dfu_elf_symbols.c for the ARM compiler.</li>
+</ul>
 </li>
-</ol>
-<dl class="section user"><dt>Memory layout of linker scripts (dfu_cm4_{app0, app1}.ld)</dt><dd></dd></dl>
-<p>This part of the GCC linker script files must have the same memory layout across all the application projects in the designed device. Any changes made to any application must be copied to other applications <em>dfu_cm4_{app0, app1}.ld</em> files.</p>
+<li>CAT2:<ul>
+<li>dfu_cm0p_app0.{ld, icf, scat}, dfu_cm0p_app1.{ld, icf, scat} for ARM GCC, IAR, and ARM compilers.</li>
+<li>dfu_common.h and dfu_elf_symbols.c for the ARM compiler.</li>
+</ul>
+</li>
+</ul>
+<p>These files define the symbols for the memory layout for each application inside the device.</p>
+<dl class="section user"><dt>Memory layout of GCC_ARM linker scripts (dfu_{cm0p, cm4}_{app0, app1}.ld)</dt><dd></dd></dl>
+<p>This part of the GCC linker script files must have the same memory layout across all the application projects in the designed device. Any changes made to any application must be copied to other applications linker script files.</p>
 <p>Memory regions:</p><ul>
-<li><em>flash_cm0p</em> - code and data of the default application CM0+ CPU.</li>
-<li><em>flash_app{X}</em> - code and data of the user application {X}.</li>
-<li><em>flash_boot_meta</em> - for the DFU SDK metadata. Cypress DFU SDK code examples place DFU SDK metadata inside this region.</li>
-<li><em>sflash_user_data</em>, <em>eFuse</em>, <em>flash_toc</em>, <em>em_eeprom</em>, <em>xip</em> - These regions not used by typical DFU SDK code examples. They are kept because they may be used in user code.</li>
-<li><em>ram_common</em> - shared between DFU SDK applications. The user may place it anywhere inside the RAM, So, one app sets some values there, switches to another app. Then app may read or update the values.</li>
+<li><em>flash_app{X}</em> - Code and data of the user application {X}.</li>
+<li><em>flash_boot_meta</em> - For the DFU SDK metadata. Cypress DFU SDK code examples place DFU SDK metadata inside this region.</li>
+<li><em>ram_common</em> - Shared between the DFU SDK applications. The user can place it anywhere inside the RAM, So, one app sets some values there, switches to another app. Then app may read or update the values.</li>
 <li><em>ram_app{X}</em> - data, stack, heap etc. for the user app{X}.</li>
 </ul>
-<p>ELF file symbols: CyMCUElfTool uses special ELF file symbols besides command-line arguments for its configuration. These symbols are defined in each linker script.</p><ol type="1">
+<p>Also, the linker script files for CAT1A include the following memory regions:</p><ul>
+<li><em>flash_cm0p</em> - Code and data of the default application CM0+ CPU.</li>
+<li><em>sflash_user_data</em>, <em>eFuse</em>, <em>flash_toc</em>, <em>em_eeprom</em>, <em>xip</em> - These regions are not used by typical DFU SDK code examples. They are kept because they may be used in user code.</li>
+</ul>
+<p>ELF file symbols: CyMCUElfTool uses special ELF file symbols besides the command-line arguments for its configuration. These symbols are defined in each linker script.</p><ol type="1">
 <li><p class="startli">__cy_memory_{N}_start - Defines the start address of the memory region. __cy_memory_{N}_length - Defines the length of the memory region. __cy_memory_{N}_row_size - Defines the row size of the memory region.</p>
-<p class="startli">CyMCUElfTool uses these symbols to determine which memory regions should be placed into the output files. I.e. without these symbols, some data like XIP may be absent in the output file. These symbols are critical for .cyacd2 file generation, CyMCUElfTool must know the row size of all the data being exported to the .cyacd2 file. The updating is done by rows, and a row size may vary across the memory regions.</p>
-<p class="startli">E.g. Internal flash of PSoC6 devices start at address 0x1000_0000 and the length and row size may de device-dependent, but let's assume it is 512KB and 512 bytes. The memory symbols for the internal flash will be: <code> __cy_memory_0_start = 0x10000000; __cy_memory_0_length = 512 * 1024; __cy_memory_0_row_size = 512; </code></p>
-<p class="startli">The number _{N}_ in the memory symbol indicates that there may be multiple memories.</p>
+<p class="startli">CyMCUElfTool uses these symbols to determine which memory regions to place into the output files. I.e. without these symbols, some data, like XIP may be absent in the output file. These symbols are critical for the .cyacd2 file generation, CyMCUElfTool must know the row size of all the data being exported to the .cyacd2 file. The updating is done by rows, and a row size may vary across the memory regions.</p>
+<p class="startli">E.g. The internal flash of PSoC6 devices start at address 0x1000_0000 and the length and row size may be device-dependent. For example, if the length and size are 512KB and 512 bytes, the memory symbols for the internal flash will be: </p><div class="fragment"><div class="line">__cy_memory_0_start    = 0x10000000;</div><div class="line">__cy_memory_0_length   = 512 * 1024;</div><div class="line">__cy_memory_0_row_size = 512;</div></div><!-- fragment --><p class="startli">The number _{N}_ in the memory symbol indicates that there may be multiple memories.</p>
 </li>
 <li>__cy_boot_metadata_addr and __cy_boot_metadata_length. These symbols are used by the DFU SDK internally to access the metadata.</li>
 <li><p class="startli">__cy_product_id - used by CyMCUElfTool to be placed in the .cyacd2 header. This value is used by the updating Host and DFU SDK firmware to confirm that the .cyacd2 file being updated is compatible with the device.</p>
@@ -268,7 +314,7 @@ Linker scripts</h2>
 </ul>
 </li>
 <li><p class="startli">__cy_app{N}_verify_start, __cy_app{N}_verify_length. These symbols are used by the dfu_user.c file to initialize the metadata. Their value is automatically updated by the linker when the user updates the memory layout (memory regions).</p>
-<p class="startli">If the user decided to use a different mechanism for SDK metadata initialization, then these symbols can be removed.</p>
+<p class="startli">If the user decides to use a different mechanism for the SDK metadata initialization, these symbols can be removed.</p>
 </li>
 <li>__cy_boot_signature_size.<a class="anchor" id="__cy_boot_signature_size"></a> Used by the DFU SDK linker scripts only. It helps avoiding the magic number for a signature size to be scattered throughout all the linker scripts. E.g.<ul>
 <li>For the CRC-32C application signature, the value of this symbol is 4 (bytes).</li>
@@ -277,90 +323,139 @@ Linker scripts</h2>
 </li>
 <li>__cy_checksum_type. The checksum type for the DFU transport packet verification used by CyMCUElfTool to generate a updating file. Must be aligned with <a class="el" href="group__group__dfu__macro__config.html#ga143573a13abbb1bf5c430f6f663492e7">CY_DFU_OPT_PACKET_CRC</a></li>
 </ol>
-<dl class="section user"><dt>File dfu_cm4_app0.ld</dt><dd></dd></dl>
+<dl class="section user"><dt>File dfu_{cm0p, cm4}_app0.ld</dt><dd></dd></dl>
 <p>This file is a linker script for the app0 for DFU SDK applications.</p>
-<p>It is similar to the default startup GCC's CM4_dual linker script but with some differences:</p><ol type="1">
-<li>Memory regions are separated between the CM0+ CPU and CM4 CPU application 0 and CM4 CPU application 1 described above.</li>
-<li>DFU-specific ELF file symbols described above.</li>
+<p>It is similar to the default startup GCC's linker script but contains the following changes:</p><ol type="1">
+<li>The memory regions are separated between the CPU application 0 and CPU application 1 described above. For CAT1A devices, there is an additional region for the CM0+ application.</li>
+<li>The DFU-specific ELF file symbols are described above.</li>
 <li>__cy_app_id. These ELF file symbols are used by CyMCUElfTool to set an application ID in the .cyacd2 file header.</li>
 <li>__cy_app_verify_start, __cy_app_verify_length. These two symbols are used by CyMCUElfTool to generate an application signature. The first symbol provides a value of the start of signed memory and the second - the length of signed memory.</li>
 <li>Section ".cy_boot_noinit". Used to place data to share between the applications. See the description of the ram_common memory region.</li>
-<li>Section ".cy_boot_metadata". Contains the DFU SDK metadata. This section name is necessary only for CyMCUElfTool to sign the section with the CRC-32C checksum of this section data. If no CRC-32C at the end of the metadata is required, then the section can be renamed.</li>
+<li>Section ".cy_boot_metadata". Contains the DFU SDK metadata. This section name is necessary only for CyMCUElfTool to sign the section with the CRC-32C checksum of this section data. If no CRC-32C at the end of the metadata is required, the section can be renamed.</li>
 <li>Section .cy_app_signature. This section is used to place an application signature. The signature is used by the DFU SDK to verify that the application is valid. Typically, CRC, SHA or any other hash of the application code and data is placed here. CyMCUElfTool updates this section in the post-build step. The memory for which the signature is calculated is defined by the following ELF file symbols: __cy_app_verify_start, __cy_app_verify_length.</li>
 </ol>
-<dl class="section user"><dt>File dfu_cm4_app1.ld</dt><dd></dd></dl>
-<p>Used to create linker scripts for application #2, .. #N It is similar to dfu_cm4_app0.ld linker script with some differences:</p><ul>
+<dl class="section user"><dt>File dfu_{cm0p, cm4}_app1.ld</dt><dd></dd></dl>
+<p>Used to create linker scripts for application #2, .. #N It is similar to dfu_{cm0p, cm4}_app0.ld linker script, but contains the following changes:</p><ul>
 <li>Region alias for flash and ram are flash_app1 and ram_app1</li>
 <li>Application ID __cy_app_id = 1</li>
-<li>Removed section for CM0+ CPU as it is allocated only once in scope of linker script dfu_cm4_app1.ld</li>
+<li>For CAT1A devices, removed section for CM0+ CPU as it is allocated only once in scope of the linker script dfu_cm4_app0.ld</li>
 </ul>
-<dl class="section user"><dt>Files dfu_cm4_{app0, app1}.{icf, scat}</dt><dd></dd></dl>
+<dl class="section user"><dt>Files dfu_{cm0p, cm4}_{app0, app1}.{icf, scat}</dt><dd></dd></dl>
 <p>These files are the linker scripts for the IAR and ARM compilers for the DFU SDK applications.</p>
-<p>Their difference from the default startup linker scripts are similar to the DFU SDK GCC's linker scripts described above.</p>
+<p>Their difference from the default startup linker scripts is similar to the DFU SDK GCC's linker scripts described above.</p>
 <h2><a class="anchor" id="group_dfu_mtb_cfg"></a>
 Use of ModusToolbox's tools for HW initialization</h2>
-<p>For a setup of the SCB I2C personality in ModusToolbox Device Configurator for the I2C DFU transport for CY8CKIT-062-WIFI-BT, see the screenshot below. For other kits, verify the I2C pins and SCB block selection. </p><dl class="section note"><dt>Note</dt><dd>The personality alias name must be DFU_I2C</dd></dl>
-<div class="image">
-<img src="dfu_basic_i2c.png" alt="dfu_basic_i2c.png"/>
-</div>
-<p>For a setup of the SCB SPI personality in ModusToolbox Device Configurator for the SPI DFU transport for CY8CKIT-062-WIFI-BT, see the screenshot below. For other kits, verify the SPI pins and SCB block selection. </p><dl class="section note"><dt>Note</dt><dd>The personality alias name must be DFU_SPI</dd></dl>
-<div class="image">
-<img src="dfu_basic_spi.png" alt="dfu_basic_spi.png"/>
-</div>
-<p>For setup SCB UART personality in ModusToolbox Device Configurator for UART DFU transport for CY8CKIT-062-WIFI-BT see screenshot below. For other kit please verify UART pins and SCB block selection. </p><dl class="section note"><dt>Note</dt><dd>Personality alias name must be DFU_UART</dd></dl>
-<div class="image">
-<img src="dfu_basic_uart.png" alt="dfu_basic_uart.png"/>
-</div>
-<p>For a setup of the USB device personality in ModusToolbox Device Configurator for the USB CDC DFU transport for CY8CKIT-062-WIFI-BT, see the screenshot below. For other kits, verify the USB pins. </p><dl class="section note"><dt>Note</dt><dd>The personality alias name must be DFU_USB_CDC</dd></dl>
+<p>The following section describes the communication interfaces settings in the Device Configurator, required to use the included with DFU middleware communication files with the DFU Host tool.</p>
+<dl class="section user"><dt>I2C</dt><dd><table class="doxtable">
+<tr>
+<th>Parameter name </th><th>value  </th></tr>
+<tr>
+<td>Personality alias name </td><td>DFU_I2C </td></tr>
+<tr>
+<td>Mode </td><td>Slave </td></tr>
+<tr>
+<td>Data Rate </td><td>Any, I2C speed in DFU Host tool should be the same </td></tr>
+<tr>
+<td>Use TX FIFO </td><td>True </td></tr>
+<tr>
+<td>Use RX FIFO </td><td>True </td></tr>
+<tr>
+<td>Slave Address </td><td>Any, I2C address in DFU Host tool should be the same </td></tr>
+</table>
+</dd></dl>
+<dl class="section user"><dt>SPI</dt><dd><table class="doxtable">
+<tr>
+<th>Parameter name </th><th>value  </th></tr>
+<tr>
+<td>Personality alias name </td><td>DFU_SPI </td></tr>
+<tr>
+<td>Mode </td><td>Slave </td></tr>
+<tr>
+<td>Sub Mode </td><td>Motorola </td></tr>
+<tr>
+<td>SCLK Mode </td><td>Any, Sub Mode in DFU Host tool should be the same </td></tr>
+<tr>
+<td>Data Rate </td><td>Any, Clock speed in DFU Host tool should be the same </td></tr>
+<tr>
+<td>Bit Order </td><td>Any, Shift direction in DFU Host tool should be the same </td></tr>
+<tr>
+<td>RX Data Width </td><td>8 </td></tr>
+<tr>
+<td>TX Data Width </td><td>8 </td></tr>
+<tr>
+<td>SS Polarity </td><td>Active Low </td></tr>
+</table>
+</dd></dl>
+<dl class="section user"><dt>UART</dt><dd><table class="doxtable">
+<tr>
+<th>Parameter name </th><th>value  </th></tr>
+<tr>
+<td>Personality alias name </td><td>DFU_UART </td></tr>
+<tr>
+<td>Com Mode </td><td>Standard </td></tr>
+<tr>
+<td>Baud Rate </td><td>Any, Baud Rate in DFU Host tool should be the same </td></tr>
+<tr>
+<td>Bit Order </td><td>LSB first </td></tr>
+<tr>
+<td>Data Width </td><td>8 bits </td></tr>
+<tr>
+<td>Parity </td><td>Any, Parity in DFU Host tool should be the same </td></tr>
+<tr>
+<td>Stop Bits </td><td>Any, Stop Bits in DFU Host tool should be the same </td></tr>
+</table>
+</dd></dl>
+<dl class="section user"><dt>USB CDC</dt><dd>For a setup of the USB device personality in the ModusToolbox Device Configurator for the USB CDC DFU transport for CY8CKIT-062-WIFI-BT, see the screenshot below. For other kits, verify the USB pins. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The personality alias name must be DFU_USB_CDC</dd></dl>
 <div class="image">
 <img src="dfu_usb_cdc.png" alt="dfu_usb_cdc.png"/>
 </div>
-<p>For a setup of the BLE device personality in ModusToolbox Device Configurator for the BLE DFU transport, see the screenshot below.</p>
+<dl class="section user"><dt>BLE</dt><dd>For a setup of the BLE device personality in the ModusToolbox Device Configurator for the BLE DFU transport, see the screenshot below.</dd></dl>
 <div class="image">
 <img src="dfu_ble.png" alt="dfu_ble.png"/>
 </div>
 <h1><a class="anchor" id="section_dfu_design"></a>
 Design Considerations</h1>
-<h2><a class="anchor" id="group_dfu_ucase_uart"></a>
-Firmware Update via UART</h2>
-<p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for steps how to set up a DFU project that upgrades an application via a UART transport interface.</p>
 <h2><a class="anchor" id="group_dfu_ucase_i2c"></a>
 Firmware Update via I2C</h2>
-<p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for basic steps how to setup a DFU project. Specific steps for the I2C transport support:</p><ul>
-<li>Include transport_i2c.c and transport_i2c.h in the project build flow. For example, copy from the \config directory to the directory with the main.c file. Ensure that other transport files are not included in the build flow.</li>
-<li>Select and configure the SCB block using ModusToolbox Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of ModusToolbox's tools for HW initialization</a> or manually using the configuration structures.</li>
+<p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for steps how to set up a DFU project that upgrades an application via a I2C transport interface.</p>
+<h2><a class="anchor" id="group_dfu_ucase_uart"></a>
+Firmware Update via UART</h2>
+<p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for basic steps how to setup a DFU project. Specific steps for the UART transport support:</p><ul>
+<li>Include transport_uart.c and transport_uart.h in the project build flow. For example, copy from the \config\CAT1A or \config\CAT2 or directory to the directory with the main.c file. Ensure that other transport files are not included in the build flow.</li>
+<li>Select and configure the SCB block using the ModusToolbox Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of ModusToolbox's tools for HW initialization</a> or manually using the configuration structures.</li>
 <li>Add the post-build step to sign the ELF file or sign it manually after the build <div class="fragment"><div class="line">&lt;MCUELFTOOL&gt; --sign app.elf --output app_signed.elf</div></div><!-- fragment --></li>
 <li>Build and program a project into the device.</li>
-<li>Open DFU Host Tool. Select the I2C interface. Set ab I2C address and speed according to the SCB I2C setup in the previous step.</li>
-<li>Select the *.cyacd2 application image and upload to the device</li>
+<li>Open the DFU Host Tool. Select the UART interface. Set the UART baud rate according to the SCB UART setup in the previous step.</li>
+<li>Select the *.cyacd2 application image and upload to the device.</li>
 </ul>
 <h2><a class="anchor" id="group_dfu_ucase_spi"></a>
 Firmware Update via SPI</h2>
-<p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for basic steps how to set up a DFU project. Specific steps for the SPI transport support:</p><ul>
-<li>Include transport_spi.c and transport_spi.h in the project build flow. For example, copy them from the \config directory to the directory with main.c file. Ensure that other transport files are not included in the build flow.</li>
+<p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for basic steps how to set up a DFU project. The steps for the SPI transport support:</p><ul>
+<li>Include transport_spi.c and transport_spi.h in the project build flow. For example, copy them from the \config\CAT1A or \config\CAT2 directory to the directory with the main.c file. Ensure that other transport files are not included in the build flow.</li>
 <li>Select and configure the SCB block. This could be done using ModusToolbox Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of ModusToolbox's tools for HW initialization</a> or manually using the configuration structures.</li>
 <li>Add the post-build step to sign the ELF file or sign it manually after the build <div class="fragment"><div class="line">&lt;MCUELFTOOL&gt; --sign app.elf --output app_signed.elf</div></div><!-- fragment --></li>
 <li>Build and program a project into the device.</li>
-<li>Open DFU Host Tool. Select the SPI interface. Set SPI mode, shift the direction and speed according to the SCB SPI setup in the previous step.</li>
-<li>Select *.cyacd2 application image and upload to the device</li>
+<li>Open the DFU Host Tool. Select the SPI interface. Set SPI mode, shift the direction and speed according to the SCB SPI setup in the previous step.</li>
+<li>Select the *.cyacd2 application image and upload to the device.</li>
 </ul>
 <h2><a class="anchor" id="group_dfu_ucase_usbcdc"></a>
 Firmware Update via USB CDC</h2>
 <p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for basic steps how to setup a DFU project. Specific steps for the USB CDC transport support:</p><ul>
-<li>Include transport_usb_cdc.c and transport_usb_cdc.h in the project build flow. For example, copy them from the \config directory to the directory with the main.c file. Ensure that other transport files are not included in the build flow.</li>
-<li>Enable and configure the USB Device block using ModusToolbox Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of ModusToolbox's tools for HW initialization</a> or manually using the configuration structures.</li>
-<li>Generate USB descriptors and USB Middleware structures using USB Configurator. Open the USB configuration file (cycfg_usb_cdc.cyusbdev) in the DFU \config folder, then click Save to generate configuration files (cycfg_usbdev.c and cycfg_usbdev.h). These files must be included in the build flow (see USB Middleware API Reference <a class="el" href="index.html#group_dfu_more_info">More Information</a>).</li>
+<li>Include transport_usb_cdc.c and transport_usb_cdc.h in the project build flow. For example, copy them from the \config\CAT1A directory to the directory with the main.c file. Ensure that other transport files are not included in the build flow.</li>
+<li>Enable and configure the USB Device block using the ModusToolbox Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of ModusToolbox's tools for HW initialization</a> or manually using the configuration structures.</li>
+<li>Generate USB descriptors and USB Middleware structures using the USB Configurator. Open the USB configuration file (cycfg_usb_cdc.cyusbdev) in the DFU \config\CAT1A folder, then click Save to generate configuration files (cycfg_usbdev.c and cycfg_usbdev.h). These files must be included in the build flow (see USB Middleware API Reference <a class="el" href="index.html#group_dfu_more_info">More Information</a>).</li>
 <li>Add the post-build step to sign the ELF file or sign it manually after the build <div class="fragment"><div class="line">&lt;MCUELFTOOL&gt; --sign app.elf --output app_signed.elf</div></div><!-- fragment --></li>
-<li>Build and program a project into the device. Connect your Host to the USB device</li>
-<li>Open DFU Host Tool. Select the UART interface, because Host recognizes a USB device as a virtual UART (the name should be DFU USB CDC transport). UART settings: baud rate - 115200, data bits - 8, stop bits - 1, parity - None.</li>
+<li>Build and program a project into the device. Connect your Host to the USB device.</li>
+<li>Open the DFU Host Tool. Select the UART interface, because the Host recognizes the USB device as a virtual UART (the name is DFU USB CDC transport). UART settings: baud rate - 115200, data bits - 8, stop bits - 1, parity - None.</li>
 <li>Select the *.cyacd2 application image and upload to the device.</li>
 </ul>
 <h2><a class="anchor" id="group_dfu_ucase_ble"></a>
 Firmware Update via BLE (Over-the-Air)</h2>
 <p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for basic steps how to set up a DFU project. Also, see code example <a href="http://www.cypress.com/ce216767">CE216767</a> Specific steps for the USB BLE transport support:</p><ul>
-<li>Include transport_ble.c and transport_ble.h in the project build flow. For example, copy them from the \config directory to the directory with the main.c file. Ensure that other transport files are not included in the build flow.</li>
-<li>Enable and configure the BLE Device block using ModusToolbox Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of ModusToolbox's tools for HW initialization</a> or manually using the configuration structures.</li>
-<li>Generate BLE Middleware configuration structures. Open the BLE configuration file (cycfg_ble.cybt) in Bluetooth Configurator. The file is located in the DFU \config folder. Then click Save to generate configuration files (cycfg_ble.c and cycfg_ble.h). These files must be included in the build flow (BLE Middleware API Reference <a class="el" href="index.html#group_dfu_more_info">More Information</a>).</li>
+<li>Include transport_ble.c and transport_ble.h in the project build flow. For example, copy them from the \config\CAT1A directory to the directory with the main.c file. Ensure that other transport files are not included in the build flow.</li>
+<li>Enable and configure the BLE Device block using the ModusToolbox Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of ModusToolbox's tools for HW initialization</a> or manually using the configuration structures.</li>
+<li>Generate BLE Middleware configuration structures. Open the BLE configuration file (cycfg_ble.cybt) in Bluetooth Configurator. The file is located in the DFU \config\CAT1A folder. Then click Save to generate configuration files (cycfg_ble.c and cycfg_ble.h). These files must be included in the build flow (BLE Middleware API Reference <a class="el" href="index.html#group_dfu_more_info">More Information</a>).</li>
 <li>Add the post build step to sign the ELF file or sign it manually after the build<div class="fragment"><div class="line">&lt;MCUELFTOOL&gt; --sign app.elf --output app_signed.elf </div></div><!-- fragment --></li>
 <li>Build and program the project into the device.</li>
 <li>Open CySmart. There are two versions: for Windows PC platforms and mobile application see <a class="el" href="index.html#group_dfu_more_info">More Information</a>). Scan for devices and select your BLE device in the list (should be OTA DFU).</li>
@@ -372,8 +467,8 @@ Change checksum types</h2>
 <li>transport packet checksum</li>
 <li>application image checksum.</li>
 </ul>
-<p>For a packet, DFU supports 2 types of checksums: Basic summation and CRC-16CCITT. The basic summation checksum is computed by adding all the bytes (excluding the checksum) and then taking the 2’s complement. CRC-16CCITT ‒ the 16-bit CRC using the CCITT algorithm. The packet checksum type is selected with a macro <a class="el" href="group__group__dfu__macro__config.html#ga143573a13abbb1bf5c430f6f663492e7">CY_DFU_OPT_PACKET_CRC</a> in dfu_user.h file: 0 - basic summation (default), 1 - for CRC-16.</p>
-<p>For an application image, DFU supports 2 types of checksums: CRC-32 and SHA1. SHA1 is calculated with a crypto hardware block. The default application checksum is CRC-32. Steps to set a SHA1 checksum for an application image:</p><ul>
+<p>For a packet, DFU supports 2 types of checksums: Basic summation and CRC-16CCITT. The basic summation checksum is computed by adding all the bytes (excluding the checksum) and then taking the 2's complement. CRC-16CCITT - the 16-bit CRC using the CCITT algorithm. The packet checksum type is selected with a macro <a class="el" href="group__group__dfu__macro__config.html#ga143573a13abbb1bf5c430f6f663492e7">CY_DFU_OPT_PACKET_CRC</a> in dfu_user.h file: 0 - basic summation (default), 1 - for CRC-16.</p>
+<p>For an application image, DFU supports 2 types of checksums: CRC-32 and SHA1. SHA1 is calculated with a crypto hardware block, which is available only on CAT1A devices. The default application checksum is CRC-32. The steps to set the SHA1 checksum for an application image:</p><ul>
 <li>Set <a class="el" href="group__group__dfu__macro__config.html#gaf26d1e1c21482dd7e3e41c2b24c22637">CY_DFU_OPT_CRYPTO_HW</a> macro to 1 in dfu_user.h file to enable the SHA1 calculation.</li>
 <li>Symbol <a class="el" href="group__group__dfu__globals__external__elf__symbols.html#ga1a0f0de51984fd00d4a54d8a47dfed4e">__cy_checksum_type</a> = 0x01 in <a class="el" href="index.html#group_dfu_config_linker_scripts">Linker scripts</a> for each application for ARM GCC and IAR compiler. Set macro CY_CHECKSUM_TYPE to 1 in dfu_common.h for the ARM compiler.</li>
 <li>Symbol <a class="el" href="index.html#__cy_boot_signature_size">__cy_boot_signature_size</a> = 20 in <a class="el" href="index.html#group_dfu_config_linker_scripts">Linker scripts</a> for each application for the ARM GCC and IAR compilers. Set macro CY_BOOT_SIGNATURE_SIZE to 20 in dfu_common.h for the ARM compiler.</li>
@@ -382,103 +477,39 @@ Change checksum types</h2>
 </ul>
 <h2><a class="anchor" id="group_dfu_ucase_multiapp"></a>
 Multi-application DFU project</h2>
-<p>DFU design does not limit the number of applications. The number of applications is limited by memory size and metadata size. The maximum size of DFU metadata is limited to the size of the flash row, because metadata should be in a single flash row. For example, 512-byte metadata supports up to 63 applications. An arbitrary number of applications can be protected from overwriting. Such a protected application is called "Golden Image". <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> For a setup of basic 2 application DFU projects. The following steps show how to set up a 3rd application. The same approach can be used to setup 4th - Nth applications.</p><ul>
-<li>Define the sizes for each of the 3 applications and define the start and size of each memory region (flash, RAM) for each application.</li>
+<p>The DFU design does not limit the number of applications but it is limited by memory size and metadata size. The maximum size of DFU metadata is limited to the size of the flash row, because metadata should be in a single flash row. For example, the 512-byte metadata supports up to 63 applications. An arbitrary number of applications can be protected from overwriting. Such a protected application is called "Golden Image". See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for a steps to setup basic 2 application DFU projects. The following steps show how to set up a 3rd application. The same approach can be used to setup 4th - Nth applications.</p><ul>
+<li>Define the sizes for each of the three applications and define the start and size of each memory region (flash, RAM) for each application.</li>
 <li>Copy the linker script dfu_cm4_app1 from DFU linker_scripts folder according to the selected compiler and rename it (for example dfu_cm4_app2).</li>
 <li>Add flash and RAM sections to the 3rd application. Name them flash_app2, ram_app2.</li>
 <li>Update the size and start address for each section in each linker script based on the defined in the first step allocation.</li>
 <li>Set __cy_app_id symbol to 2</li>
-<li>Update the region aliases for flash and ram to use flash_app2 and ram_app2 accordingly: <div class="fragment"><div class="line">REGION_ALIAS(<span class="stringliteral">&quot;flash&quot;</span>, flash_app2);</div><div class="line">REGION_ALIAS(<span class="stringliteral">&quot;ram&quot;</span>,     ram_app2);</div></div><!-- fragment --></li>
+<li>Update the region aliases for flash and RAM to use flash_app2 and ram_app2 accordingly: <div class="fragment"><div class="line">REGION_ALIAS(<span class="stringliteral">&quot;flash&quot;</span>, flash_app2);</div><div class="line">REGION_ALIAS(<span class="stringliteral">&quot;ram&quot;</span>,     ram_app2);</div></div><!-- fragment --></li>
 <li>Add symbols __cy_app2_verify_start and __cy_app2_verify_length for metadata initialization in the same way as for application 0 and 1.</li>
-<li>Add macro in the dfu_user.h CY_DFU_APP2_VERIFY_START and CY_DFU_APP2_VERIFY_LENGTH in the same way as for application 0 and 1</li>
-<li>Add to the cy_dfu_metadata array of the dfu_user.c CY_DFU_APP2_VERIFY_START and CY_DFU_APP2_VERIFY_LENGTH to update metadata with 3rd application.</li>
+<li>Add a macro to the dfu_user.h CY_DFU_APP2_VERIFY_START and CY_DFU_APP2_VERIFY_LENGTH in the same way as for application 0 and 1</li>
+<li>Add to the cy_dfu_metadata array of the dfu_user.c CY_DFU_APP2_VERIFY_START and CY_DFU_APP2_VERIFY_LENGTH to update the metadata with the 3rd application.</li>
 <li>Update you build scripts to use the dfu_cm4_app2 linker script.</li>
 </ul>
 <p>Protect the application image by setting parameters in the dfu_user.h file of the loader project: <a class="el" href="group__group__dfu__macro__config.html#ga93f01cd0c868966a20c08369779fc707">CY_DFU_OPT_GOLDEN_IMAGE</a> set to 1 to enable the Golden Image functionality. <a class="el" href="group__group__dfu__macro__config.html#gaadc5be8ec2c8b42394ca06ffb123c023">CY_DFU_GOLDEN_IMAGE_IDS</a> lists the number of images that to be protected.</p>
 <h2><a class="anchor" id="group_dfu_ucase_cyacd2"></a>
 Creation of the CYACD2 file</h2>
-<p>The .cyacd2 file contains downloadable application data created by CyMCUElfTool and used by host programs such as Cypress’ DFU Host Program and CySmart to send applications to the target DFU module (see <a class="el" href="index.html#group_dfu_more_info">More Information</a>). Refer to the <a href="http://www.cypress.com/an213924">AN213924</a> DFU SDK User Guide for the .cyacd2 file format. See the <a class="el" href="index.html#loadable_DFU_app_steps">Loadable Application Setup</a> section of the <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for the steps to convert a general application into a DFU loadable application.</p>
-<p>Steps to create a .cyacd2 file with a CRC application signature:</p><ol type="1">
+<p>The .cyacd2 file contains downloadable application data created by CyMCUElfTool and used by host programs such as Cypress DFU Host Program and CySmart to send applications to the target DFU module (see <a class="el" href="index.html#group_dfu_more_info">More Information</a>). Refer to the <a href="http://www.cypress.com/an213924">AN213924</a> DFU SDK User Guide for the .cyacd2 file format. See the <a class="el" href="index.html#loadable_DFU_app_steps">Loadable Application Setup</a> section of the <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for the steps to convert a general application into a DFU loadable application.</p>
+<p>The steps to create a .cyacd2 file with a CRC application signature:</p><ol type="1">
 <li>Copy the path to the CyMCUElfTool binary. The path can be found in the folder with ModusToolbox tools (for example /ModusToolbox/tools_2.0/cymcuelftool-1.0/bin/cymcuelftool).</li>
 <li>Update the application ELF with a CRC checksum (&lt;MCUELFTOOL&gt; - the copied path to the binary): <div class="fragment"><div class="line">&lt;MCUELFTOOL&gt; --sign app.elf CRC --output app_crc.elf </div></div><!-- fragment --></li>
 <li>Generate a .cyacd2 file: <div class="fragment"><div class="line">&lt;MCUELFTOOL&gt; -P app_crc.elf --output app.cyacd2 </div></div><!-- fragment --></li>
 </ol>
 <p>These commands can be added as post build steps to the build Makefile.</p>
-<p>For the SHA1 application signature, use command (<a class="el" href="index.html#group_dfu_ucase_checksum">Change checksum types</a>): </p><div class="fragment"><div class="line">&lt;MCUELFTOOL&gt; --sign app.elf SHA1 --output app_crc.elf </div></div><!-- fragment --><h1><a class="anchor" id="section_dfu_toolchain"></a>
-Supported Software and Tools</h1>
-<p>This version of the DFU Middleware was validated for the compatibility with the following Software and Tools:</p>
-<table class="doxtable">
-<tr>
-<th>Software and Tools </th><th>Version  </th></tr>
-<tr>
-<td>ModusToolbox Software Environment </td><td>2.0  </td></tr>
-<tr>
-<td>- ModusToolbox Device Configurator </td><td>2.0  </td></tr>
-<tr>
-<td>- Device Firmware Update Host Tool </td><td>1.1  </td></tr>
-<tr>
-<td>- CyMCUElfTool </td><td>1.0  </td></tr>
-<tr>
-<td>GCC Compiler </td><td>7.2.1  </td></tr>
-<tr>
-<td>IAR Compiler </td><td>8.32  </td></tr>
-<tr>
-<td>ARM Compiler 6 </td><td>6.11  </td></tr>
-</table>
-<h1><a class="anchor" id="group_dfu_MISRA"></a>
-MISRA-C Compliance</h1>
-<table class="doxtable">
-<tr>
-<th>MISRA Rule </th><th>Rule Class (Required/Advisory) </th><th>Rule Description </th><th>Description of Deviation(s)  </th></tr>
-<tr>
-<td>1.1 </td><td>R </td><td>This rule states that code shall conform to C ISO/IEC 9899:1990 standard. </td><td>DFU middleware supports the ISO:C99 standard.  </td></tr>
-<tr>
-<td>2.3 </td><td>A </td><td>Nested comments are not recognized in the ISO standard. </td><td>The comments provide the useful WEB link to the additional documentation.   </td></tr>
-<tr>
-<td>3.1 </td><td>R </td><td>All usage of implementation defined behavior shall be documented </td><td>The DFU SDK deviates rule 11.3 which triggers rule 3.1. The ANSI symbols Dollar and Back quote are used by PDL headers before being preprocessed.  </td></tr>
-<tr>
-<td>5.6 </td><td>A </td><td>To avoid confusion, no identifier in one name space should have the same spelling as an identifier in another name space, with the exception of structure and union member names </td><td>This rule is deviated because the generalized implementation approach requires having the same names.  </td></tr>
-<tr>
-<td>8.7 </td><td>R </td><td>Objects shall be defined at block scope if they are only accessed from within a single function. That is, minimize the scope of objects and variables </td><td>For some communication APIs, an object scope can be reduced, but that is not because of the generalized implementation approach.  </td></tr>
-<tr>
-<td>9.2 </td><td>R </td><td>Braces shall be used to indicate and match the structure in the nonzero initialization of arrays and structures </td><td>This rule is deviated in the dfu_user.c file, it is manually checked to be valid.  </td></tr>
-<tr>
-<td>11.3 </td><td>A </td><td>Avoid casts between a pointer type and an integral type </td><td>There are a few casts between the pointer and uint32_t type in the cy_dfu.c file. All of them are manually verified and reviewed to be safe.  </td></tr>
-<tr>
-<td>11.4 </td><td>A </td><td>A cast should not be performed between a pointer to object type and a different pointer to object type. </td><td>Casts involving pointers are conducted with caution that the pointers are correctly aligned for the type of the object being pointed to.   </td></tr>
-<tr>
-<td>11.5 </td><td>R </td><td>Not performed, the cast that removes any const or volatile qualification from the type addressed by a pointer. </td><td>The removal of the volatile qualification inside the function has no side effects.  </td></tr>
-<tr>
-<td>13.7 </td><td>R </td><td>Boolean operations whose results are invariant shall not be permitted. </td><td>MISRA-C:2004 is not smart enough to understand the function is weak, thus may return values other than in the default implementation.  </td></tr>
-<tr>
-<td>14.1 </td><td>R </td><td>There shall be no unreachable code. This refers to code which cannot, under any circumstances, be reached. </td><td>MISRA-C:2004 does not understand that a weak function is supposed to be overwritten in the customer project. Thus assumes the function returns always the same fixed value, so any if() branch testing weak-function return-value may be treated as unreachable code.  </td></tr>
-<tr>
-<td>14.2 </td><td>R </td><td>All non-null statements shall either have at least one side-effect, however executed, or cause control flow to change. </td><td>MISRA-C:2004 is not smart enough to understand the intention of the (void)unused_param; statement. <br />
- GCC, ARM and IAR compilers understand the intention of this.  </td></tr>
-<tr>
-<td>16.7 </td><td>A </td><td>The object addressed by the pointer parameter is not modified and so the pointer could be of type 'pointer to const'. </td><td>Some DFU SDK functions are weak, and can be redefined in the user code. They contain non-const pointer parameters intentionally to be more generic .  </td></tr>
-<tr>
-<td>17.4 </td><td>R </td><td>Array indexing shall be the only allowed form of pointer arithmetic  </td><td>There are several instances of the pointer arithmetic in cy_dfu.c. They cannot be avoided, so are manually checked and reviewed to be safe.  </td></tr>
-<tr>
-<td>19.7 </td><td>A </td><td>A function shall be used in preference to a function-like macro </td><td>Function-like macros are used for performance reasons.  </td></tr>
-<tr>
-<td>19.13 </td><td>A </td><td>Avoid use of the # and ## preprocessor directives when possible </td><td>The directive ## of the preprocessor used in the transport_uart/i2c/spi/usb_cdc.c. The use of ## is intentional and allows setting the UART/I2C/SPI/USBFS component name in one place and does not change it throughout the whole transport_uart/i2c/spi/ usb_ucd.c file.  </td></tr>
-<tr>
-<td>21.1 </td><td>R </td><td>Minimization of run-time failures shall be ensured by the use of at least one of:<ul>
-<li>static analysis tools/techniques;</li>
-<li>dynamic analysis tools/techniques;</li>
-<li>explicit coding of checks to handle run-time faults. </li>
-</ul>
-</td><td>Redundant operations are present because of the generalized implementation approach.  </td></tr>
-</table>
-<h1><a class="anchor" id="section_dfu_errata"></a>
-Errata</h1>
-<p>No know issues.</p>
-<h1><a class="anchor" id="group_dfu_changelog"></a>
+<p>For the SHA1 application signature, use command (<a class="el" href="index.html#group_dfu_ucase_checksum">Change checksum types</a>): </p><div class="fragment"><div class="line">&lt;MCUELFTOOL&gt; --sign app.elf SHA1 --output app_crc.elf </div></div><!-- fragment --><h1><a class="anchor" id="group_dfu_changelog"></a>
 Changelog</h1>
 <table class="doxtable">
 <tr>
 <th>Version</th><th>Changes</th><th>Reason for Change </th></tr>
+<tr>
+<td rowspan="3">4.10 </td><td>Added PSoC 4 devices support.  </td><td>Extended device support.   </td></tr>
+<tr>
+<td>Added MISRA-C:2012 compliance. </td><td>MISRA standard compliance.  </td></tr>
+<tr>
+<td>Updated SPI communication timeout granularity. </td><td>Fixed SPI communication issue.  </td></tr>
 <tr>
 <td rowspan="6">4.0 </td><td>Updated the linker scripts to use the single pre-compiled CM0p image. The upgradeable part of the image is the CM4 application. </td><td>Support ModusToolbox v2.0 build flow.  </td></tr>
 <tr>
@@ -539,7 +570,7 @@ More Information</h1>
 <li><a href="https://www.cypress.com/ModusToolboxUSBConfig">ModusToolbox USB Configurator Tool Guide</a></li>
 <li><a href="https://www.cypress.com/ModusToolboxBLEConfig">ModusToolbox BT Configurator Tool Guide</a></li>
 <li><a href="http://www.cypress.com/documentation/software-and-drivers/cysmart-bluetooth-le-test-and-debug-tool">CySmart - BLE Test and Debug Tool</a></li>
-<li><a href="https://www.cypress.com/documentation/software-and-drivers/cysmart-mobile-app">CySmart – Mobile App</a></li>
+<li><a href="https://www.cypress.com/documentation/software-and-drivers/cysmart-mobile-app">CySmart - Mobile App</a></li>
 <li><a href="http://www.cypress.com/CY8CKIT-062-BLE">PSoC 6 BLE Pioneer Kit</a></li>
 <li><a href="http://www.cypress.com/CY8CKIT-062-WiFi-BT">PSoC 6 WiFi-BT Pioneer Kit</a></li>
 <li><a href="http://www.cypress.com/cy8cproto-062-4343w">PSoC 6 Wi-Fi BT Prototyping Kit</a></li>
@@ -554,7 +585,7 @@ More Information</h1>
 <div id="nav-path" class="navpath">
     <ul>
         <li class="footer">
-            Generated for <b>Cypress Device Firmware Update (DFU) Middleware Library 4.0</b> by <b>Cypress Semiconductor Corporation</b>.
+            Generated for <b>Cypress Device Firmware Update (DFU) Middleware Library 4.10</b> by <b>Cypress Semiconductor Corporation</b>.
             All rights reserved.
         </li>
     </ul>

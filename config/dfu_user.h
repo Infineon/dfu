@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file dfu_user.h
-* \version 4.0
+* \version 4.10
 *
 * This file provides declarations that can be modified by the user but
 * are used by the DFU SDK.
@@ -17,8 +17,9 @@
 #define DFU_USER_H
 
 #include <stdint.h>
+
 #include "cy_flash.h"
-    
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -30,10 +31,10 @@ extern "C" {
 
 /** The size of a buffer to hold DFU commands */
 /* 16 bytes is a maximum overhead of a DFU packet and additional data for the Program Data command */
-#define CY_DFU_SIZEOF_CMD_BUFFER  (CY_FLASH_SIZEOF_ROW + 16u)
+#define CY_DFU_SIZEOF_CMD_BUFFER  (CY_FLASH_SIZEOF_ROW + 16U)
 
 /** The size of a buffer to hold an NVM row of data to write or verify */
-#define CY_DFU_SIZEOF_DATA_BUFFER (CY_FLASH_SIZEOF_ROW + 16u)
+#define CY_DFU_SIZEOF_DATA_BUFFER (CY_FLASH_SIZEOF_ROW + 16U)
 
 /**
 * Set to non-zero for the DFU SDK Program Data command to check
@@ -48,20 +49,20 @@ extern "C" {
 *
 * Usage. Define the list of Golden Image Application IDs without enclosing
 * parenthesis, e.g.
-* \code #define CY_DFU_GOLDEN_IMAGE_IDS()     0u, 1u, 3u \endcode
+* \code #define CY_DFU_GOLDEN_IMAGE_IDS()     0U, 1U, 3U \endcode
 * later it is used in cy_dfu.c file:
 * \code uint8_t goldenImages[] = { CY_DFU_GOLDEN_IMAGE_IDS() }; \endcode
 */
-#define CY_DFU_GOLDEN_IMAGE_IDS()  0u
+#define CY_DFU_GOLDEN_IMAGE_IDS()  0U
 
 /**
 * The number of applications in the metadata,
 * for 512 bytes in a flash row - 63 is the maximum possible value,
 * because 4 bytes are reserved for the entire metadata CRC.
-* 
+*
 * The smallest metadata size if CY_DFU_MAX_APPS * 8 (bytes per one app) + 4 (bytes for CRC-32C)
 */
-#define CY_DFU_MAX_APPS            (2u)
+#define CY_DFU_MAX_APPS            (2U)
 
 
 /** A non-zero value enables the Verify Data DFU command  */
@@ -139,7 +140,7 @@ extern "C" {
 
 #if defined(__cplusplus)
 }
-#endif        
+#endif
 
 #endif /* !defined(DFU_USER_H) */
 

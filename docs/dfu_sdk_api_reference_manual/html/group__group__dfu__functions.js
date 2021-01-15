@@ -10,6 +10,7 @@ var group__group__dfu__functions =
     [ "Cy_DFU_ValidateApp", "group__group__dfu__functions.html#gae4eed95b94cdb006c79e2036f01d7fc4", null ],
     [ "Cy_DFU_GetRunningApp", "group__group__dfu__functions.html#ga6e8ba375e3199d481b534deaca54f514", null ],
     [ "Cy_DFU_GetAppMetadata", "group__group__dfu__functions.html#ga17d8b5157dc842d05115cf41fef4221d", null ],
+    [ "Cy_DFU_SetAppMetadata", "group__group__dfu__functions.html#gabcdc75d72e323577e207eca9a105f7dd", null ],
     [ "Cy_DFU_CopyApp", "group__group__dfu__functions.html#ga4e2ab4649104775358b885daada90b11", null ],
     [ "Cy_DFU_OnResetApp0", "group__group__dfu__functions.html#ga6e0defdaf9adb2e5663dc6144dc6823a", null ],
     [ "Cy_DFU_ReadData", "group__group__dfu__functions.html#ga9709777e59f6cbdc9ca70c1ca041e414", null ],

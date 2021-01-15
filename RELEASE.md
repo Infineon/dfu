@@ -1,4 +1,4 @@
-### PSoC 6 Device Firmware Update (DFU) Middleware Library 4.0
+### Device Firmware Update (DFU) Middleware Library 4.10
  
 ### What's Included?
 
@@ -7,15 +7,12 @@ and the [DFU API Reference](https://cypresssemiconductorco.github.io/dfu/dfu_sdk
 The revision history of the DFU middleware is also available in the [API Reference Changelog](https://cypresssemiconductorco.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html#group_dfu_changelog).
 New in this release:
 
-* Updated the linker scripts to use the single pre-compiled CM0p image.
-  The upgradeable part of the image is the CM4 application.
-* Added the ModusToolbox 2.0 flow support.
-* Added the ARM compiler version 6 support.
-* Added the USB interface (virtual COM) transport.
+* Added PSoC 4 devices support.
+* Added MISRA-C:2012 compliance.
 
 ### Defect Fixes
 
-* Fixed the return value for the SYNC command processing.
+* Fixed SPI communication timeout granularity.
 
 ### Known Issues
 
@@ -27,13 +24,13 @@ This version of the DFU middleware was validated for compatibility with the foll
 
 | Software and Tools                        | Version |
 | :---                                      | :----:  |
-| ModusToolbox Software Environment         | 2.0     |
-| - ModusToolbox Device Configurator        | 2.0     |
-| - Device Firmware Update Host Tool        | 1.1     |
+| ModusToolbox Software Environment         | 2.20    |
+| - ModusToolbox Device Configurator        | 2.20    |
+| - Device Firmware Update Host Tool        | 1.3     |
 | - CyMCUElfTool                            | 1.0     |
-| GCC Compiler                              | 7.2.1   |
-| IAR Compiler                              | 8.32    |
-| ARM Compiler 6                            | 6.11    |
+| GCC Compiler                              | 9.3.1   |
+| IAR Compiler                              | 8.42.2  |
+| ARM Compiler 6                            | 6.13    |
 
 ### More information
 
@@ -42,7 +39,8 @@ This version of the DFU middleware was validated for compatibility with the foll
 * [AN213924](http://www.cypress.com/an213924) DFU SDK User Guide
 * [CE213903](http://www.cypress.com/ce213903) DFU SDK Basic Communication Code Examples
 * [CE216767](http://www.cypress.com/ce216767) DFU SDK BLE OTA Code Example
-* [PSoC 6 Peripheral Driver Library API Reference](https://cypresssemiconductorco.github.io/psoc6pdl/pdl_api_reference_manual/html/index.html)
+* [CAT1 Peripheral Driver Library API Reference](https://cypresssemiconductorco.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/index.html)
+* [CAT2 Peripheral Driver Library API Reference](https://cypresssemiconductorco.github.io/mtb-pdl-cat2/pdl_api_reference_manual/html/index.html)
 * [Cypress USB Device Middleware Library API Reference](https://cypresssemiconductorco.github.io/usbdev/usbfs_dev_api_reference_manual/html/index.html)
 * [BLE Middleware API Reference Guide](https://cypresssemiconductorco.github.io/middleware-ble/ble_api_reference_manual/html/index.html)
 * [ModusToolbox Software Environment, Quick Start Guide, Documentation, and Videos](https://www.cypress.com/products/modustoolbox-software-environment)
@@ -59,6 +57,8 @@ This version of the DFU middleware was validated for compatibility with the foll
 * [PSoC 6 MCU Datasheets](http://www.cypress.com/psoc6ds)
 * [PSoC 6 MCU Application Notes](http://www.cypress.com/psoc6an)
 * [PSoC 6 MCU Technical Reference Manuals](http://www.cypress.com/psoc6trm)
+* [PSoC 4 Technical Reference Manuals](https://www.cypress.com/search/all?f%5B0%5D=meta_type%3Atechnical_documents&f%5B1%5D=resource_meta_type%3A583&f%5B2%5D=field_related_products%3A1314)
+* [PSoC 4 MCU Datasheets](https://www.cypress.com/search/all?f%5B0%5D=meta_type%3Atechnical_documents&f%5B1%5D=field_related_products%3A1297&f%5B2%5D=resource_meta_type%3A575)
 * [Cypress Semiconductor](http://www.cypress.com)
 
 ---

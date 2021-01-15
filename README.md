@@ -1,4 +1,4 @@
-# PSoC 6 Device Firmware Update (DFU) Middleware Library
+# Device Firmware Update (DFU) Middleware Library
 
 ### Overview
 
@@ -54,7 +54,8 @@ For more information, refer to the following links:
 * [AN213924](http://www.cypress.com/an213924) DFU SDK User Guide
 * [CE213903](http://www.cypress.com/ce213903) DFU SDK Basic Communication Code Examples
 * [CE216767](http://www.cypress.com/ce216767) DFU SDK BLE OTA Code Example
-* [PSoC 6 Peripheral Driver Library API Reference](https://cypresssemiconductorco.github.io/psoc6pdl/pdl_api_reference_manual/html/index.html)
+* [CAT1 Peripheral Driver Library API Reference](https://cypresssemiconductorco.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/index.html)
+* [CAT2 Peripheral Driver Library API Reference](https://cypresssemiconductorco.github.io/mtb-pdl-cat2/pdl_api_reference_manual/html/index.html)
 * [Cypress USB Device Middleware Library API Reference](https://cypresssemiconductorco.github.io/usbdev/usbfs_dev_api_reference_manual/html/index.html)
 * [BLE Middleware API Reference Guide](https://cypresssemiconductorco.github.io/middleware-ble/ble_api_reference_manual/html/index.html)
 * [ModusToolbox Software Environment, Quick Start Guide, Documentation, and Videos](https://www.cypress.com/products/modustoolbox-software-environment)
@@ -71,6 +72,8 @@ For more information, refer to the following links:
 * [PSoC 6 MCU Datasheets](http://www.cypress.com/psoc6ds)
 * [PSoC 6 MCU Application Notes](http://www.cypress.com/psoc6an)
 * [PSoC 6 MCU Technical Reference Manuals](http://www.cypress.com/psoc6trm)
+* [PSoC 4 Technical Reference Manuals](https://www.cypress.com/search/all?f%5B0%5D=meta_type%3Atechnical_documents&f%5B1%5D=resource_meta_type%3A583&f%5B2%5D=field_related_products%3A1314)
+* [PSoC 4 MCU Datasheets](https://www.cypress.com/search/all?f%5B0%5D=meta_type%3Atechnical_documents&f%5B1%5D=field_related_products%3A1297&f%5B2%5D=resource_meta_type%3A575)
 * [Cypress Semiconductor](http://www.cypress.com)
 
 ---
