@@ -72,6 +72,5 @@ var searchData=
   ['cy_5fdfu_5fwritedata',['Cy_DFU_WriteData',['../group__group__dfu__functions.html#ga9f589c0df780bd29477ab4d73cf4063b',1,'Cy_DFU_WriteData(uint32_t address, uint32_t length, uint32_t ctl, cy_stc_dfu_params_t *params):&#160;cy_dfu.c'],['../group__group__dfu__functions.html#ga9f589c0df780bd29477ab4d73cf4063b',1,'Cy_DFU_WriteData(uint32_t address, uint32_t length, uint32_t ctl, cy_stc_dfu_params_t *params):&#160;cy_dfu.c']]],
   ['cy_5fen_5fdfu_5fstatus_5ft',['cy_en_dfu_status_t',['../group__group__dfu__enums.html#gafcff247e9cb8dc6c1282873b0d2dae1b',1,'cy_dfu.h']]],
   ['cy_5fstc_5fdfu_5fenter_5ft',['cy_stc_dfu_enter_t',['../structcy__stc__dfu__enter__t.html',1,'']]],
-  ['cy_5fstc_5fdfu_5fparams_5ft',['cy_stc_dfu_params_t',['../structcy__stc__dfu__params__t.html',1,'']]],
-  ['cypress_20device_20firmware_20update_20_28dfu_29_20middleware_20library',['Cypress Device Firmware Update (DFU) Middleware Library',['../index.html',1,'']]]
+  ['cy_5fstc_5fdfu_5fparams_5ft',['cy_stc_dfu_params_t',['../structcy__stc__dfu__params__t.html',1,'']]]
 ];

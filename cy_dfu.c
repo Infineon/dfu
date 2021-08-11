@@ -1,15 +1,41 @@
 /***************************************************************************//**
 * \file cy_dfu.c
-* \version 4.10
+* \version 4.20
 *
-*  This file provides the implementation of Cypress DFU SDK.
+*  This file provides the implementation of DFU Middleware.
 *
 ********************************************************************************
 * \copyright
-* Copyright 2016-2019, Cypress Semiconductor Corporation.  All rights reserved.
-* You may use this file only in accordance with the license, terms, conditions,
-* disclaimers, and limitations in the end user license agreement accompanying
-* the software package with which this file was provided.
+* (c) (2016-2021), Cypress Semiconductor Corporation (an Infineon company) or
+* an affiliate of Cypress Semiconductor Corporation. All rights reserved.
+********************************************************************************
+* This software, including source code, documentation and related materials
+* ("Software") is owned by Cypress Semiconductor Corporation or one of its
+* affiliates ("Cypress") and is protected by and subject to worldwide patent
+* protection (United States and foreign), United States copyright laws and
+* international treaty provisions. Therefore, you may use this Software only
+* as provided in the license agreement accompanying the software package from
+* which you obtained this Software ("EULA").
+*
+* If no EULA applies, Cypress hereby grants you a personal, non-exclusive,
+* non-transferable license to copy, modify, and compile the Software source
+* code solely for use in connection with Cypress's integrated circuit products.
+* Any reproduction, modification, translation, compilation, or representation
+* of this Software except as specified above is prohibited without the express
+* written permission of Cypress.
+*
+* Disclaimer: THIS SOFTWARE IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, NONINFRINGEMENT, IMPLIED
+* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. Cypress
+* reserves the right to make changes to the Software without notice. Cypress
+* does not assume any liability arising out of the application or use of the
+* Software or any product or circuit described in the Software. Cypress does
+* not authorize its products for use in any products where a malfunction or
+* failure of the Cypress product may reasonably be expected to result in
+* significant property damage, injury or death ("High Risk Product"). By
+* including Cypress's product in a High Risk Product, the manufacturer of such
+* system or application assumes all risk of such use and in doing so agrees to
+* indemnify Cypress against all liability.
 *******************************************************************************/
 
 #include <string.h>
@@ -92,11 +118,11 @@ CY_SECTION(".cy_boot_noinit.appId") __USED static uint8_t cy_dfu_appId;
 #define PUBLIC_KEY_IDX                      (9UL) /* The TOC item at index 9 is a public Key object  */
 #define PUBLIC_KEY_OFFSET                   (8UL) /* The Public Key offset in the Public key Object */
 
-/* The address of the the verify application function entry in the Flash Boot shared functions table */
+/* The address of the verify application function entry in the Flash Boot shared functions table */
 #define VERIFY_APP_TABLE_ADDR               (0x16002040UL)
-/* The address of the the verify key function entry in the Flash Boot shared functions table */
+/* The address of the verify key function entry in the Flash Boot shared functions table */
 #define IS_VALID_KEY_TABLE_ADDR             (0x16002044UL)
-/* The address of the the verify TOC function entry in the Flash Boot shared functions table */
+/* The address of the verify TOC function entry in the Flash Boot shared functions table */
 #define VALIDATE_TOC_TABLE_ADDR             (0x1600204CUL)
 
 /* For the DFU packet */

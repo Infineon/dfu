@@ -1,6 +1,6 @@
 # Device Firmware Update (DFU) Middleware Library
 
-### Overview
+## Overview
 
  The purpose of the DFU middleware library is to provide an SDK for updating
  firmware images. The middleware allows creating two types of projects:
@@ -11,7 +11,7 @@
 
  A project can contain features of both first and second type.
 
-### Features
+## Features
 
 * Read firmware images from a host through a number of transport interfaces,
   e.g. BLE, USB, UART, I2C, SPI.
@@ -25,41 +25,41 @@
   applications.
 * Supports encrypted image files.
   Transfers encrypted images without decrypting in the middle.
-* Supports many application images, the number of which is limited by 
-  the metadata size. Each image can be an application loader. For example, 
+* Supports many application images, the number of which is limited by
+  the metadata size. Each image can be an application loader. For example,
   512-byte metadata supports up to 63 applications.
 * Supports customization.
 * Supports the CRC-32 checksum to validate data.
 
-### DFU Specific Instructions
+## DFU Specific Instructions
 
 The DFU middleware requires configuration files located in the /config
 directory. The directory /config is skipped from a build process, so
 copy the configuration files manually. The application loader requires
 dfu_user.h/c, transport files (e.g. for loading with UART - transport_uart.c/h).
-The loadable application requires dfu_user.h file. 
+The loadable application requires dfu_user.h file.
 For a build, use the dfu linker scripts located in the linker_script directory.
 
-### Quick Start
+## Quick Start
 
-The [Quick Start section of the DFU Middleware API Reference Guide](https://cypresssemiconductorco.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html#section_dfu_quick_start)
+The [Quick Start section of the DFU Middleware API Reference Guide](https://infineon.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html#section_dfu_quick_start)
 describes step-by-step instructions to set up a DFU application.
 
-### More information
+## More information
 
 For more information, refer to the following links:
 
-* [Cypress DFU Middleware Library Release Notes](./RELEASE.md)
-* [DFU Middleware API Reference Guide](https://cypresssemiconductorco.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html)
+* [DFU Middleware Library Release Notes](./RELEASE.md)
+* [DFU Middleware Library API Reference](https://infineon.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html)
 * [AN213924](http://www.cypress.com/an213924) DFU SDK User Guide
 * [CE213903](http://www.cypress.com/ce213903) DFU SDK Basic Communication Code Examples
 * [CE216767](http://www.cypress.com/ce216767) DFU SDK BLE OTA Code Example
-* [CAT1 Peripheral Driver Library API Reference](https://cypresssemiconductorco.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/index.html)
-* [CAT2 Peripheral Driver Library API Reference](https://cypresssemiconductorco.github.io/mtb-pdl-cat2/pdl_api_reference_manual/html/index.html)
-* [Cypress USB Device Middleware Library API Reference](https://cypresssemiconductorco.github.io/usbdev/usbfs_dev_api_reference_manual/html/index.html)
-* [BLE Middleware API Reference Guide](https://cypresssemiconductorco.github.io/middleware-ble/ble_api_reference_manual/html/index.html)
+* [CAT1 Peripheral Driver Library API Reference](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/index.html)
+* [CAT2 Peripheral Driver Library API Reference](https://infineon.github.io/mtb-pdl-cat2/pdl_api_reference_manual/html/index.html)
+* [USB Device Middleware Library API Reference](https://infineon.github.io/usbdev/usbfs_dev_api_reference_manual/html/index.html)
+* [PSoC 6 BLE Middleware Library API Reference](https://infineon.github.io/bless/ble_api_reference_manual/html/index.html)
 * [ModusToolbox Software Environment, Quick Start Guide, Documentation, and Videos](https://www.cypress.com/products/modustoolbox-software-environment)
-* [PSoC 6 SDK Examples](https://github.com/cypresssemiconductorco/Code-Examples-for-the-ModusToolbox-PSoC-6-SDK)
+* [Code Examples for ModusToolbox Software](https://github.com/Infineon/Code-Examples-for-ModusToolbox-Software)
 * [ModusToolbox Device Configurator Tool Guide](https://www.cypress.com/ModusToolboxDeviceConfig)
 * [ModusToolbox Device Firmware Update Host Tool](https://www.cypress.com/ModusToolboxDFUHostTool)
 * [ModusToolbox USB Configurator Tool Guide](https://www.cypress.com/ModusToolboxUSBConfig)
@@ -77,4 +77,4 @@ For more information, refer to the following links:
 * [Cypress Semiconductor](http://www.cypress.com)
 
 ---
-© Cypress Semiconductor Corporation, 2019.
+© Cypress Semiconductor Corporation (an Infineon company), 2021.

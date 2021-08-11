@@ -1,22 +1,48 @@
 /***************************************************************************//**
 * \file cy_dfu.h
-* \version 4.10
+* \version 4.20
 *
-* Provides API declarations for the DFU SDK.
+* Provides API declarations for the DFU Middleware.
 *
 ********************************************************************************
 * \copyright
-* Copyright 2016-2019, Cypress Semiconductor Corporation.  All rights reserved.
-* You may use this file only in accordance with the license, terms, conditions,
-* disclaimers, and limitations in the end user license agreement accompanying
-* the software package with which this file was provided.
+* (c) (2016-2021), Cypress Semiconductor Corporation (an Infineon company) or
+* an affiliate of Cypress Semiconductor Corporation. All rights reserved.
+********************************************************************************
+* This software, including source code, documentation and related materials
+* ("Software") is owned by Cypress Semiconductor Corporation or one of its
+* affiliates ("Cypress") and is protected by and subject to worldwide patent
+* protection (United States and foreign), United States copyright laws and
+* international treaty provisions. Therefore, you may use this Software only
+* as provided in the license agreement accompanying the software package from
+* which you obtained this Software ("EULA").
+*
+* If no EULA applies, Cypress hereby grants you a personal, non-exclusive,
+* non-transferable license to copy, modify, and compile the Software source
+* code solely for use in connection with Cypress's integrated circuit products.
+* Any reproduction, modification, translation, compilation, or representation
+* of this Software except as specified above is prohibited without the express
+* written permission of Cypress.
+*
+* Disclaimer: THIS SOFTWARE IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, NONINFRINGEMENT, IMPLIED
+* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. Cypress
+* reserves the right to make changes to the Software without notice. Cypress
+* does not assume any liability arising out of the application or use of the
+* Software or any product or circuit described in the Software. Cypress does
+* not authorize its products for use in any products where a malfunction or
+* failure of the Cypress product may reasonably be expected to result in
+* significant property damage, injury or death ("High Risk Product"). By
+* including Cypress's product in a High Risk Product, the manufacturer of such
+* system or application assumes all risk of such use and in doing so agrees to
+* indemnify Cypress against all liability.
 *******************************************************************************/
 
 #if !defined(CY_DFU_H)
 #define CY_DFU_H
 
 /**
-* \mainpage Cypress Device Firmware Update (DFU) Middleware Library
+* \mainpage Device Firmware Update (DFU) Middleware Library 4.20
 *
 * \section section_mainpage_overview Overview
 *
@@ -49,8 +75,8 @@
 *   applications.
 * - Supports encrypted image files.
 *   Transfers encrypted images without decrypting in the middle.
-* - Supports many application images, the number of which is limited only by 
-*   the metadata size. Each image can be an application loader. For example, 
+* - Supports many application images, the number of which is limited only by
+*   the metadata size. Each image can be an application loader. For example,
 *   512-byte metadata supports up to 63 applications.
 * - Supports customization.
 * - Supports the CRC-32 checksum to validate data.
@@ -60,7 +86,7 @@
 ********************************************************************************
 *
 * The DFU SDK is used to design updating applications of
-* arbitrary flexibility and complexity. Cypress DFU middleware can be used in 
+* arbitrary flexibility and complexity. Cypress DFU middleware can be used in
 * various software environments. Refer to RELEASE.md file for details.
 * To quick start, use the Code Examples.
 * Cypress Semiconductor continuously extends its portfolio of code examples
@@ -70,26 +96,28 @@
 *
 * The Quick Start Guide (QSG) assumes ModusToolbox 2.2 is installed
 * with all needed tools.
-* 
-* The following steps are to set up and build a basic DFU loader and loadable 
+*
+* The following steps are to set up and build a basic DFU loader and loadable
 * applications. The DFU loader application uses the I2C transport interface.
 * The steps assume that the user builds an application for CY8CKIT-062-WIFI-BT or CY8CKIT-149 kits
 * based on a starter Hello_World ModusToolbox project.
+* \note For other kits or devices, update default linker scripts with the valid
+* memory addresses. Refer to \ref group_dfu_config_linker_scripts for details.
 *
 * \subsection ssection_dfu_step_0 STEP 0: Projects preparation.
 *
 * 1. Create a project for CY8CKIT-062-WIFI-BT or CY8CKIT-149 with the DFU loader application
-*    using the Hello_World starter application. 
-*    Name it QSG_DFU_App0_I2C. See the ModusToolbox 2.2 IDE Quick Start 
+*    using the Hello_World starter application.
+*    Name it QSG_DFU_App0_I2C. See the ModusToolbox 2.2 IDE Quick Start
 *    Guide for the detail steps.
-* 2. Create a project for the DFU loadable application in the same way and name 
+* 2. Create a project for the DFU loadable application in the same way and name
 *    it QSG_DFU_App1_Hello_World.
-* 3. Include the DFU middleware into each project using the ModusToolbox Library 
-*    Manager or download it from GitHub and copy it to the project manually. 
-*    When Library Manager is used, it is recommended to check **Shared** checkbox 
-*    against DFU middleware, so it will be downloaded once and then shared between 
+* 3. Include the DFU middleware into each project using the ModusToolbox Library
+*    Manager or download it from GitHub and copy it to the project manually.
+*    When Library Manager is used, it is recommended to check **Shared** checkbox
+*    against DFU middleware, so it will be downloaded once and then shared between
 *    all applications in the workspace.
-* 4. Include a DFU header in main.c of each project to get access to DFU API: 
+* 4. Include a DFU header in main.c of each project to get access to DFU API:
 *    \snippet dfu/snippet/main.c snipped_cy_dfu_include
 *
 * \subsection ssection_dfu_step_1 STEP 1: Setup Loader Application QSG_DFU_App0_I2C
@@ -110,28 +138,30 @@
 *      - For CY8CKIT-062-WIFI-BT kit: ..\\mtb_shared\\dfu\\[VERSION]\\config\\CAT1A
 *      - For CY8CKIT-149 kit: ..\\mtb_shared\\dfu\\[VERSION]\\config\\CAT2
 *
-* 3. Copy the app0 linker script files and put them near main.c: 
-*      - For CY8CKIT-062-WIFI-BT kit: <br> 
+* 3. Copy the app0 linker script files and put them near main.c:
+*      - For CY8CKIT-062-WIFI-BT kit: <br>
 *        ..\\mtb_shared\\dfu\\[VERSION]\\linker_scripts\\CAT1A\\TOOLCHAIN_<COMPILER>\\dfu_cm4_app0.[ext]
-*      - For CY8CKIT-149 kit: <br> 
+*      - For CY8CKIT-149 kit: <br>
 *        ..\\mtb_shared\\dfu\\[VERSION]\\linker_scripts\\CAT2\\TOOLCHAIN_<COMPILER>\\dfu_cm0p_app0.[ext]
 *
 *    For example, for CY8CKIT-062-WIFI-BT kit and GCC ARM compiler, copy
 *    ..\\mtb_shared\\dfu\\[VERSION]\\linker_scripts\\CAT1A\\TOOLCHAIN_GCC_ARM\\dfu_cm4_app0.ld file.
-*    
-*   \note For ARM compiler, copy additional **dfu_common.h** and **dfu_elf_symbols.c** 
+*
+*   \note For ARM compiler, copy additional **dfu_common.h** and **dfu_elf_symbols.c**
 *         files to the project. Those files are located in the same folder as the selected linker file.
 *
-* 4. Copy folder from ..\\mtb_shared\\TARGET_[KIT_NAME]\\[VERSION]\\COMPONENT_BSP_DESIGN_MODUS 
+* 4. Copy folder from ..\\mtb_shared\\TARGET_[KIT_NAME]\\[VERSION]\\COMPONENT_BSP_DESIGN_MODUS
 *    to the project root and rename it to DFU_DESIGN_MODUS.
 *
-* 5. Update project's Makefile to use Generated sources, created in DFU_DESIGN_MODUS folder: 
+* 5. Update project's Makefile to use Generated sources, created in DFU_DESIGN_MODUS folder:
 *    locate **DISABLE_COMPONENTS** variable and add **BSP_DESIGN_MODUS**:
 *    \code DISABLE_COMPONENTS=BSP_DESIGN_MODUS \endcode
+*    locate **DEFINES** variable and add **COMPONENT_CUSTOM_DESIGN_MODUS**:
+*    \code DEFINES=COMPONENT_CUSTOM_DESIGN_MODUS \endcode
 *
-* 6. Open DFU_DESIGN_MODUS\\design.modus file and configure SCB for I2C 
+* 6. Open DFU_DESIGN_MODUS\\design.modus file and configure SCB for I2C
 *    communication using ModusToolbox Device Configurator.
-*    
+*
 *    For CY8CKIT-062-WIFI-BT use SCB 3, which is connected to the KitProg.
 *    For CY8CKIT-149, SCB 1 is connected to the KitProg.
 *    SCB parameter name     | value
@@ -160,7 +190,7 @@
 * 5. Update the main loop with a routine to switch to the loaded
 *    QSG_DFU_App1_Hello_World application:
 *
-*    For example, to switch by pressing the kit user button: 
+*    For example, to switch by pressing the kit user button:
 *    - In the Device Configurator, enable pin 0[4] for CY8CKIT-062-WIFI-BT and pin 3[7] for CY8CKIT-149 and name it **PIN_SW**
 *    - Set/check the pin configuration:
 *      Parameter name      | Value
@@ -188,15 +218,17 @@
 *        \code LINKER_SCRIPT=dfu_cm4_app0.ld \endcode
 *      - CY8CKIT-149 + GCC_ARM:
 *        \code LINKER_SCRIPT=dfu_cm0p_app0.ld \endcode
-*   
+*
 * 2. Add a post-build step to sign the ELF file or sign it manually after
 *    the build: \<MCUELFTOOL\> --sign \<app\>.elf --output \<app_signed\>.elf
-*    --hex \<app_signed\>.hex.\n  
+*    --hex \<app_signed\>.hex.\n
 *    For the macOS/Linux platform:
 *    \code POSTBUILD=$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool --sign $(CY_CONFIG_DIR)/$(APPNAME).elf --hex $(CY_CONFIG_DIR)/$(APPNAME).hex\endcode
 *    For the Windows platform:
 *    \code POSTBUILD="$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool.exe" --sign $(CY_CONFIG_DIR)/$(APPNAME).elf --hex $(CY_CONFIG_DIR)/$(APPNAME).hex\endcode
-* 3. Connect your kit to the computer. Build and program the device. 
+* 3. Connect your kit to the computer. Build and program the device.
+*    \warning The DFU loader application requires an XRES reset after programming to
+*    initialize the <i>ram_common</i> data section.
 * 4. Observe the kit blue LED on.
 *
 *  \anchor loadable_DFU_app_steps
@@ -208,12 +240,12 @@
 *    structures.
 *
 * 3. Copy the app1 linker script file and put them near the main.c. Linker script files are located at:
-*      - CY8CKIT-062-WIFI-BT kit: <br> 
+*      - CY8CKIT-062-WIFI-BT kit: <br>
 *        ..\\mtb_shared\\dfu\\[VERSION]\\linker_scripts\\CAT1A\\TOOLCHAIN_<COMPILER>\\dfu_cm4_app1.[ext]
-*      - CY8CKIT-149 kit: <br> 
+*      - CY8CKIT-149 kit: <br>
 *        ..\\mtb_shared\\dfu\\[VERSION]\\linker_scripts\\CAT2\\TOOLCHAIN_<COMPILER>\\dfu_cm0p_app1.[ext]
 *    For the GCC ARM compiler, copy dfu_cm4_app0.ld (CY8CKIT-062-WIFI-BT kit) of dfu_cm0p_app0.ld file (CY8CKIT-149 kit).
-*   \note For the ARM compiler, copy additional **dfu_common.h** and **dfu_elf_symbols.c** 
+*   \note For the ARM compiler, copy additional **dfu_common.h** and **dfu_elf_symbols.c**
 *         files to the project. Those files are located in the same folder as the selected linker file.
 *
 * \subsection ssection_dfu_step_5 STEP 5: Update Loadable QSG_DFU_App1_Hello_World main.c
@@ -235,7 +267,7 @@
 *     + Generate a patch file:
 *         \<MCUELFTOOL\> -P app_crc.elf --output app.cyacd2
 *
-*    Generate a *.cyacd2 file in the project root.\n  
+*    Generate a *.cyacd2 file in the project root.\n
 *    For the macOS/Linux platform:
 *    \code POSTBUILD=$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool --sign $(CY_CONFIG_DIR)/$(APPNAME).elf CRC --output $(APPNAME)_crc.elf && \
 *         $(CY_MCUELFTOOL_DIR)/bin/cymcuelftool -P $(APPNAME)_crc.elf --output $(APPNAME)_crc.cyacd2\endcode
@@ -276,9 +308,9 @@
 *        IAR, and ARM compilers.
 *     - dfu_common.h and dfu_elf_symbols.c for the ARM compiler.
 *
-* These files define the symbols for the memory layout for each application 
+* These files define the symbols for the memory layout for each application
 * inside the device.
-* 
+*
 * \par Memory layout of GCC_ARM linker scripts (dfu_{cm0p, cm4}_{app0, app1}.ld)
 *
 * This part of the GCC linker script files must have the same memory layout
@@ -304,7 +336,7 @@
 * * <i>sflash_user_data</i>, <i>eFuse</i>, <i>flash_toc</i>, <i>em_eeprom</i>,
 *   <i>xip</i> - These regions are not used by typical DFU SDK code examples.
 *   They are kept because they may be used in user code.
-* 
+*
 * ELF file symbols:
 * CyMCUElfTool uses special ELF file symbols besides the command-line arguments for
 * its configuration. These symbols are defined in each linker script.
@@ -402,7 +434,7 @@
 *
 * \par File dfu_{cm0p, cm4}_app1.ld
 *
-* Used to create linker scripts for application \#2, .. \#N  
+* Used to create linker scripts for application \#2, .. \#N
 * It is similar to dfu_{cm0p, cm4}_app0.ld linker script, but contains the following changes:
 * - Region alias for flash and ram are flash_app1 and ram_app1
 * - Application ID __cy_app_id = 1
@@ -420,7 +452,7 @@
 ********************************************************************************
 * \subsection group_dfu_mtb_cfg Use of ModusToolbox's tools for HW initialization
 ********************************************************************************
-* The following section describes the communication interfaces settings in the Device Configurator, 
+* The following section describes the communication interfaces settings in the Device Configurator,
 * required to use the included with DFU middleware communication files with the DFU Host tool.
 *
 * \par I2C
@@ -440,18 +472,21 @@
 *      Mode                   | Slave
 *      Sub Mode               | Motorola
 *      SCLK Mode              | Any, Sub Mode in DFU Host tool should be the same
-*      Data Rate              | Any, Clock speed in DFU Host tool should be the same
+*      Data Rate              | 1000 kbps (For other data rates, adjust the value of the SPI_SPI_BYTE_TO_BYTE macro in the transport_spi.c file)
 *      Bit Order              | Any, Shift direction in DFU Host tool should be the same
 *      RX Data Width          | 8
 *      TX Data Width          | 8
 *      SS Polarity            | Active Low
-*      
+*
+*      \note By default, used the Slave Select 1 line. To change it, update
+*      the CY_SPI_SLAVE_SELECT macro in transport_spi.c file.
+*
 * \par UART
 *      Parameter name         | value
 *      -----------------------|--------------------------------------
 *      Personality alias name | DFU_UART
 *      Com Mode               | Standard
-*      Baud Rate              | Any, Baud Rate in DFU Host tool should be the same
+*      Baud Rate              | 115200 bps (For other baud rates, adjust the value of the UART_BYTE_TO_BYTE_TIMEOUT_US macro in transport_uart.c file)
 *      Bit Order              | LSB first
 *      Data Width             | 8 bits
 *      Parity                 | Any, Parity in DFU Host tool should be the same
@@ -459,15 +494,15 @@
 *
 * \par USB CDC
 * For a setup of the USB device personality in the ModusToolbox Device Configurator
-* for the USB CDC DFU transport for CY8CKIT-062-WIFI-BT, see the screenshot 
+* for the USB CDC DFU transport for CY8CKIT-062-WIFI-BT, see the screenshot
 * below. For other kits, verify the USB pins.
 * \note The personality alias name must be DFU_USB_CDC
 *
 * \image html dfu_usb_cdc.png
 *
 * \par BLE
-* For a setup of the BLE device personality in the ModusToolbox Device Configurator 
-* for the BLE DFU transport, see the screenshot below. 
+* For a setup of the BLE device personality in the ModusToolbox Device Configurator
+* for the BLE DFU transport, see the screenshot below.
 *
 * \image html dfu_ble.png
 *
@@ -478,8 +513,8 @@
 ********************************************************************************
 * \subsection group_dfu_ucase_i2c Firmware Update via I2C
 ********************************************************************************
-* 
-* See \ref section_dfu_quick_start for steps how to set up a DFU project that 
+*
+* See \ref section_dfu_quick_start for steps how to set up a DFU project that
 * upgrades an application via a I2C transport interface.
 *
 ********************************************************************************
@@ -489,21 +524,21 @@
 * See \ref section_dfu_quick_start for basic steps how to setup a DFU project.
 * Specific steps for the UART transport support:
 * - Include transport_uart.c and transport_uart.h in the project build flow. For
-*   example, copy from the \\config\\CAT1A or \\config\\CAT2 or directory to 
-*   the directory with the main.c file. Ensure that other transport files are 
+*   example, copy from the \\config\\CAT1A or \\config\\CAT2 or directory to
+*   the directory with the main.c file. Ensure that other transport files are
 *   not included in the build flow.
-* - Select and configure the SCB block using the ModusToolbox Device 
-*   Configurator 
+* - Select and configure the SCB block using the ModusToolbox Device
+*   Configurator
 *   see \ref group_dfu_mtb_cfg or manually using the configuration
 *   structures.
 * - Add the post-build step to sign the ELF file or sign it manually after
 *   the build
-* \code 
+* \code
 *       <MCUELFTOOL> --sign app.elf --output app_signed.elf\endcode
 * - Build and program a project into the device.
 * - Open the DFU Host Tool. Select the UART interface. Set the UART baud rate
 *   according to the SCB UART setup in the previous step.
-* - Select the *.cyacd2 application image and upload to the device.     
+* - Select the *.cyacd2 application image and upload to the device.
 *
 ********************************************************************************
 * \subsection group_dfu_ucase_spi Firmware Update via SPI
@@ -512,11 +547,11 @@
 * See \ref section_dfu_quick_start for basic steps how to set up a DFU project.
 * The steps for the SPI transport support:
 * - Include transport_spi.c and transport_spi.h in the project build flow. For
-*   example, copy them from the \\config\\CAT1A or \\config\\CAT2 directory to 
-*   the directory with the main.c file. Ensure that other transport files are 
+*   example, copy them from the \\config\\CAT1A or \\config\\CAT2 directory to
+*   the directory with the main.c file. Ensure that other transport files are
 *   not included in the build flow.
-* - Select and configure the SCB block. This could be done using ModusToolbox 
-*   Device Configurator 
+* - Select and configure the SCB block. This could be done using ModusToolbox
+*   Device Configurator
 *   see \ref group_dfu_mtb_cfg or manually using the configuration structures.
 * - Add the post-build step to sign the ELF file or sign it manually after
 *   the build
@@ -525,7 +560,7 @@
 * - Build and program a project into the device.
 * - Open the DFU Host Tool. Select the SPI interface. Set SPI mode, shift the
 *   direction and speed according to the SCB SPI setup in the previous step.
-* - Select the *.cyacd2 application image and upload to the device.     
+* - Select the *.cyacd2 application image and upload to the device.
 *
 ********************************************************************************
 * \subsection group_dfu_ucase_usbcdc Firmware Update via USB CDC
@@ -534,17 +569,17 @@
 * See \ref section_dfu_quick_start for basic steps how to setup a DFU project.
 * Specific steps for the USB CDC transport support:
 * - Include transport_usb_cdc.c and transport_usb_cdc.h in the project build
-*   flow. For example, copy them from the \\config\\CAT1A 
-*   directory to the directory with the main.c file. Ensure that other 
+*   flow. For example, copy them from the \\config\\CAT1A
+*   directory to the directory with the main.c file. Ensure that other
 *   transport files are not included in the build flow.
-* - Enable and configure the USB Device block using the ModusToolbox 
+* - Enable and configure the USB Device block using the ModusToolbox
 *   Device Configurator
 *   see \ref group_dfu_mtb_cfg or manually using the configuration structures.
-* - Generate USB descriptors and USB Middleware structures using the USB 
+* - Generate USB descriptors and USB Middleware structures using the USB
 *   Configurator. Open the USB configuration file (cycfg_usb_cdc.cyusbdev)
-*   in the DFU \\config\\CAT1A folder, then click Save to generate configuration 
-*   files (cycfg_usbdev.c and cycfg_usbdev.h). These files must be included in the 
-*   build flow (see USB Middleware API Reference \ref group_dfu_more_info).  
+*   in the DFU \\config\\CAT1A folder, then click Save to generate configuration
+*   files (cycfg_usbdev.c and cycfg_usbdev.h). These files must be included in the
+*   build flow (see USB Middleware API Reference \ref group_dfu_more_info).
 * - Add the post-build step to sign the ELF file or sign it manually after
 *   the build
 * \code
@@ -553,8 +588,8 @@
 *   device.
 * - Open the DFU Host Tool. Select the UART interface, because the Host recognizes the USB
 *   device as a virtual UART (the name is DFU USB CDC transport). UART
-*   settings: baud rate - 115200, data bits - 8, stop bits - 1, parity - None.   
-* - Select the *.cyacd2 application image and upload to the device.  
+*   settings: baud rate - 115200, data bits - 8, stop bits - 1, parity - None.
+* - Select the *.cyacd2 application image and upload to the device.
 *
 ********************************************************************************
 * \subsection group_dfu_ucase_ble Firmware Update via BLE (Over-the-Air)
@@ -565,14 +600,14 @@
 * Specific steps for the USB BLE transport support:
 * - Include transport_ble.c and transport_ble.h in the project build
 *   flow. For example, copy them from the \\config\\CAT1A directory to the directory
-*   with the main.c file.  Ensure that other transport files are not included in 
+*   with the main.c file.  Ensure that other transport files are not included in
 *   the build flow.
 * - Enable and configure the BLE Device block using the ModusToolbox
-*   Device Configurator 
+*   Device Configurator
 *   see  \ref group_dfu_mtb_cfg or manually using the configuration structures.
 * - Generate BLE Middleware configuration structures. Open the BLE configuration
-*   file (cycfg_ble.cybt) in Bluetooth Configurator. The file is located in 
-*   the DFU \\config\\CAT1A folder. Then click Save to generate configuration files 
+*   file (cycfg_ble.cybt) in Bluetooth Configurator. The file is located in
+*   the DFU \\config\\CAT1A folder. Then click Save to generate configuration files
 *   (cycfg_ble.c and cycfg_ble.h). These files must be included in the build
 *   flow (BLE Middleware API Reference \ref group_dfu_more_info).
 * - Add the post build step to sign the ELF file or sign it manually after the
@@ -600,9 +635,9 @@
 * 0 - basic summation (default),
 * 1 - for CRC-16.
 *
-* For an application image, DFU supports 2 types of checksums: CRC-32 and SHA1. 
+* For an application image, DFU supports 2 types of checksums: CRC-32 and SHA1.
 * SHA1 is calculated with a crypto hardware block, which is available only on CAT1A devices.
-* The default application checksum is CRC-32. 
+* The default application checksum is CRC-32.
 * The steps to set the SHA1 checksum for an application image:
 * - Set \ref CY_DFU_OPT_CRYPTO_HW macro to 1 in dfu_user.h file to enable
 *   the SHA1 calculation.
@@ -625,14 +660,14 @@
 ********************************************************************************
 *
 * The DFU design does not limit the number of applications but it is limited
-* by memory size and metadata size. The maximum size 
+* by memory size and metadata size. The maximum size
 * of DFU metadata is limited to the size of the flash row, because metadata
 * should be in a single flash row. For example, the 512-byte metadata supports
 * up to 63 applications.
 * An arbitrary number of applications can be protected from overwriting. Such
 * a protected application is called "Golden Image".
 * See \ref section_dfu_quick_start for a steps to setup basic 2 application DFU
-* projects. The following steps show how to set up a 3rd application. 
+* projects. The following steps show how to set up a 3rd application.
 * The same approach can be used to setup 4th - Nth applications.
 * - Define the sizes for each of the three applications and define the start and
 *   size of each memory region (flash, RAM) for each application.
@@ -644,8 +679,8 @@
 *   based on the defined in the first step allocation.
 * - Set __cy_app_id symbol to 2
 * - Update the region aliases for flash and RAM to use flash_app2 and ram_app2
-*   accordingly: 
-*   \code 
+*   accordingly:
+*   \code
 *   REGION_ALIAS("flash", flash_app2);
 *   REGION_ALIAS("ram",     ram_app2);
 *   \endcode
@@ -666,8 +701,8 @@
 * \subsection group_dfu_ucase_cyacd2 Creation of the CYACD2 file
 ********************************************************************************
 *
-* The .cyacd2 file contains downloadable application data created by 
-* CyMCUElfTool and used by host programs such as Cypress DFU Host Program and 
+* The .cyacd2 file contains downloadable application data created by
+* CyMCUElfTool and used by host programs such as Cypress DFU Host Program and
 * CySmart to send applications to the target DFU module
 * (see \ref group_dfu_more_info). Refer to the
 * [AN213924](http://www.cypress.com/an213924) DFU SDK User Guide for the .cyacd2
@@ -697,6 +732,22 @@
 *
 * <table class="doxtable">
 *   <tr><th>Version</th><th>Changes</th><th>Reason for Change</th></tr>
+*   <tr>
+*     <td rowspan="3">4.20</td>
+*     <td>Added USB CDC transport configuration for the CAT2 PDL.</td>
+*     <td>Add support for the USB interface for the PMG1 device family.</td>
+*   </tr>
+*   <tr>
+*     <td>Updated timeout time for the CAT1A SPI transport. </td>
+*     <td>Fixed the DFU Host Tool timeout error for the CAT1A SPI transport
+*         caused by the incorrect function call
+*         (transport_spi.c file, SPI_SpiCyBtldrCommRead() function).
+*     </td>
+*   </tr>
+*   <tr>
+*     <td>Minor documentation update.</td>
+*     <td>Documentation improvement.</td>
+*   </tr>
 *   <tr>
 *     <td rowspan="3">4.10</td>
 *     <td>Added PSoC 4 devices support.
@@ -811,27 +862,8 @@
 * \section group_dfu_more_info More Information
 ********************************************************************************
 *
-* * [AN213924](http://www.cypress.com/an213924) DFU SDK User Guide
-* * [CE213903](http://www.cypress.com/ce213903) DFU SDK Basic Communication Code Examples
-* * [CE216767](http://www.cypress.com/ce216767) DFU SDK BLE OTA Code Example
-* * [PSoC 6 Peripheral Driver Library API Reference](https://cypresssemiconductorco.github.io/psoc6pdl/pdl_api_reference_manual/html/index.html)
-* * [Cypress USB Device Middleware Library API Reference](https://cypresssemiconductorco.github.io/usbdev/usbfs_dev_api_reference_manual/html/index.html)
-* * [BLE Middleware API Reference Guide](https://cypresssemiconductorco.github.io/middleware-ble/ble_api_reference_manual/html/index.html)
-* * [ModusToolbox Software Environment, Quick Start Guide, Documentation, and Videos](https://www.cypress.com/products/modustoolbox-software-environment)
-* * [PSoC 6 SDK Examples](https://github.com/cypresssemiconductorco/Code-Examples-for-the-ModusToolbox-PSoC-6-SDK)
-* * [ModusToolbox Device Configurator Tool Guide](https://www.cypress.com/ModusToolboxDeviceConfig)
-* * [ModusToolbox Device Firmware Update Host Tool](https://www.cypress.com/ModusToolboxDFUHostTool)
-* * [ModusToolbox USB Configurator Tool Guide](https://www.cypress.com/ModusToolboxUSBConfig)
-* * [ModusToolbox BT Configurator Tool Guide](https://www.cypress.com/ModusToolboxBLEConfig)
-* * [CySmart - BLE Test and Debug Tool](http://www.cypress.com/documentation/software-and-drivers/cysmart-bluetooth-le-test-and-debug-tool)
-* * [CySmart - Mobile App](https://www.cypress.com/documentation/software-and-drivers/cysmart-mobile-app)
-* * [PSoC 6 BLE Pioneer Kit](http://www.cypress.com/CY8CKIT-062-BLE)
-* * [PSoC 6 WiFi-BT Pioneer Kit](http://www.cypress.com/CY8CKIT-062-WiFi-BT)
-* * [PSoC 6 Wi-Fi BT Prototyping Kit](http://www.cypress.com/cy8cproto-062-4343w)
-* * [PSoC 6 MCU Datasheets](http://www.cypress.com/psoc6ds)
-* * [PSoC 6 MCU Application Notes](http://www.cypress.com/psoc6an)
-* * [PSoC 6 MCU Technical Reference Manuals](http://www.cypress.com/psoc6trm)
-* * [Cypress Semiconductor](http://www.cypress.com)
+* For more information, refer to the links in the
+* [README.md](https://github.com/Infineon/dfu/blob/master/README.md#more-information)
 *
 * \defgroup group_dfu_macro         Macros
 * \{
@@ -871,7 +903,7 @@ extern "C"{
 #define CY_DFU_SDK_MW_VERSION_MAJOR       (4)
 
 /** The DFU SDK minor version */
-#define CY_DFU_SDK_MW_VERSION_MINOR       (10)
+#define CY_DFU_SDK_MW_VERSION_MINOR       (20)
 
 /**
 * \defgroup group_dfu_macro_state DFU State
@@ -1091,9 +1123,9 @@ extern uint8_t __cy_boot_metadata_length;
 extern uint8_t __cy_product_id;
 /**
  * Checksum Algorithm of the DFU Host Command/Response Protocol packet.
- * Possible values 
+ * Possible values
  * - 0 For the Basic Summation algorithm
- * - 1 For the CRC-16 algorithm 
+ * - 1 For the CRC-16 algorithm
  * \note Must be aligned with \ref CY_DFU_OPT_PACKET_CRC
  */
 extern uint8_t __cy_checksum_type;

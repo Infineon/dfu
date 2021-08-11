@@ -6,9 +6,8 @@
 * for the USB device that implements a virtual COM port (CDC class).
 *
 * Note
-* This file supports the PSoC Creator and ModusToolbox flows.
-* For the PSoC Creator flow, the default USBFS component instance name is
-* "USBFS". For the ModusToolbox flow, the USB device personality alias must be
+* This file supports only the ModusToolbox flow.
+* For the ModusToolbox flow, the USB device personality alias must be
 * "DFU_USB_CDC".
 * This file serves as a template and can be modified defining any component
 * name or personality alias.
@@ -56,24 +55,6 @@
 
 /* USER CONFIGURABLE: The USB device COM port data endpoint maximum packet size */
 #define CY_DFU_USB_CDC_ENDPOINT_MAX_PACKET  (64U)
-
-#if defined(CY_PSOC_CREATOR_USED)
-
-    /* USER CONFIGURABLE: The UART component instance name */
-    #include "USBFS.h"
-
-    /* USER CONFIGURABLE: The instance name of the UART component */
-    #define CY_DFU_USBFS_INSTANCE       USBFS
-
-    #define USB_DEV_API(fn)             USB_DEV_API_IMPL(CY_DFU_USBFS_INSTANCE, fn)
-    #define USB_DEV_API_IMPL2(a, b)     a ## b
-    #define USB_DEV_API_IMPL(a, b)      USB_DEV_API_IMPL2(a, b)
-
-    #define CY_DFU_USB_CONTEXT          USB_DEV_API_IMPL(CY_DFU_USBFS_INSTANCE, _drvContext)
-    #define CY_DFU_USB_DEV_CONTEXT      USB_DEV_API_IMPL(CY_DFU_USBFS_INSTANCE, _devContext)
-    #define CY_DFU_USB_DEV_CDC_CONTEXT  USB_DEV_API_IMPL(CY_DFU_USBFS_INSTANCE, _cdcContext)
-
-#else /* ModusToolbox is used for the DFU transport configuration */
 
 /* Include USBFS driver configuration */
 #include "cycfg_peripherals.h"
@@ -132,7 +113,6 @@ static cy_stc_usb_dev_cdc_context_t    USB_DEV_CDC_cdcContext;
 * \ref USB_CDC_CyBtldrCommStart routine.
 * For re-initialization set \ref USB_DEV_initVar to false and call
 * \ref USB_CDC_CyBtldrCommStart.
-* Note that PSoC Creator USBFS component uses its own initVar variable.
 */
 bool USB_DEV_initVar = false;
 
@@ -148,9 +128,9 @@ bool USB_DEV_initVar = false;
 #define USB_DEV_INTR_MED_SOURCE     (IRQn_Type) usb_interrupt_med_IRQn
 #define USB_DEV_INTR_LOW_SOURCE     (IRQn_Type) usb_interrupt_lo_IRQn
 
-#define USB_DEV_INTR_HIGH_PRIORITY  (5U)
-#define USB_DEV_INTR_MED_PRIORITY   (6U)
-#define USB_DEV_INTR_LOW_PRIORITY   (7U)
+#define USB_DEV_INTR_HIGH_PRIORITY  (0U)
+#define USB_DEV_INTR_MED_PRIORITY   (1U)
+#define USB_DEV_INTR_LOW_PRIORITY   (2U)
 
 
 /*******************************************************************************
@@ -274,7 +254,7 @@ static void USB_DEV_Start(void)
     /* A USB Device connection error - stops the execution */
     CY_ASSERT(CY_USB_DEV_SUCCESS == status);
 }
-#endif /* defined(CY_PSOC_CREATOR_USED) */
+
 
 
 /*******************************************************************************
@@ -285,19 +265,14 @@ static void USB_DEV_Start(void)
 *
 * \note
 * This function does not configure an infrastructure required for the USB device
-* operation: clocks and pins. For the PSoC Creator and ModusToolbox flows, the
-* generated files configure clocks and pins. This configuration must be
-* performed by the application when the project uses only PDL.
+* operation: clocks and pins. For the ModusToolbox flow, the generated files 
+* configure clocks and pins. This configuration must be performed by the 
+* application when the project uses only PDL.
 *
 *******************************************************************************/
 void USB_CDC_CyBtldrCommStart(void)
 {
-#if defined(CY_PSOC_CREATOR_USED)
-    /* Waits until the USB device enumerates */
-    USB_DEV_API(_Start)(CY_DFU_USB_DEVICE, false);
-#else
     USB_DEV_Start();
-#endif /* defined(CY_PSOC_CREATOR_USED) */
 }
 
 

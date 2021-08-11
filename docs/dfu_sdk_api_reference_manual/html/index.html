@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Cypress Device Firmware Update (DFU) Middleware Library 4.10: Cypress Device Firmware Update (DFU) Middleware Library</title>
+<title>Device Firmware Update (DFU) Middleware Library 4.20: Device Firmware Update (DFU) Middleware Library 4.20</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><a href="http://www.cypress.com/"><img alt="Logo" src="IFXCYP_one-line.png"/></a></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Cypress Device Firmware Update (DFU) Middleware Library 4.10</div>
+   <div id="projectname">Device Firmware Update (DFU) Middleware Library 4.20</div>
   </td>
  </tr>
  </tbody>
@@ -81,7 +81,7 @@ $(document).ready(function(){initNavTree('index.html','');});
 
 <div class="header">
   <div class="headertitle">
-<div class="title">Cypress Device Firmware Update (DFU) Middleware Library </div>  </div>
+<div class="title">Device Firmware Update (DFU) Middleware Library 4.20 </div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="section_mainpage_overview"></a>
@@ -111,7 +111,7 @@ General Description</h1>
 Quick Start Guide</h1>
 <p>The DFU SDK is used to design updating applications of arbitrary flexibility and complexity. Cypress DFU middleware can be used in various software environments. Refer to RELEASE.md file for details. To quick start, use the Code Examples. Cypress Semiconductor continuously extends its portfolio of code examples at <a href="http://www.cypress.com"><b>Cypress Semiconductor website</b></a> and <a href="https://github.com/cypresssemiconductorco"><b>Cypress Semiconductor GitHub</b></a>.</p>
 <p>The Quick Start Guide (QSG) assumes ModusToolbox 2.2 is installed with all needed tools.</p>
-<p>The following steps are to set up and build a basic DFU loader and loadable applications. The DFU loader application uses the I2C transport interface. The steps assume that the user builds an application for CY8CKIT-062-WIFI-BT or CY8CKIT-149 kits based on a starter Hello_World ModusToolbox project.</p>
+<p>The following steps are to set up and build a basic DFU loader and loadable applications. The DFU loader application uses the I2C transport interface. The steps assume that the user builds an application for CY8CKIT-062-WIFI-BT or CY8CKIT-149 kits based on a starter Hello_World ModusToolbox project. </p><dl class="section note"><dt>Note</dt><dd>For other kits or devices, update default linker scripts with the valid memory addresses. Refer to <a class="el" href="index.html#group_dfu_config_linker_scripts">Linker scripts</a> for details.</dd></dl>
 <h2><a class="anchor" id="ssection_dfu_step_0"></a>
 STEP 0: Projects preparation.</h2>
 <ol type="1">
@@ -151,7 +151,7 @@ STEP 1: Setup Loader Application QSG_DFU_App0_I2C</h2>
 <dl class="section note"><dt>Note</dt><dd>For ARM compiler, copy additional <b>dfu_common.h</b> and <b>dfu_elf_symbols.c</b> files to the project. Those files are located in the same folder as the selected linker file.</dd></dl>
 </li>
 <li>Copy folder from ..\mtb_shared\TARGET_[KIT_NAME]\[VERSION]\COMPONENT_BSP_DESIGN_MODUS to the project root and rename it to DFU_DESIGN_MODUS.</li>
-<li>Update project's Makefile to use Generated sources, created in DFU_DESIGN_MODUS folder: locate <b>DISABLE_COMPONENTS</b> variable and add <b>BSP_DESIGN_MODUS</b>: <div class="fragment"><div class="line">DISABLE_COMPONENTS=BSP_DESIGN_MODUS </div></div><!-- fragment --></li>
+<li>Update project's Makefile to use Generated sources, created in DFU_DESIGN_MODUS folder: locate <b>DISABLE_COMPONENTS</b> variable and add <b>BSP_DESIGN_MODUS</b>: <div class="fragment"><div class="line">DISABLE_COMPONENTS=BSP_DESIGN_MODUS </div></div><!-- fragment --> locate <b>DEFINES</b> variable and add <b>COMPONENT_CUSTOM_DESIGN_MODUS</b>: <div class="fragment"><div class="line">DEFINES=COMPONENT_CUSTOM_DESIGN_MODUS </div></div><!-- fragment --></li>
 <li><p class="startli">Open DFU_DESIGN_MODUS\design.modus file and configure SCB for I2C communication using ModusToolbox Device Configurator.</p>
 <p class="startli">For CY8CKIT-062-WIFI-BT use SCB 3, which is connected to the KitProg. For CY8CKIT-149, SCB 1 is connected to the KitProg. </p><table class="doxtable">
 <tr>
@@ -224,7 +224,8 @@ STEP 3: Build and Program Loader QSG_DFU_App0_I2C</h2>
 </li>
 <li>Add a post-build step to sign the ELF file or sign it manually after the build: &lt;MCUELFTOOL&gt; &ndash;sign &lt;app&gt;.elf &ndash;output &lt;app_signed&gt;.elf &ndash;hex &lt;app_signed&gt;.hex.<br />
  For the macOS/Linux platform: <div class="fragment"><div class="line">POSTBUILD=$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool --sign $(CY_CONFIG_DIR)/$(APPNAME).elf --hex $(CY_CONFIG_DIR)/$(APPNAME).hex</div></div><!-- fragment --> For the Windows platform: <div class="fragment"><div class="line">POSTBUILD=<span class="stringliteral">&quot;$(CY_MCUELFTOOL_DIR)/bin/cymcuelftool.exe&quot;</span> --sign $(CY_CONFIG_DIR)/$(APPNAME).elf --hex $(CY_CONFIG_DIR)/$(APPNAME).hex</div></div><!-- fragment --></li>
-<li>Connect your kit to the computer. Build and program the device.</li>
+<li>Connect your kit to the computer. Build and program the device. <dl class="section warning"><dt>Warning</dt><dd>The DFU loader application requires an XRES reset after programming to initialize the <em>ram_common</em> data section.</dd></dl>
+</li>
 <li>Observe the kit blue LED on.</li>
 </ol>
 <p><a class="anchor" id="loadable_DFU_app_steps"></a></p>
@@ -375,7 +376,7 @@ Use of ModusToolbox's tools for HW initialization</h2>
 <tr>
 <td>SCLK Mode </td><td>Any, Sub Mode in DFU Host tool should be the same </td></tr>
 <tr>
-<td>Data Rate </td><td>Any, Clock speed in DFU Host tool should be the same </td></tr>
+<td>Data Rate </td><td>1000 kbps (For other data rates, adjust the value of the SPI_SPI_BYTE_TO_BYTE macro in the transport_spi.c file) </td></tr>
 <tr>
 <td>Bit Order </td><td>Any, Shift direction in DFU Host tool should be the same </td></tr>
 <tr>
@@ -386,6 +387,7 @@ Use of ModusToolbox's tools for HW initialization</h2>
 <td>SS Polarity </td><td>Active Low </td></tr>
 </table>
 </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>By default, used the Slave Select 1 line. To change it, update the CY_SPI_SLAVE_SELECT macro in transport_spi.c file.</dd></dl>
 <dl class="section user"><dt>UART</dt><dd><table class="doxtable">
 <tr>
 <th>Parameter name </th><th>value  </th></tr>
@@ -394,7 +396,7 @@ Use of ModusToolbox's tools for HW initialization</h2>
 <tr>
 <td>Com Mode </td><td>Standard </td></tr>
 <tr>
-<td>Baud Rate </td><td>Any, Baud Rate in DFU Host tool should be the same </td></tr>
+<td>Baud Rate </td><td>115200 bps (For other baud rates, adjust the value of the UART_BYTE_TO_BYTE_TIMEOUT_US macro in transport_uart.c file) </td></tr>
 <tr>
 <td>Bit Order </td><td>LSB first </td></tr>
 <tr>
@@ -505,6 +507,12 @@ Changelog</h1>
 <tr>
 <th>Version</th><th>Changes</th><th>Reason for Change </th></tr>
 <tr>
+<td rowspan="3">4.20 </td><td>Added USB CDC transport configuration for the CAT2 PDL. </td><td>Add support for the USB interface for the PMG1 device family.  </td></tr>
+<tr>
+<td>Updated timeout time for the CAT1A SPI transport.  </td><td>Fixed the DFU Host Tool timeout error for the CAT1A SPI transport caused by the incorrect function call (transport_spi.c file, SPI_SpiCyBtldrCommRead() function).   </td></tr>
+<tr>
+<td>Minor documentation update. </td><td>Documentation improvement.  </td></tr>
+<tr>
 <td rowspan="3">4.10 </td><td>Added PSoC 4 devices support.  </td><td>Extended device support.   </td></tr>
 <tr>
 <td>Added MISRA-C:2012 compliance. </td><td>MISRA standard compliance.  </td></tr>
@@ -556,36 +564,14 @@ Made CRC default application checksum. </li>
 </table>
 <h1><a class="anchor" id="group_dfu_more_info"></a>
 More Information</h1>
-<ul>
-<li><a href="http://www.cypress.com/an213924">AN213924</a> DFU SDK User Guide</li>
-<li><a href="http://www.cypress.com/ce213903">CE213903</a> DFU SDK Basic Communication Code Examples</li>
-<li><a href="http://www.cypress.com/ce216767">CE216767</a> DFU SDK BLE OTA Code Example</li>
-<li><a href="https://cypresssemiconductorco.github.io/psoc6pdl/pdl_api_reference_manual/html/index.html">PSoC 6 Peripheral Driver Library API Reference</a></li>
-<li><a href="https://cypresssemiconductorco.github.io/usbdev/usbfs_dev_api_reference_manual/html/index.html">Cypress USB Device Middleware Library API Reference</a></li>
-<li><a href="https://cypresssemiconductorco.github.io/middleware-ble/ble_api_reference_manual/html/index.html">BLE Middleware API Reference Guide</a></li>
-<li><a href="https://www.cypress.com/products/modustoolbox-software-environment">ModusToolbox Software Environment, Quick Start Guide, Documentation, and Videos</a></li>
-<li><a href="https://github.com/cypresssemiconductorco/Code-Examples-for-the-ModusToolbox-PSoC-6-SDK">PSoC 6 SDK Examples</a></li>
-<li><a href="https://www.cypress.com/ModusToolboxDeviceConfig">ModusToolbox Device Configurator Tool Guide</a></li>
-<li><a href="https://www.cypress.com/ModusToolboxDFUHostTool">ModusToolbox Device Firmware Update Host Tool</a></li>
-<li><a href="https://www.cypress.com/ModusToolboxUSBConfig">ModusToolbox USB Configurator Tool Guide</a></li>
-<li><a href="https://www.cypress.com/ModusToolboxBLEConfig">ModusToolbox BT Configurator Tool Guide</a></li>
-<li><a href="http://www.cypress.com/documentation/software-and-drivers/cysmart-bluetooth-le-test-and-debug-tool">CySmart - BLE Test and Debug Tool</a></li>
-<li><a href="https://www.cypress.com/documentation/software-and-drivers/cysmart-mobile-app">CySmart - Mobile App</a></li>
-<li><a href="http://www.cypress.com/CY8CKIT-062-BLE">PSoC 6 BLE Pioneer Kit</a></li>
-<li><a href="http://www.cypress.com/CY8CKIT-062-WiFi-BT">PSoC 6 WiFi-BT Pioneer Kit</a></li>
-<li><a href="http://www.cypress.com/cy8cproto-062-4343w">PSoC 6 Wi-Fi BT Prototyping Kit</a></li>
-<li><a href="http://www.cypress.com/psoc6ds">PSoC 6 MCU Datasheets</a></li>
-<li><a href="http://www.cypress.com/psoc6an">PSoC 6 MCU Application Notes</a></li>
-<li><a href="http://www.cypress.com/psoc6trm">PSoC 6 MCU Technical Reference Manuals</a></li>
-<li><a href="http://www.cypress.com">Cypress Semiconductor</a> </li>
-</ul>
+<p>For more information, refer to the links in the <a href="https://github.com/Infineon/dfu/blob/master/README.md#more-information">README.md</a> </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part
 <div id="nav-path" class="navpath">
     <ul>
         <li class="footer">
-            Generated for <b>Cypress Device Firmware Update (DFU) Middleware Library 4.10</b> by <b>Cypress Semiconductor Corporation</b>.
+            Generated for <b>Device Firmware Update (DFU) Middleware Library 4.20</b> by <b>Cypress Semiconductor Corporation</b>.
             All rights reserved.
         </li>
     </ul>
