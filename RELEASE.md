@@ -17,7 +17,10 @@ See [API Reference Changelog](https://infineon.github.io/dfu/dfu_sdk_api_referen
 
 ## Known Issues
 
-No known issues
+Several template files (transport_uart.c, transport_spi.c) use the old type
+uint32, which was deprecated and removed in mtb-pdl-cat2 v2.0.0. Now, using
+mtb-pdl-cat2 v2.0.0 or later causes a build error of an/the undeclared type.
+To avoid this, change the uint32 type to uint32_t or use mtb-pdl-cat2 v1.x.
 
 ## Supported Software and Tools
 
