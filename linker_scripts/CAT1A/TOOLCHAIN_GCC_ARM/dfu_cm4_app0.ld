@@ -1,20 +1,20 @@
 /***************************************************************************//**
 * \file dfu_cm4_app0.ld
-* \version 4.20
+* \version 5.0
 *
 * The linker file for the GNU C compiler.
-* Used for the DFU SDK application 0 firmware project. Contains sections for 
+* Used for the DFU SDK application 0 firmware project. Contains sections for
 * the CM0p image that starts CM4 application 0.
 *
 * \note
-* This linker file is generic and handles common use cases. Your project may not 
-* use each section defined in the linker file and then you may see warnings 
+* This linker file is generic and handles common use cases. Your project may not
+* use each section defined in the linker file and then you may see warnings
 * during the build process. Simply comment out or remove the relevant code
 * in the linker file.
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2021), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -70,17 +70,17 @@ MEMORY
      * Note that 2 KB of RAM (at the end of the SRAM) are reserved for system use.
      * Using this memory region for other purposes will lead to unexpected behavior.
      */
-    ram_common        (rwx) : ORIGIN = 0x08002000, LENGTH = 0x0400
+    ram_common  (rwx) : ORIGIN = 0x08002000, LENGTH = 0x0400
 
     /* Note: the ram_appX_core1 regions has to be 0x400 aligned
      * as they contain Interrupt Vector Table Remapped at the start.
-    */ 
+    */
     ram_app0    (rwx) : ORIGIN = 0x08002400, LENGTH = 0x8000
     ram_app1    (rwx) : ORIGIN = 0x08002400, LENGTH = 0x8000
-         
-    flash_cm0p  (rx)  : ORIGIN = 0x10000000, LENGTH = 0x2000     
-    flash_app0  (rx)  : ORIGIN = 0x10002000, LENGTH = 0x10000
-    flash_app1  (rx)  : ORIGIN = 0x10050000, LENGTH = 0x10000
+
+    flash_cm0p  (rx)  : ORIGIN = 0x10000000, LENGTH = 0x2000
+    flash_app0  (rx)  : ORIGIN = 0x10002000, LENGTH = 0x20000
+    flash_app1  (rx)  : ORIGIN = 0x10050000, LENGTH = 0x20000
 
     flash_boot_meta   (rw)  : ORIGIN = 0x100FFA00, LENGTH = 0x400
 
@@ -199,7 +199,7 @@ GROUP(libgcc.a libc.a libm.a libnosys.a)
 
 
 SECTIONS
-{   
+{
     /* App0 uses it to initialize DFU SDK metadata, in the dfu_user.c file */
     .cy_boot_metadata :
     {
@@ -214,6 +214,9 @@ SECTIONS
         KEEP(*(.cy_m0p_image))
         __cy_m0p_code_end = . ;
     } > flash_cm0p
+
+    /* Check if .cy_m0p_image size exceeds flash_cm0p*/
+    ASSERT(__cy_m0p_code_end <= FLASH_CM4_START, "CM0+ flash image overflows with CM4, increase size of flash_cm0p")
 
     /* Cortex-M4 application image */
     .text FLASH_CM4_START :
@@ -401,7 +404,7 @@ SECTIONS
     {
         KEEP(*(.stack*))
     } > ram
-    
+
     /* DFU SDK specific */
     /* The noinit section, used across all the applications */
     .cy_boot_noinit (NOLOAD) :
@@ -413,7 +416,7 @@ SECTIONS
     .cy_boot_noinit.appId ORIGIN(ram_common) + LENGTH(ram_common) - 1 (NOLOAD) :
     {
         KEEP(*(.cy_boot_noinit.appId));
-    } > ram_common    
+    } > ram_common
 
 
     /* Set stack top to end of RAM, and stack limit move down by
@@ -470,7 +473,7 @@ SECTIONS
         KEEP(*(.cy_toc_part2))
     } > sflash_toc_2
 
-    
+
     /* Supervisory flash: Table of Content # 2 Copy */
     .cy_rtoc_part2 :
     {

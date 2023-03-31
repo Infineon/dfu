@@ -4,7 +4,7 @@
 
 ;***************************************************************************//**
 ;* \file dfu_cm0p_app1.sct
-;* \version 4.20
+;* \version 5.0
 ;*
 ;* The linker file for the ARM compiler.
 ;* Used for the DFU SDK application 1 firmware project.
@@ -22,7 +22,7 @@
 ;*
 ;*******************************************************************************
 ;* \copyright
-;* (c) (2016-2021), Cypress Semiconductor Corporation (an Infineon company) or
+;* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
 ;* an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ;********************************************************************************
 ;* This software, including source code, documentation and related materials
@@ -86,7 +86,7 @@ LR_ROM FLASH_START FLASH_SIZE
         .ANY (+XO)
     }
 
-    ER_RAM_COMMON CY_APP_RAM_COMMON_ADDR UNINIT
+    ER_RAM_COMMON CY_APP_RAM_COMMON_ADDR UNINIT OVERLAY
     {
         * (.cy_boot_noinit.appId)
     }

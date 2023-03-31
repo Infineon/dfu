@@ -4,24 +4,24 @@
 
 ;***************************************************************************//**
 ;* \file dfu_cm4_app0.sct
-;* \version 4.20
+;* \version 5.0
 ;*
 ;* The linker file for the ARM compiler.
-;* Used for the DFU SDK application 0 firmware project. 
+;* Used for the DFU SDK application 0 firmware project.
 ;* Contains sections for the CM0p image that starts CM4 application #0.
 ;*
 ;* \note
-;* This linker file is generic and handles common use cases. Your project may not 
+;* This linker file is generic and handles common use cases. Your project may not
 ;* use each section defined in the linker file and then you may see warnings
-;* during the build process: L6314W (no section matches the pattern) and/or 
-;* L6329W (the pattern only matches removed unused sections). 
-;* You can suppress a warning by passing the "--diag_suppress=L6314W,L6329W" 
-;* option to the linker. Simply comment out or remove the relevant code in the 
+;* during the build process: L6314W (no section matches the pattern) and/or
+;* L6329W (the pattern only matches removed unused sections).
+;* You can suppress a warning by passing the "--diag_suppress=L6314W,L6329W"
+;* option to the linker. Simply comment out or remove the relevant code in the
 ;* linker file.
 ;*
 ;*******************************************************************************
 ;* \copyright
-;* (c) (2016-2021), Cypress Semiconductor Corporation (an Infineon company) or
+;* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
 ;* an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ;********************************************************************************
 ;* This software, including source code, documentation and related materials
@@ -129,8 +129,8 @@ LR_IROM1 FLASH_START FLASH_SIZE
         * (InRoot$$Sections)
         * (+RO)
     }
-    
-    ER_RAM_COMMON CY_APP_RAM_COMMON_ADDR UNINIT
+
+    ER_RAM_COMMON CY_APP_RAM_COMMON_ADDR UNINIT OVERLAY
     {
         * (.cy_boot_noinit.appId)
     }
@@ -155,9 +155,9 @@ LR_IROM1 FLASH_START FLASH_SIZE
 
     ; Application heap area (HEAP)
     ARM_LIB_HEAP  +0 EMPTY ((RAM_START+RAM_SIZE)-AlignExpr(ImageLimit(RW_IRAM1), 8)-STACK_SIZE)
-    { 
+    {
     }
-    
+
     ; Stack region growing down
     ARM_LIB_STACK (RAM_START+RAM_SIZE) EMPTY -STACK_SIZE
     {

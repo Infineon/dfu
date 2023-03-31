@@ -1,13 +1,13 @@
 /*******************************************************************************
 * \file dfu_common.h
-* \version 4.20
-* 
-* This file provides project configuration macro definitions. They are used 
+* \version 5.0
+*
+* This file provides project configuration macro definitions. They are used
 * in the scatter files and source code files.
-* 
+*
 ********************************************************************************
 * \copyright
-* (c) (2016-2021), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -38,7 +38,7 @@
 * system or application assumes all risk of such use and in doing so agrees to
 * indemnify Cypress against all liability.
 *******************************************************************************/
-    
+
 #ifndef DFU_MDK_COMMON_H_
 #define DFU_MDK_COMMON_H_
 
@@ -75,7 +75,7 @@
 #define CY_APP_RAM_COMMON_ADDR      0x08002000
 #define CY_APP_RAM_COMMON_LENGTH    0x00000400
 
-/* Note: the ram_appX regions has to be 0x400 aligned as they contain 
+/* Note: the ram_appX regions has to be 0x400 aligned as they contain
  * Interrupt Vector Table Remapped at the start.
  */
 #define CY_APP0_RAM_ADDR            (CY_APP_RAM_COMMON_ADDR + CY_APP_RAM_COMMON_LENGTH)

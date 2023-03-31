@@ -1,22 +1,22 @@
 /***************************************************************************//**
 * \file dfu_cm4_app1.icf
-* \version 4.20
+* \version 5.0
 *
 * The linker file for the GNU C compiler.
-* Used for the DFU SDK application 1 firmware project. 
-* Contains only CM4 sections (no section for the CM0p image that 
-* starts CM4 application 0). Application 1 is uploaded through 
+* Used for the DFU SDK application 1 firmware project.
+* Contains only CM4 sections (no section for the CM0p image that
+* starts CM4 application 0). Application 1 is uploaded through
 * Bootloader Host Tool using the generated cyadc2 file.
 *
 * \note
-* This linker file is generic and handles common use cases. Your project may not 
-* use each section defined in the linker file and then you may see warnings 
+* This linker file is generic and handles common use cases. Your project may not
+* use each section defined in the linker file and then you may see warnings
 * during the build process. Simply comment out or remove the relevant code
 * in the linker file.
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2021), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -67,7 +67,7 @@ define symbol __ICFEDIT_intvec_start__ = 0x00000000;
  */
 /* RAM */
 define symbol __ICFEDIT_region_IRAM1_comon_start__ = 0x08002000;
-define symbol __ICFEDIT_region_IRAM1_comon_end__   = 0x080023FF; 
+define symbol __ICFEDIT_region_IRAM1_comon_end__   = 0x080023FF;
 
 define symbol __ICFEDIT_region_IRAM1_app0_start__ = 0x08002400;
 define symbol __ICFEDIT_region_IRAM1_app0_end__   = 0x0800A3FF;
@@ -89,7 +89,7 @@ define symbol __ICFEDIT_region_IROM1_app1_end__   = 0x1005FFFF;
 define symbol __ICFEDIT_region_IROM1_boot_meta_start__ = 0x100FFA00;
 define symbol __ICFEDIT_region_IROM1_boot_meta_end__   = 0x100FFBFF;
 
-/* The following symbols define a 32K flash region used for EEPROM emulation. 
+/* The following symbols define a 32K flash region used for EEPROM emulation.
  * This region can also be used as the general purpose flash.
  * You can assign sections to this memory region for only one of the cores.
  * Note some middleware (e.g. BLE, Emulated EEPROM) can place their data into this memory region.

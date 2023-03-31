@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_i2c.c
-* \version 4.20
+* \version 5.0
 *
 * This file provides the source code of the DFU communication APIs
 * for the SCB Component I2C mode.
@@ -15,7 +15,7 @@
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2021), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -51,22 +51,6 @@
 #include "cy_scb_i2c.h"
 #include "cy_sysint.h"
 #include <string.h>
-
-#if defined(CY_PSOC_CREATOR_USED)
-
-    /* USER CONFIGURABLE: Change the header file based on the I2C component instance name */
-    #include "I2C.h"
-
-    /* USER CONFIGURABLE: Instance name of the I2C component */
-    #define CY_DFU_I2C_INSTANCE     I2C
-
-    #define JOIN_LEVEL2(a, b)       a ## b
-    #define JOIN_LEVEL1(a, b)       JOIN_LEVEL2(a, b)
-    #define CY_DFU_I2C_HW           JOIN_LEVEL1(CY_DFU_I2C_INSTANCE, _SCB__HW)
-    #define I2C_API(fn)             JOIN_LEVEL1(CY_DFU_I2C_INSTANCE, fn)
-    #define CY_DFU_I2C_CONTEXT      JOIN_LEVEL1(CY_DFU_I2C_INSTANCE, _context)
-
-#else /* ModusToolbox is used for the DFU transport configuration */
 
 /* Includes driver configuration */
 #include "cycfg_peripherals.h"
@@ -205,8 +189,6 @@ static void I2C_Start(void)
     Cy_SCB_I2C_Enable(CY_DFU_I2C_HW);
 }
 
-#endif  /* #if defined(CY_PSOC_CREATOR_USED) */
-
 
 /*******************************************************************************
 * Function Name: I2C_I2cCyBtldrCommStart
@@ -222,11 +204,7 @@ static void I2C_Start(void)
 *******************************************************************************/
 void I2C_I2cCyBtldrCommStart(void)
 {
-    #if defined(CY_PSOC_CREATOR_USED)
-        I2C_API(_Start)();
-    #else
-        I2C_Start();
-    #endif /* CY_PSOC_CREATOR_USED */
+    I2C_Start();
 
     Cy_SCB_I2C_SlaveConfigReadBuf(CY_DFU_I2C_HW, I2C_slaveTxBuf, 0U, &CY_DFU_I2C_CONTEXT);
     Cy_SCB_I2C_SlaveConfigWriteBuf(CY_DFU_I2C_HW, I2C_slaveRxBuf, I2C_BTLDR_SIZEOF_RX_BUFFER, &CY_DFU_I2C_CONTEXT);
@@ -245,7 +223,6 @@ void I2C_I2cCyBtldrCommStart(void)
 void I2C_I2cCyBtldrCommStop(void)
 {
     Cy_SCB_I2C_Disable(CY_DFU_I2C_HW, &CY_DFU_I2C_CONTEXT);
-    Cy_SCB_I2C_DeInit(CY_DFU_I2C_HW);
 }
 
 
@@ -415,80 +392,6 @@ static void I2C_I2CResposeInsert(uint32_t event)
         /* No action */
     }
 }
-
-
-#ifndef CY_DFU_I2C_TRANSPORT_DISABLE
-
-/*******************************************************************************
-* Function Name: Cy_DFU_TransportStart
-****************************************************************************//**
-*
-* This function documentation is part of the DFU SDK API, see the
-* cy_dfu.h file or DFU SDK API Reference Manual for details.
-*
-*******************************************************************************/
-void Cy_DFU_TransportStart(void)
-{
-    I2C_I2cCyBtldrCommStart();
-}
-
-
-/*******************************************************************************
-* Function Name: Cy_DFU_TransportStop
-****************************************************************************//**
-*
-* This function documentation is part of the DFU SDK API, see the
-* cy_dfu.h file or DFU SDK API Reference Manual for details.
-*
-*******************************************************************************/
-void Cy_DFU_TransportStop(void)
-{
-    I2C_I2cCyBtldrCommStop();
-}
-
-
-/*******************************************************************************
-* Function Name: Cy_DFU_TransportReset
-****************************************************************************//**
-*
-* This function documentation is part of the DFU SDK API, see the
-* cy_dfu.h file or DFU SDK API Reference Manual for details.
-*
-*******************************************************************************/
-void Cy_DFU_TransportReset(void)
-{
-    I2C_I2cCyBtldrCommReset();
-}
-
-
-/*******************************************************************************
-* Function Name: Cy_DFU_TransportRead
-****************************************************************************//**
-*
-* This function documentation is part of the DFU SDK API, see the
-* cy_dfu.h file or DFU SDK API Reference Manual for details.
-*
-*******************************************************************************/
-cy_en_dfu_status_t Cy_DFU_TransportRead(uint8_t buffer[], uint32_t size, uint32_t *count, uint32_t timeout)
-{
-    return (I2C_I2cCyBtldrCommRead(buffer, size, count, timeout));
-}
-
-
-/*******************************************************************************
-* Function Name: Cy_DFU_TransportWrite
-****************************************************************************//**
-*
-* This function documentation is part of the DFU SDK API, see the
-* cy_dfu.h file or DFU SDK API Reference Manual for details.
-*
-*******************************************************************************/
-cy_en_dfu_status_t Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size, uint32_t *count, uint32_t timeout)
-{
-    return (I2C_I2cCyBtldrCommWrite(buffer, size, count, timeout));
-}
-
-#endif /* CY_DFU_I2C_TRANSPORT_DISABLE */
 
 
 /* [] END OF FILE */

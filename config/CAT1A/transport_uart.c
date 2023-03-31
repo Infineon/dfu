@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_uart.c
-* \version 4.20
+* \version 5.0
 *
 * This file provides the source code of the DFU communication APIs
 * for the SCB Component UART mode.
@@ -15,7 +15,7 @@
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2021), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -57,23 +57,6 @@
 * E.g. baud_rate = 115200, UART_BYTE_TO_BYTE_TIMEOUT_US ~ 434
 */
 #define UART_BYTE_TO_BYTE_TIMEOUT_US  (868U)
-
-
-#if defined(CY_PSOC_CREATOR_USED)
-
-    /* USER CONFIGURABLE: UART component instance name */
-    #include "UART.h"
-
-    /* USER CONFIGURABLE: Instance name of the UART component */
-    #define CY_DFU_UART_INSTANCE    UART
-
-    #define UART_API(fn)            UART_API_IMPL(CY_DFU_UART_INSTANCE, fn)
-    #define UART_API_IMPL(a, b)     UART_API_IMPL2(a, b)
-    #define UART_API_IMPL2(a, b)    a ## b
-
-    #define CY_DFU_UART_HW          UART_API_IMPL(CY_DFU_UART_INSTANCE, _SCB__HW)
-
-#else
 
 /* Includes driver configuration */
 #include "cycfg_peripherals.h"
@@ -140,12 +123,11 @@ static void UART_Start(void)
     Cy_SCB_UART_Enable(CY_DFU_UART_HW);
 }
 
-#endif /* defined(CY_PSOC_CREATOR_USED) */
 
 /* Returns a number of bytes to copy into a DFU buffer */
 #define UART_BYTES_TO_COPY(actBufSize, bufSize) \
-                            ( ((uint32)(actBufSize) < (uint32)(bufSize)) ? \
-                                ((uint32) (actBufSize)) : ((uint32) (bufSize)) )
+                            ( ((uint32_t)(actBufSize) < (uint32_t)(bufSize)) ? \
+                                ((uint32_t) (actBufSize)) : ((uint32_t) (bufSize)) )
 
 /*******************************************************************************
 * Function Name: UART_UartCyBtldrCommStart
@@ -162,11 +144,7 @@ static void UART_Start(void)
 *******************************************************************************/
 void UART_UartCyBtldrCommStart(void)
 {
-#if defined(CY_PSOC_CREATOR_USED)
-    UART_API(_Start)();
-#else
     UART_Start();
-#endif /* defined(CY_PSOC_CREATOR_USED) */
 }
 
 
@@ -179,11 +157,7 @@ void UART_UartCyBtldrCommStart(void)
 *******************************************************************************/
 void UART_UartCyBtldrCommStop(void)
 {
-#if defined(CY_PSOC_CREATOR_USED)
-    UART_API(_Disable)();
-#else
     Cy_SCB_UART_Disable(CY_DFU_UART_HW, NULL);
-#endif /* defined(CY_PSOC_CREATOR_USED) */
 }
 
 
@@ -318,80 +292,6 @@ cy_en_dfu_status_t UART_UartCyBtldrCommWrite(uint8_t pData[], uint32_t size, uin
 
     return (status);
 }
-
-
-#ifndef CY_DFU_UART_TRANSPORT_DISABLE
-
-/*******************************************************************************
-* Function Name: Cy_DFU_TransportRead
-****************************************************************************//**
-*
-* This function documentation is part of the DFU SDK API, see the
-* cy_dfu.h file or DFU SDK API Reference Manual for details.
-*
-*******************************************************************************/
-cy_en_dfu_status_t Cy_DFU_TransportRead(uint8_t buffer[], uint32_t size, uint32_t *count, uint32_t timeout)
-{
-    return (UART_UartCyBtldrCommRead(buffer, size, count, timeout));
-}
-
-
-/*******************************************************************************
-* Function Name: Cy_DFU_TransportWrite
-****************************************************************************//**
-*
-* This function documentation is part of the DFU SDK API, see the
-* cy_dfu.h file or DFU SDK API Reference Manual for details.
-*
-*******************************************************************************/
-cy_en_dfu_status_t Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size, uint32_t *count, uint32_t timeout)
-{
-    return (UART_UartCyBtldrCommWrite(buffer, size, count, timeout));
-}
-
-
-/*******************************************************************************
-* Function Name: Cy_DFU_TransportReset
-****************************************************************************//**
-*
-* This function documentation is part of the DFU SDK API, see the
-* cy_dfu.h file or DFU SDK API Reference Manual for details.
-*
-*******************************************************************************/
-void Cy_DFU_TransportReset(void)
-{
-    UART_UartCyBtldrCommReset();
-}
-
-
-/*******************************************************************************
-* Function Name: Cy_DFU_TransportStart
-****************************************************************************//**
-*
-* This function documentation is part of the DFU SDK API, see the
-* cy_dfu.h file or DFU SDK API Reference Manual for details.
-*
-*******************************************************************************/
-void Cy_DFU_TransportStart(void)
-{
-    UART_UartCyBtldrCommStart();
-}
-
-
-/*******************************************************************************
-* Function Name: Cy_DFU_TransportStop
-****************************************************************************//**
-*
-* This function documentation is part of the DFU SDK API, see the
-* cy_dfu.h file or DFU SDK API Reference Manual for details.
-*
-*******************************************************************************/
-void Cy_DFU_TransportStop(void)
-{
-    UART_UartCyBtldrCommStop();
-}
-
-#endif /* CY_DFU_UART_TRANSPORT_DISABLE */
 
 
 /* [] END OF FILE */

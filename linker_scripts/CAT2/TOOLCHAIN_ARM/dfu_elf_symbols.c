@@ -1,6 +1,6 @@
 /*******************************************************************************
 * \file dfu_elf_symbols.c
-* \version 4.20
+* \version 5.0
 *
 * This file provides inline assembly to add symbols in the an ELF file required
 * by CyMCUElfTool to generate correct CYACD2 image.
@@ -11,7 +11,7 @@
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2021), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials

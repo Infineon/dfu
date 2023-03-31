@@ -1,4 +1,4 @@
-# Device Firmware Update (DFU) Middleware Library 4.20
+# Device Firmware Update (DFU) Middleware Library 5.0
 
 ## What's Included?
 
@@ -7,38 +7,38 @@ and the [DFU API Reference](https://infineon.github.io/dfu/dfu_sdk_api_reference
 The revision history of the DFU middleware is also available in the [API Reference Changelog](https://infineon.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html#group_dfu_changelog).
 New in this release:
 
-* Added USB CDC transport configuration for the CAT2 PDL.
-* Documentation improvement.
+* Added support of the MCUBoot flow
+* Added support of the transport switching at the run time
 
 ## Defect Fixes
 
-* Fixed the DFU Host Tool timeout-error for the CAT1A SPI transport.
-See [API Reference Changelog](https://infineon.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html#group_dfu_changelog) for details.
+No fixes
 
 ## Known Issues
 
-Several template files (transport_uart.c, transport_spi.c) use the old type
-uint32, which was deprecated and removed in mtb-pdl-cat2 v2.0.0. Now, using
-mtb-pdl-cat2 v2.0.0 or later causes a build error of an/the undeclared type.
-To avoid this, change the uint32 type to uint32_t or use mtb-pdl-cat2 v1.x.
+No known issues
 
 ## Supported Software and Tools
 
 This version of the DFU middleware was validated for compatibility with the following Software and Tools (add and remove information as needed):
 
 | Software and Tools                        | Version |
-| :---                                      | :----:  |
-| ModusToolbox Software Environment         | 2.20    |
-| - ModusToolbox Device Configurator        | 2.20    |
-| - Device Firmware Update Host Tool        | 1.3     |
-| - CyMCUElfTool                            | 1.0     |
-| GCC Compiler                              | 9.3.1   |
-| IAR Compiler                              | 8.42.2  |
-| ARM Compiler 6                            | 6.13    |
+| :---------------------------------------  | :----:  |
+| ModusToolbox Software Environment         | 3.0     |
+|  - ModusToolbox Device Configurator       | 2.20    |
+|  - Device Firmware Update Host Tool       | 2.0     |
+|  - CyMCUElfTool                           | 1.0     |
+| GCC Compiler                              | 10.3.1  |
+| IAR Compiler                              | 9.30.1  |
+| ARM Compiler 6                            | 6.16    |
+| mtb-hal-cat1                              | 2.3.0   |
+
+Usage of the CAT1 HAL flow requires mtb-hal-cat1 2.3.0 or higher.
+Usage of the MCUBoot flow requires DFU Host Tool 2.0 or higher.
 
 ## More information
 
 * [README.md](./README.md)
 
 ---
-© Cypress Semiconductor Corporation (an Infineon company), 2021.
+© Cypress Semiconductor Corporation (an Infineon company), 2023.
