@@ -50,7 +50,7 @@ in the linker_script directory.
 
 ## Quick Start
 
-The [Quick Start section of the DFU Middleware API Reference Guide](https://infineon.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html#section_dfu_quick_start)
+The [Quick Start section of the DFU Middleware API Reference Guide](https://infineon.github.io/dfu/html/index.html#section_dfu_quick_start)
 describes step-by-step instructions to set up a DFU application.
 
 ## More information
@@ -58,7 +58,7 @@ describes step-by-step instructions to set up a DFU application.
 For more information, refer to the following links:
 
 - [DFU Middleware Library Release Notes](./RELEASE.md)
-- [DFU Middleware Library API Reference](https://infineon.github.io/dfu/dfu_sdk_api_reference_manual/html/index.html)
+- [DFU Middleware Library API Reference](https://infineon.github.io/dfu/html/index.html)
 - [AN213924](https://www.infineon.com/an213924) DFU SDK User Guide
 - [CE213903](https://www.infineon.com/ce213903) DFU SDK Basic Communication Code Examples
 - [CAT1 Peripheral Driver Library API Reference](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/index.html)
