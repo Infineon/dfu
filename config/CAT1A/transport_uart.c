@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_uart.c
-* \version 5.0
+* \version 5.1
 *
 * This file provides the source code of the DFU communication APIs
 * for the SCB Component UART mode.
@@ -56,7 +56,9 @@
 * Set it to approximately to (50e6 / baud_rate) value in microseconds.
 * E.g. baud_rate = 115200, UART_BYTE_TO_BYTE_TIMEOUT_US ~ 434
 */
-#define UART_BYTE_TO_BYTE_TIMEOUT_US  (868U)
+#ifndef UART_BYTE_TO_BYTE_TIMEOUT_US
+    #define UART_BYTE_TO_BYTE_TIMEOUT_US  (868U)
+#endif /* UART_BYTE_TO_BYTE_TIMEOUT_US */
 
 /* Includes driver configuration */
 #include "cycfg_peripherals.h"

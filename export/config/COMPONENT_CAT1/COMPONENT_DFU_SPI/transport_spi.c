@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_spi.c
-* \version 5.0
+* \version 5.1
 *
 * This file provides the source code of the DFU communication APIs
 * for the SPI driver from HAL.

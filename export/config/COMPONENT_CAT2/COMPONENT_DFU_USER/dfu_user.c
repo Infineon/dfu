@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file dfu_user.c
-* \version 5.0
+* \version 5.1
 *
 * This file provides the custom API for a firmware application with
 * DFU SDK.

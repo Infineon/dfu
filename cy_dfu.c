@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cy_dfu.c
-* \version 5.0
+* \version 5.1
 *
 *  This file provides the implementation of DFU Middleware.
 *
@@ -659,6 +659,8 @@ CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.6','Casting int to pointer is safe a
     }
     return (status);
 #else
+    CY_UNUSED_PARAMETER(appId);
+    CY_UNUSED_PARAMETER(params);
     return CY_DFU_SUCCESS;
 #endif /*CY_DFU_FLOW == CY_DFU_BASIC_FLOW*/
 }

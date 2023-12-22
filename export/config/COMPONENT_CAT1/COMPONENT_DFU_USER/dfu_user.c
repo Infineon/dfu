@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file dfu_user.c
-* \version 5.0
+* \version 5.1
 *
 * This file provides the custom API for a firmware application with
 * DFU SDK.
@@ -63,9 +63,15 @@
     #include "transport_usb_cdc.h"
 #endif  /* COMPONENT_DFU_USB_CDC */
 
+#ifdef COMPONENT_DFU_EMUSB_CDC
+    #include "transport_emusb_cdc.h"
+#endif  /* COMPONENT_DFU_EMUSB_CDC */
+
 
 /* Global flash object */
-static cyhal_flash_t flash_obj;
+static cyhal_nvm_t flash_obj;
+
+static cy_en_dfu_transport_t selectedInterface = CY_DFU_UART;
 
 #ifdef CY_IP_M7CPUSS
     static const cyhal_flash_block_info_t* blocks_info;
@@ -73,25 +79,28 @@ static cyhal_flash_t flash_obj;
 #endif
 
 #if CY_DFU_FLOW == CY_DFU_BASIC_FLOW
-/*
-* The DFU SDK metadata initial value is placed here
-* Note: the number of elements equal to the number of the app multiplies by 2
-*       because of the two fields per app plus one element for the CRC-32C field.
-*/
-CY_SECTION(".cy_boot_metadata") __USED
-static const uint32_t cy_dfu_metadata[CY_FLASH_SIZEOF_ROW / sizeof(uint32_t)] =
-{
-    CY_DFU_APP0_VERIFY_START, CY_DFU_APP0_VERIFY_LENGTH, /* The App0 base address and length */
-    CY_DFU_APP1_VERIFY_START, CY_DFU_APP1_VERIFY_LENGTH, /* The App1 base address and length */
-    0U                                                             /* The rest does not matter     */
-};
+    /*
+    * The DFU SDK metadata initial value is placed here
+    * Note: the number of elements equal to the number of the app multiplies by 2
+    *       because of the two fields per app plus one element for the CRC-32C field.
+    */
+    CY_SECTION(".cy_boot_metadata") __USED
+    static const uint32_t cy_dfu_metadata[CY_FLASH_SIZEOF_ROW / sizeof(uint32_t)] =
+    {
+        CY_DFU_APP0_VERIFY_START, CY_DFU_APP0_VERIFY_LENGTH, /* The App0 base address and length */
+        CY_DFU_APP1_VERIFY_START, CY_DFU_APP1_VERIFY_LENGTH, /* The App1 base address and length */
+        0U                                                             /* The rest does not matter     */
+    };
 #endif /*CY_DFU_FLOW == CY_DFU_BASIC_FLOW*/
 
-static uint32_t IsMultipleOf(uint32_t value, uint32_t multiple);
+
+static bool IsMultipleOf(uint32_t value, uint32_t multiple);
+static bool AddressValid(uint32_t address, cy_stc_dfu_params_t *params);
+
+
 #if CY_DFU_FLOW == CY_DFU_BASIC_FLOW
-static void GetStartEndAddress(uint32_t appId, uint32_t *startAddress, uint32_t *endAddress);
-#endif /*CY_DFU_FLOW == CY_DFU_BASIC_FLOW*/
-static cy_en_dfu_transport_t selectedInterface = CY_DFU_UART;
+    static void GetStartEndAddress(uint32_t appId, uint32_t *startAddress, uint32_t *endAddress);
+#endif /* CY_DFU_FLOW == CY_DFU_BASIC_FLOW */
 
 
 /*******************************************************************************
@@ -104,44 +113,81 @@ static cy_en_dfu_transport_t selectedInterface = CY_DFU_UART;
 * \param value      value that will be checked
 * \param multiple   value with which value is checked
 *
-* \return 1 - value is multiple of parameter multiple, else 0
+* \return True - value is multiple of parameter multiple, else False
 *
 *******************************************************************************/
-static uint32_t IsMultipleOf(uint32_t value, uint32_t multiple)
+static bool IsMultipleOf(uint32_t value, uint32_t multiple)
 {
-    return ( ((value % multiple) == 0U)? 1UL : 0UL);
+    return ((value % multiple) == 0U);
 }
 
-#if CY_DFU_FLOW == CY_DFU_BASIC_FLOW
+
 /*******************************************************************************
-* Function Name: GetStartEndAddress
+* Function Name: AddressValid
 ****************************************************************************//**
 *
-* This internal function returns start and end address of application
+* Internal function to validate address
 *
-* \param appId          The application number
-* \param startAddress   The pointer to a variable where an application start
-*                       address is stored
-* \param endAddress     The pointer to a variable where a size of application
-*                       area is stored.
+* \param address    The address to check.
+* \param params     The pointer to a DFU parameters structure, see \ref cy_stc_dfu_params_t.
+*
+* \return True - address valid
 *
 *******************************************************************************/
-static void GetStartEndAddress(uint32_t appId, uint32_t *startAddress, uint32_t *endAddress)
+static bool AddressValid(uint32_t address, cy_stc_dfu_params_t *params)
 {
-    uint32_t verifyStart;
-    uint32_t verifySize;
+    bool addrValid = true;
 
-    (void)Cy_DFU_GetAppMetadata(appId, &verifyStart, &verifySize);
-
-#if (CY_DFU_APP_FORMAT == CY_DFU_SIMPLIFIED_APP)
-    *startAddress = verifyStart - CY_DFU_SIGNATURE_SIZE;
-    *endAddress = verifyStart + verifySize;
-#else
-    *startAddress = verifyStart;
-    *endAddress = verifyStart + verifySize + CY_DFU_SIGNATURE_SIZE;
+#if CY_DFU_FLOW == CY_DFU_BASIC_FLOW
+    addrValid = ((((CY_FLASH_BASE + CY_DFU_APP0_VERIFY_LENGTH)) <= address) &&
+                                (address < (CY_FLASH_BASE + CY_FLASH_SIZE))) ||
+                ((CY_EM_EEPROM_BASE <= address) &&
+                        (address < (CY_EM_EEPROM_BASE + CY_EM_EEPROM_SIZE)));
+    CY_UNUSED_PARAMETER(params);
+#else /* MCUBoot flow*/
+    #if defined CY_FLASH_BASE
+        addrValid = (CY_FLASH_BASE <= address) &&
+                                (address < (CY_FLASH_BASE + CY_FLASH_SIZE));
+    #else
+        CY_UNUSED_PARAMETER(address);
+    #endif
+    CY_UNUSED_PARAMETER(params);
 #endif
+
+    return addrValid;
 }
-#endif /*CY_DFU_FLOW == CY_DFU_BASIC_FLOW*/
+
+
+#if CY_DFU_FLOW == CY_DFU_BASIC_FLOW
+    /*******************************************************************************
+    * Function Name: GetStartEndAddress
+    ****************************************************************************//**
+    *
+    * This internal function returns start and end address of application
+    *
+    * \param appId          The application number
+    * \param startAddress   The pointer to a variable where an application start
+    *                       address is stored
+    * \param endAddress     The pointer to a variable where a size of application
+    *                       area is stored.
+    *
+    *******************************************************************************/
+    static void GetStartEndAddress(uint32_t appId, uint32_t *startAddress, uint32_t *endAddress)
+    {
+        uint32_t verifyStart;
+        uint32_t verifySize;
+
+        (void)Cy_DFU_GetAppMetadata(appId, &verifyStart, &verifySize);
+
+    #if (CY_DFU_APP_FORMAT == CY_DFU_SIMPLIFIED_APP)
+        *startAddress = verifyStart - CY_DFU_SIGNATURE_SIZE;
+        *endAddress = verifyStart + verifySize;
+    #else
+        *startAddress = verifyStart;
+        *endAddress = verifyStart + verifySize + CY_DFU_SIGNATURE_SIZE;
+    #endif
+    }
+#endif /* CY_DFU_FLOW == CY_DFU_BASIC_FLOW */
 
 
 /*******************************************************************************
@@ -157,22 +203,21 @@ cy_en_dfu_status_t Cy_DFU_WriteData (uint32_t address, uint32_t length, uint32_t
 {
     cy_en_dfu_status_t status = CY_DFU_SUCCESS;
 
-    /* Check if the address  and length are valid
+    /* Check if the address is inside the valid range */
+    if(!AddressValid(address, params))
+    {
+        status = CY_DFU_ERROR_ADDRESS;
+    }
+
+    /* Check if the length is valid
      * Note Length = 0 is valid for erase command */
-    if ( (IsMultipleOf(address, CY_FLASH_SIZEOF_ROW) == 0U) ||
-         ( (length != CY_FLASH_SIZEOF_ROW) && ( (ctl & CY_DFU_IOCTL_ERASE) == 0U) ) )
+    if ( (IsMultipleOf(address, CY_NVM_SIZEOF_ROW) == 0U) ||
+         ( (length != CY_NVM_SIZEOF_ROW) && ( (ctl & CY_DFU_IOCTL_ERASE) == 0U) ) )
     {
         status = CY_DFU_ERROR_LENGTH;
     }
-#if CY_DFU_FLOW == CY_DFU_BASIC_FLOW
-    /* application flash limits */
-    /* Note that App0 is out of range */
-    const uint32_t minUFlashAddress = CY_FLASH_BASE + CY_DFU_APP0_VERIFY_LENGTH;
-    const uint32_t maxUFlashAddress = CY_FLASH_BASE + CY_FLASH_SIZE;
-    /* EM_EEPROM Limits*/
-    const uint32_t minEmEepromAddress = CY_EM_EEPROM_BASE;
-    const uint32_t maxEmEepromAddress = CY_EM_EEPROM_BASE + CY_EM_EEPROM_SIZE;
 
+#if CY_DFU_FLOW == CY_DFU_BASIC_FLOW
     uint32_t app = Cy_DFU_GetRunningApp();
     uint32_t startAddress;
     uint32_t endAddress;
@@ -184,94 +229,92 @@ cy_en_dfu_status_t Cy_DFU_WriteData (uint32_t address, uint32_t length, uint32_t
     {   /* It is forbidden to overwrite the currently running application */
         status = CY_DFU_ERROR_ADDRESS;
     }
-#if CY_DFU_OPT_GOLDEN_IMAGE
-    if (status == CY_DFU_SUCCESS)
-    {
-        uint8_t goldenImages[] = { CY_DFU_GOLDEN_IMAGE_IDS() };
-        uint32_t count = sizeof(goldenImages) / sizeof(goldenImages[0]);
-        uint32_t idx;
-        for (idx = 0U; idx < count; ++idx)
-        {
-            app = goldenImages[idx];
-            GetStartEndAddress(app, &startAddress, &endAddress);
 
-            if ( (startAddress <= address) && (address < endAddress) )
+    #if CY_DFU_OPT_GOLDEN_IMAGE
+        if (status == CY_DFU_SUCCESS)
+        {
+            uint8_t goldenImages[] = { CY_DFU_GOLDEN_IMAGE_IDS() };
+            uint32_t count = sizeof(goldenImages) / sizeof(goldenImages[0]);
+            uint32_t idx;
+            for (idx = 0U; idx < count; ++idx)
             {
-                status = Cy_DFU_ValidateApp(app, params);
-                status = (status == CY_DFU_SUCCESS) ? CY_DFU_ERROR_ADDRESS : CY_DFU_SUCCESS;
-                break;
+                app = goldenImages[idx];
+                GetStartEndAddress(app, &startAddress, &endAddress);
+
+                if ( (startAddress <= address) && (address < endAddress) )
+                {
+                    status = Cy_DFU_ValidateApp(app, params);
+                    status = (status == CY_DFU_SUCCESS) ? CY_DFU_ERROR_ADDRESS : CY_DFU_SUCCESS;
+                    break;
+                }
             }
         }
-    }
-#endif /* #if CY_DFU_OPT_GOLDEN_IMAGE != 0 */
-
-    /* Check if the address is inside the valid range */
-    if ( ( (minUFlashAddress <= address) && (address < maxUFlashAddress) )
-      || ( (minEmEepromAddress <= address) && (address < maxEmEepromAddress) )  )
-    {   /* Do nothing, this is an allowed memory range to update to */
-    }
-    else
-    {
-        status = CY_DFU_ERROR_ADDRESS;
-    }
+    #endif /* #if CY_DFU_OPT_GOLDEN_IMAGE != 0 */
 #endif /*CY_DFU_FLOW == CY_DFU_BASIC_FLOW*/
 
     if (status == CY_DFU_SUCCESS)
     {
-        cy_rslt_t fstatus = CY_RSLT_SUCCESS;
         if ((ctl & CY_DFU_IOCTL_ERASE) != 0U)
         {
-            (void) memset(params->dataBuffer, 0, CY_FLASH_SIZEOF_ROW);
+            (void) memset(params->dataBuffer, 0, CY_NVM_SIZEOF_ROW);
         }
 
-    #ifdef CY_IP_M7CPUSS
+        cy_rslt_t fstatus = CY_RSLT_SUCCESS;
 
-        uint32_t nvm_sector_size = 0U;
-        uint32_t int_status;
-        for (uint32_t block_num = 0; block_num < blocks_count; block_num++)
-        {
-            uint32_t flash_start_address = (&blocks_info[block_num])->start_address;
-            uint32_t flash_size          = (&blocks_info[block_num])->size;
-            if((flash_start_address <= address) && (address < flash_start_address + flash_size))
+        #ifdef CY_IP_M7CPUSS
+
+            uint32_t nvm_sector_size = 0U;
+            uint32_t int_status;
+            for (uint32_t block_num = 0; block_num < blocks_count; block_num++)
             {
-                nvm_sector_size = (&blocks_info[0])->sector_size;
-                break;
+                uint32_t flash_start_address = (&blocks_info[block_num])->start_address;
+                uint32_t flash_size          = (&blocks_info[block_num])->size;
+                if((flash_start_address <= address) && (address < flash_start_address + flash_size))
+                {
+                    nvm_sector_size = (&blocks_info[0])->sector_size;
+                    break;
+                }
             }
-        }
-        if(nvm_sector_size == 0U)
-        {
-            CY_ASSERT(false);
-        }
-        int_status = Cy_SysLib_EnterCriticalSection();
-        if(address % nvm_sector_size == 0)
-        {
-            fstatus = cyhal_flash_erase(&flash_obj, address);
-        }
-        if(fstatus == CY_RSLT_SUCCESS)
-        {
-            fstatus = cyhal_flash_program(&flash_obj, address, (uint32_t*)params->dataBuffer);
-        }
-        else
-        {
-            status = CY_DFU_ERROR_DATA;
-            CY_DFU_LOG_ERR("Flash erase failed on [0x%X]: module=0x%X code=0x%X", (unsigned int)address,
-                                (unsigned int)CY_RSLT_GET_MODULE(fstatus),
-                                (unsigned int)CY_RSLT_GET_CODE(fstatus));
-        }
-        Cy_SysLib_ExitCriticalSection(int_status);
-    #else
-        fstatus = cyhal_flash_write(&flash_obj, address, (uint32_t*)params->dataBuffer);
-    #endif /* CY_IP_M7CPUSS */
+            if(nvm_sector_size == 0U)
+            {
+                CY_ASSERT(false);
+            }
+            int_status = Cy_SysLib_EnterCriticalSection();
+            if(address % nvm_sector_size == 0)
+            {
+                fstatus = cyhal_flash_erase(&flash_obj, address);
+            }
+            if(fstatus == CY_RSLT_SUCCESS)
+            {
+                fstatus = cyhal_flash_program(&flash_obj, address, (uint32_t*)params->dataBuffer);
+            }
+            else
+            {
+                status = CY_DFU_ERROR_DATA;
+                CY_DFU_LOG_ERR("Flash erase failed: module=0x%X code=0x%X",
+                                    (unsigned int)CY_RSLT_GET_MODULE(fstatus),
+                                    (unsigned int)CY_RSLT_GET_CODE(fstatus));
+            }
+            Cy_SysLib_ExitCriticalSection(int_status);
+        #else
+            fstatus = cyhal_flash_write(&flash_obj, address, (uint32_t*)params->dataBuffer);
+        #endif /* CY_IP_M7CPUSS */
         if((CY_DFU_SUCCESS == status) && (fstatus != CY_RSLT_SUCCESS))
         {
             status = CY_DFU_ERROR_DATA;
-        	CY_DFU_LOG_ERR("Flash write failed: fstatus 0x%X, address 0x%X", (unsigned int)fstatus, (unsigned int)address);
+            CY_DFU_LOG_ERR("Flash write failed: fstatus 0x%X ", (unsigned int)fstatus);
         }
         else
         {
             status = CY_DFU_SUCCESS;
         }
     }
+
+    if (CY_DFU_SUCCESS != status)
+    {
+        CY_DFU_LOG_ERR("Write operation failed at address 0x%X", (unsigned int)address);
+    }
+
     return (status);
 }
 
@@ -290,32 +333,16 @@ cy_en_dfu_status_t Cy_DFU_ReadData (uint32_t address, uint32_t length, uint32_t 
     cy_en_dfu_status_t status = CY_DFU_SUCCESS;
 
     /* Check if the length is valid */
-    if (IsMultipleOf(length, CY_FLASH_SIZEOF_ROW) == 0U)
+    if (IsMultipleOf(length, CY_NVM_SIZEOF_ROW) == 0U)
     {
         status = CY_DFU_ERROR_LENGTH;
     }
 
-#if CY_DFU_FLOW == CY_DFU_BASIC_FLOW
-    /* application flash limits */
-    /* Note that App0 is out of range */
-    const uint32_t minUFlashAddress = CY_FLASH_BASE + CY_DFU_APP0_VERIFY_LENGTH;
-    const uint32_t maxUFlashAddress = CY_FLASH_BASE + CY_FLASH_SIZE;
-    /* EM_EEPROM Limits*/
-    const uint32_t minEmEepromAddress = CY_EM_EEPROM_BASE;
-    const uint32_t maxEmEepromAddress = CY_EM_EEPROM_BASE + CY_EM_EEPROM_SIZE;
-
-
-
     /* Check if the address is inside the valid range */
-    if ( ( (minUFlashAddress <= address) && (address < maxUFlashAddress) )
-      || ( (minEmEepromAddress <= address) && (address < maxEmEepromAddress) )  )
-    {   /* Do nothing, this is an allowed memory range to update to */
-    }
-    else
+    if(!AddressValid(address, params))
     {
         status = CY_DFU_ERROR_ADDRESS;
     }
-#endif /*CY_DFU_FLOW == CY_DFU_BASIC_FLOW*/
 
     /* Read or Compare */
     if (status == CY_DFU_SUCCESS)
@@ -328,7 +355,7 @@ cy_en_dfu_status_t Cy_DFU_ReadData (uint32_t address, uint32_t length, uint32_t 
         else
         {
             status = ( memcmp(params->dataBuffer, (const void *)address, length) == 0 )
-                     ? CY_DFU_SUCCESS : CY_DFU_ERROR_VERIFY;
+                    ? CY_DFU_SUCCESS : CY_DFU_ERROR_VERIFY;
         }
     }
     return (status);
@@ -347,10 +374,8 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport)
 {
     selectedInterface = transport;
 
-    cyhal_flash_t      flash_obj;
-
     /* Initialize flash object */
-    cy_rslt_t result = cyhal_flash_init(&flash_obj);
+    cy_rslt_t result = cyhal_nvm_init(&flash_obj);
     if (result != CY_RSLT_SUCCESS)
     {
         CY_DFU_LOG_ERR("HAL FLash Initialization failed");
@@ -391,6 +416,11 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport)
             USB_CDC_CyBtldrCommStart();
             break;
     #endif /* COMPONENT_DFU_USB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_CDC
+        case CY_DFU_USB_CDC:
+            USB_CDC_CyBtldrCommStart();
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_CDC */
 
         default:
             /* Selected interface in not applicable */
@@ -411,7 +441,7 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport)
 void Cy_DFU_TransportStop()
 {
     /* Release flash object */
-    cyhal_flash_free(&flash_obj);
+    cyhal_nvm_free(&flash_obj);
 
     switch (selectedInterface)
     {
@@ -436,6 +466,11 @@ void Cy_DFU_TransportStop()
             USB_CDC_CyBtldrCommStop();
             break;
     #endif /* COMPONENT_DFU_USB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_CDC
+        case CY_DFU_USB_CDC:
+            USB_CDC_CyBtldrCommStop();
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_CDC */
 
         default:
             /* Selected interface in not applicable */
@@ -478,6 +513,11 @@ void Cy_DFU_TransportReset(void)
             USB_CDC_CyBtldrCommReset();
             break;
     #endif /* COMPONENT_DFU_USB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_CDC
+        case CY_DFU_USB_CDC:
+            USB_CDC_CyBtldrCommReset();
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_CDC */
 
         default:
             /* Selected interface in not applicable */
@@ -522,6 +562,11 @@ cy_en_dfu_status_t Cy_DFU_TransportRead(uint8_t buffer[], uint32_t size, uint32_
             status = USB_CDC_CyBtldrCommRead(buffer, size, count, timeout);
             break;
     #endif /* COMPONENT_DFU_USB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_CDC
+        case CY_DFU_USB_CDC:
+            status = USB_CDC_CyBtldrCommRead(buffer, size, count, timeout);
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_CDC */
 
         default:
             /* Selected interface in not applicable */
@@ -568,6 +613,11 @@ cy_en_dfu_status_t Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size, uint32
             status = USB_CDC_CyBtldrCommWrite(buffer, size, count, timeout);
             break;
     #endif /* COMPONENT_DFU_USB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_CDC
+        case CY_DFU_USB_CDC:
+            status = USB_CDC_CyBtldrCommWrite(buffer, size, count, timeout);
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_CDC */
 
         default:
             /* Selected interface in not applicable */

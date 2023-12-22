@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file dfu_cm0p_app0.ld
-* \version 5.0
+* \version 5.1
 *
 * Linker file for the GNU C compiler.
 * Used for the DFU SDK application 1 firmware project.

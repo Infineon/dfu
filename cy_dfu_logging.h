@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cy_dfu_logging.h
-* \version 5.0
+* \version 5.1
 *
 * Provides API for DFU logging.
 *

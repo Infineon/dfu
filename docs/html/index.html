@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Device Firmware Update (DFU) Middleware Library 5.0</title>
+<title>Device Firmware Update (DFU) Middleware Library 5.1</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -31,7 +31,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><a href="https://www.infineon.com/"><img alt="Logo" src="logo.png"/></a></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Device Firmware Update (DFU) Middleware Library 5.0</div>
+   <div id="projectname">Device Firmware Update (DFU) Middleware Library 5.1</div>
   </td>
  </tr>
  </tbody>
@@ -87,7 +87,7 @@ $(document).ready(function(){initNavTree('index.html','');});
 
 <div class="header">
   <div class="headertitle">
-<div class="title">Device Firmware Update (DFU) Middleware Library 5.0 Documentation</div>  </div>
+<div class="title">Device Firmware Update (DFU) Middleware Library 5.1 Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="section_mainpage_overview"></a>
@@ -116,6 +116,7 @@ General Description</h1>
 <li>Supports many application images - the number of applications is limited only by the metadata size; each image can be an application loader, for example, 512-byte metadata supports up to 63 applications</li>
 <li>Supports customization</li>
 <li>Supports the CRC-32 checksum to validate data.</li>
+<li>Supports extend of the host command/response protocol with custom commands.</li>
 </ul>
 <h1><a class="anchor" id="section_dfu_quick_start"></a>
 Quick Start Guide</h1>
@@ -149,7 +150,8 @@ STEP 1: Setup Loader Application QSG_DFU_App0_I2C</h3>
 <dl class="section note"><dt>Note</dt><dd>For ARM compiler, copy additional <b>dfu_common.h</b> and <b>dfu_elf_symbols.c</b> files to the project. Those files are located in the same folder as the selected linker file.</dd></dl>
 </li>
 <li>Update project's Makefile to add DFU user and I2C transport components : locate the <b>COMPONENTS</b> variable and add <b>DFU_USER</b> and <b>DFU_I2C</b>: <div class="fragment"><div class="line">COMPONENTS=DFU_USER DFU_I2C </div></div><!-- fragment --></li>
-<li><p class="startli">For CY8CKIT-149 kit, configure the I2C communication interface. </p><dl class="section warning"><dt>Warning</dt><dd>Not needed for the CAT1A device - configuration is done by HAL.</dd></dl>
+<li><p class="startli">For CY8CKIT-149 kit, configure the I2C communication interface. </p><dl class="section warning"><dt>Warning</dt><dd>Not needed for the CAT1 devices - configuration is done by HAL.<br />
+ Please check/setup the required pins assignments in the BSP.</dd></dl>
 <p>Open the ModusToolbox(TM) Device Configurator and enable SCB on the Peripheral tab under Communication section with the following parameter.</p>
 <p class="startli">For CY8CKIT-149, SCB 1 is connected to the KitProg. </p><table class="markdownTable">
 <tr class="markdownTableHead">
@@ -175,7 +177,7 @@ STEP 1: Setup Loader Application QSG_DFU_App0_I2C</h3>
 <h3><a class="anchor" id="ssection_dfu_step_2"></a>
 STEP 2: Update Loader QSG_DFU_App0_I2C main.c</h3>
 <ol type="1">
-<li>Include a DFU reset handler to start the appropriate application after a reset: <div class="fragment"><div class="line"><span class="comment">/*******************************************************************************</span></div><div class="line"><span class="comment">* Function Name: Cy_OnResetUser</span></div><div class="line"><span class="comment">********************************************************************************</span></div><div class="line"><span class="comment">*</span></div><div class="line"><span class="comment">*  This function is called at the start of Reset_Handler().</span></div><div class="line"><span class="comment">*  DFU requires it to call Cy_DFU_OnResetApp0() in app#0.</span></div><div class="line"><span class="comment">*</span></div><div class="line"><span class="comment">*******************************************************************************/</span></div><div class="line"><span class="keywordtype">void</span> Cy_OnResetUser(<span class="keywordtype">void</span>)</div><div class="line">{</div><div class="line">    <a class="code" href="group__group__dfu__functions__app.html#ga6e0defdaf9adb2e5663dc6144dc6823a">Cy_DFU_OnResetApp0</a>();</div><div class="line">}</div></div><!-- fragment --></li>
+<li>Include a DFU reset handler to start the appropriate application after a reset: <div class="fragment"><div class="line"><span class="comment">/*******************************************************************************</span></div><div class="line"><span class="comment">* Function Name: Cy_OnResetUser</span></div><div class="line"><span class="comment">********************************************************************************</span></div><div class="line"><span class="comment">*</span></div><div class="line"><span class="comment">*  This function is called at the start of Reset_Handler().</span></div><div class="line"><span class="comment">*  DFU requires it to call Cy_DFU_OnResetApp0() in app#0.</span></div><div class="line"><span class="comment">*</span></div><div class="line"><span class="comment">*******************************************************************************/</span></div><div class="line"><span class="keywordtype">void</span> Cy_OnResetUser(<span class="keywordtype">void</span>)</div><div class="line">{</div><div class="line"><span class="preprocessor">#if CY_DFU_FLOW == CY_DFU_BASIC_FLOW</span></div><div class="line">    <a class="code" href="group__group__dfu__functions__app.html#ga6e0defdaf9adb2e5663dc6144dc6823a">Cy_DFU_OnResetApp0</a>();</div><div class="line"><span class="preprocessor">#endif </span><span class="comment">/* CY_DFU_FLOW == CY_DFU_BASIC_FLOW */</span><span class="preprocessor"></span></div><div class="line">}</div></div><!-- fragment --></li>
 <li>Initialize the variables and call the DFU initialization function: <div class="fragment"><div class="line">    <span class="comment">/*</span></div><div class="line"><span class="comment">    * Used to count seconds</span></div><div class="line"><span class="comment">    */</span></div><div class="line">    uint32_t count = 0;</div><div class="line"></div><div class="line">    <span class="comment">/* Status codes for DFU API */</span></div><div class="line">    <a class="code" href="group__group__dfu__enums.html#gafcff247e9cb8dc6c1282873b0d2dae1b">cy_en_dfu_status_t</a> status;</div><div class="line"></div><div class="line">    <span class="comment">/*</span></div><div class="line"><span class="comment">    * DFU state, one of the:</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_NONE</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_UPDATING</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_FINISHED</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_FAILED</span></div><div class="line"><span class="comment">    */</span></div><div class="line">    uint32_t state;</div><div class="line"></div><div class="line">    <span class="comment">/* Timeout for Cy_DFU_Continue(), in milliseconds */</span></div><div class="line">    <span class="keyword">const</span> uint32_t paramsTimeout = 20u;</div><div class="line"></div><div class="line">    <span class="comment">/* Buffer to store DFU commands */</span></div><div class="line">    CY_ALIGN(4) static uint8_t buffer[<a class="code" href="group__group__dfu__macro__config.html#ga01f0e598d60b05879166f93ef38cecee">CY_DFU_SIZEOF_DATA_BUFFER</a>];</div><div class="line"></div><div class="line">    <span class="comment">/* Buffer for DFU data packets for transport API */</span></div><div class="line">    CY_ALIGN(4) static uint8_t packet[<a class="code" href="group__group__dfu__macro__config.html#ga21b70d16eb321a6d2010b92c8584b782">CY_DFU_SIZEOF_CMD_BUFFER</a> ];</div><div class="line"></div><div class="line">    <span class="comment">/* DFU params, used to configure DFU */</span></div><div class="line">    <a class="code" href="group__group__dfu__data__structs.html#structcy__stc__dfu__params__t">cy_stc_dfu_params_t</a> dfuParams;</div><div class="line"></div><div class="line">    <span class="comment">/* Initialize dfuParams structure */</span></div><div class="line">    dfuParams.timeout          = paramsTimeout;</div><div class="line">    dfuParams.dataBuffer       = &amp;buffer[0];</div><div class="line">    dfuParams.packetBuffer     = &amp;packet[0];</div><div class="line"></div><div class="line">    status = <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line"></div><div class="line">    <span class="comment">/* Stop program execution if DFU init failed */</span></div><div class="line">    CY_ASSERT(<a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23">CY_DFU_SUCCESS</a> == status);</div><div class="line"></div><div class="line">    <span class="comment">/* Set up the device based on configurator selections */</span></div><div class="line">    init_cycfg_all();</div><div class="line"></div><div class="line">    <span class="comment">/* enable interrupts */</span></div><div class="line">    __enable_irq();</div></div><!-- fragment --></li>
 <li>Initialize the DFU transport layer: <div class="fragment"><div class="line">    <span class="comment">/* Initialize DFU communication */</span></div><div class="line">    <a class="code" href="group__group__dfu__functions__transport.html#gae72c860849c0ede5b2a34eaea7acbb64">Cy_DFU_TransportStart</a>(<a class="code" href="group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137a74f139ec8e316257d10b026bedb02bdd">CY_DFU_I2C</a>);</div></div><!-- fragment --></li>
 <li>Update the main loop with the Host Command/Response protocol processing: <div class="fragment"><div class="line">        status = <a class="code" href="group__group__dfu__functions.html#ga6514a9d999be746edc406fcf764d07f5">Cy_DFU_Continue</a>(&amp;state, &amp;dfuParams);</div><div class="line">        ++count;</div><div class="line"></div><div class="line">        <span class="keywordflow">if</span> (state == <a class="code" href="group__group__dfu__macro__state.html#ga75352e8101b5fe7c4de37f86b06f1d18">CY_DFU_STATE_FINISHED</a>)</div><div class="line">        {</div><div class="line">           <span class="comment">/* Finished loading the application image */</span></div><div class="line"></div><div class="line">           <span class="comment">/* Validate DFU application, if it is valid then switch to it */</span></div><div class="line">           status = <a class="code" href="group__group__dfu__functions__app.html#gae4eed95b94cdb006c79e2036f01d7fc4">Cy_DFU_ValidateApp</a>(1u, &amp;dfuParams);</div><div class="line">           <span class="keywordflow">if</span> (status == <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23">CY_DFU_SUCCESS</a>)</div><div class="line">           {</div><div class="line">               <a class="code" href="group__group__dfu__functions__transport.html#gaa979bcdabc0bb7dc392be24a25986ca9">Cy_DFU_TransportStop</a>();</div><div class="line">               <a class="code" href="group__group__dfu__functions__app.html#ga462d2b960d0a1420bd365cbb12173266">Cy_DFU_ExecuteApp</a>(1u);</div><div class="line">           }</div><div class="line">           <span class="keywordflow">else</span> <span class="keywordflow">if</span> (status == <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba5ec17ddd14f6e0a3ac1ad893d3cef065">CY_DFU_ERROR_VERIFY</a>)</div><div class="line">           {</div><div class="line">               <span class="comment">/*</span></div><div class="line"><span class="comment">               * Restarts loading, an alternatives are to Halt MCU here</span></div><div class="line"><span class="comment">               * or switch to the other app if it is valid.</span></div><div class="line"><span class="comment">               * Error code may be handled here, i.e. print to debug UART.</span></div><div class="line"><span class="comment">               */</span></div><div class="line">               status = <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line">               <a class="code" href="group__group__dfu__functions__transport.html#gaf440cbe4ded2f8090c51fe7c23a00e8c">Cy_DFU_TransportReset</a>();</div><div class="line">           }</div><div class="line">        }</div><div class="line">        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (state == <a class="code" href="group__group__dfu__macro__state.html#gab0ee6f2a05184dcf2ded6f3e1c6ff74b">CY_DFU_STATE_FAILED</a>)</div><div class="line">        {</div><div class="line">           <span class="comment">/* An error has happened during the loading process */</span></div><div class="line">           <span class="comment">/* Handle it here */</span></div><div class="line"></div><div class="line">           <span class="comment">/* In this Code Example just restart loading process */</span></div><div class="line">           status = <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line">           <a class="code" href="group__group__dfu__functions__transport.html#gaf440cbe4ded2f8090c51fe7c23a00e8c">Cy_DFU_TransportReset</a>();</div><div class="line">        }</div><div class="line">        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (state == <a class="code" href="group__group__dfu__macro__state.html#gac52da0b4bc0d00ccef1726e7ab639817">CY_DFU_STATE_UPDATING</a>)</div><div class="line">        {</div><div class="line">           uint32_t passed5seconds = (count &gt;= (5000ul/paramsTimeout)) ? 1u : 0u;</div><div class="line">           <span class="comment">/*</span></div><div class="line"><span class="comment">           * if no command has been received during 5 seconds when the loading</span></div><div class="line"><span class="comment">           * has started then restart loading.</span></div><div class="line"><span class="comment">           */</span></div><div class="line">           <span class="keywordflow">if</span> (status == <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23">CY_DFU_SUCCESS</a>)</div><div class="line">           {</div><div class="line">               count = 0u;</div><div class="line">           }</div><div class="line">           <span class="keywordflow">else</span> <span class="keywordflow">if</span> (status == <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1badccb00d92664320cfae8448b0811eb09">CY_DFU_ERROR_TIMEOUT</a>)</div><div class="line">           {</div><div class="line">               <span class="keywordflow">if</span> (passed5seconds != 0u)</div><div class="line">               {</div><div class="line">                   count = 0u;</div><div class="line">                   <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line">                   <a class="code" href="group__group__dfu__functions__transport.html#gaf440cbe4ded2f8090c51fe7c23a00e8c">Cy_DFU_TransportReset</a>();</div><div class="line">               }</div><div class="line">           }</div><div class="line">           <span class="keywordflow">else</span></div><div class="line">           {</div><div class="line">               count = 0u;</div><div class="line">               <span class="comment">/* Delay because Transport still may be sending error response to a host */</span></div><div class="line">               Cy_SysLib_Delay(paramsTimeout);</div><div class="line">               <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line">               <a class="code" href="group__group__dfu__functions__transport.html#gaf440cbe4ded2f8090c51fe7c23a00e8c">Cy_DFU_TransportReset</a>();</div><div class="line">           }</div><div class="line">        }</div></div><!-- fragment --> <dl class="section warning"><dt>Warning</dt><dd>An additional timeout in the main loop can break the DFU transfer. For example, CY8CKIT-149 Hello_World template application uses the 0.5 seconds delay for the LED blinking. This needs to be disabled during the DFU image transfer.</dd></dl>
@@ -253,8 +255,8 @@ STEP1: Projects preparation.</h3>
 <ol type="1">
 <li>Create a ModusToolbox(TM) application for the CAT1A or CAT1C devices. For example, the CY8CKIT-062-WIFI-BT kit can be used as CAT1A or KIT_XMC72_EVK as CAT1C. Create a new application in the ModusToolbox(TM) IDE using an appropriate BSP and an empty application as a template (Empty App). Name it "DFU_App0". For details, refer to the ModusToolbox(TM) 3.x IDE Quick Start Guide.</li>
 <li>Include the DFU middleware into the project using the ModusToolbox(TM) Library Manager.</li>
-<li>Add DFU configuration files <b>dfu_user.c</b> and <b>dfu_user.h</b> and transport files <b>transport_&lt;interface_name&gt;.h</b> and <b>transport_&lt;interface_name&gt;.c</b>. In this guide, the I2C interface is used and transport_i2c.h and <b>transport_i2c.c</b> need to be added. (Use the path in Makefile, copy the files manually)</li>
-<li>Update project's Makefile to use MCUBoot flow. <div class="fragment"><div class="line">DEFINES=<a class="code" href="group__group__dfu__macro__config.html#ga7dc6b3120ee56d0f36285f3c1e8dec2d">CY_DFU_FLOW</a>=<a class="code" href="group__group__dfu__macro__config.html#ga1fd9a1a5a6386dc3d01e9b381d97ecdb">CY_DFU_MCUBOOT_FLOW</a> </div></div><!-- fragment --> Add the DFU transport components to enable the transport interface(s). In our case, I2C is used: <div class="fragment"><div class="line">COMPONENTS=DFU_I2C </div></div><!-- fragment --></li>
+<li>Add the DFU transport components to project's Makefile to enable the transport interface(s). In our case, I2C is used: <div class="fragment"><div class="line">COMPONENTS += DFU_I2C </div></div><!-- fragment --></li>
+<li>Update project's Makefile to use MCUBoot flow: <div class="fragment"><div class="line">DEFINES += <a class="code" href="group__group__dfu__macro__config.html#ga7dc6b3120ee56d0f36285f3c1e8dec2d">CY_DFU_FLOW</a>=<a class="code" href="group__group__dfu__macro__config.html#ga1fd9a1a5a6386dc3d01e9b381d97ecdb">CY_DFU_MCUBOOT_FLOW</a> </div></div><!-- fragment --> <div class="fragment"><div class="line">COMPONENTS += DFU_USER </div></div><!-- fragment --></li>
 </ol>
 <h3><a class="anchor" id="subsubsection_qsg_mcuboot_s2"></a>
 STEP2: Add DFU logic to main.c</h3>
@@ -359,7 +361,8 @@ Linker scripts</h2>
 <p>Their difference from the default startup linker scripts is similar to the DFU SDK GCC's linker scripts described above.</p>
 <h2><a class="anchor" id="group_dfu_mtb_cfg"></a>
 Use of the ModusToolbox(TM) tools for HW initialization</h2>
-<p>The following section describes the communication interfaces settings in the Device Configurator required to use the included with DFU middleware communication files with the DFU Host tool. </p><dl class="section warning"><dt>Warning</dt><dd>The ModusToolbox(TM) Device Configurator is not used for templates based on the HAL drivers.</dd></dl>
+<p>The following section describes the communication interfaces settings in the Device Configurator required to use the included with DFU middleware communication files with the DFU Host tool. </p><dl class="section warning"><dt>Warning</dt><dd>The ModusToolbox(TM) Device Configurator is not used for templates based on the HAL drivers.<br />
+ Please check/setup the required pins assignments in the BSP.</dd></dl>
 <dl class="section user"><dt>I2C</dt><dd><table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Parameter name  </th><th class="markdownTableHeadNone">Value   </th></tr>
@@ -392,7 +395,7 @@ Use of the ModusToolbox(TM) tools for HW initialization</h2>
 <tr class="markdownTableBody" class="markdownTableRowEven">
 <td class="markdownTableBodyNone">SCLK Mode  </td><td class="markdownTableBodyNone">Any, Sub Mode in DFU Host tool should be the same   </td></tr>
 <tr class="markdownTableBody" class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Data Rate  </td><td class="markdownTableBodyNone">1000 kbps (For other data rates, adjust the value of the SPI_SPI_BYTE_TO_BYTE macro in the transport_spi.c file)   </td></tr>
+<td class="markdownTableBodyNone">Data Rate  </td><td class="markdownTableBodyNone">1000 kbps (For other data rates, adjust the value of the SPI_BYTE_TO_BYTE macro in the transport_spi.c file)   </td></tr>
 <tr class="markdownTableBody" class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Bit Order  </td><td class="markdownTableBodyNone">Any, Shift direction in DFU Host tool should be the same   </td></tr>
 <tr class="markdownTableBody" class="markdownTableRowOdd">
@@ -436,7 +439,12 @@ Firmware Update via I2C</h2>
 Firmware Update via UART</h2>
 <p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for basic steps how to setup a DFU project. Specific steps for the UART transport support:</p><ul>
 <li>Add UART transport component in project's Makefile: locate <b>COMPONENTS</b> variable and add <b>DFU_UART</b>: <div class="fragment"><div class="line">COMPONENTS+=DFU_UART </div></div><!-- fragment --></li>
-<li>Select and configure the SCB block using the ModusToolbox(TM) Device Configurator for templates based on the PDL drivers see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox(TM) tools for HW initialization</a> or manually using the configuration structures.</li>
+<li>For templates based on the PDL drivers:<ul>
+<li>Select and configure the SCB block using the ModusToolbox(TM) Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox(TM) tools for HW initialization</a> or manually using the configuration structures.</li>
+<li>Adjust value of the UART_BYTE_TO_BYTE_TIMEOUT_US constant to align with UART speed in the transport_uart.c file.</li>
+<li>Adjust UART interrupt priority in the UART_INTR_PRIORITY in the transport_uart.c file.</li>
+</ul>
+</li>
 <li>Build and program a project into the device.</li>
 <li>Open the DFU Host Tool. Select the UART interface. Set the UART baud rate according to the SCB UART setup in the previous step.</li>
 <li>Select the *.cyacd2 application image and upload to the device.</li>
@@ -445,20 +453,31 @@ Firmware Update via UART</h2>
 Firmware Update via SPI</h2>
 <p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for basic steps how to set up a DFU project. The steps for the SPI transport support:</p><ul>
 <li>Add SPI transport component in project's Makefile: locate <b>COMPONENTS</b> variable and add <b>DFU_SPI</b>: <div class="fragment"><div class="line">COMPONENTS+=DFU_SPI </div></div><!-- fragment --></li>
-<li>Select and configure the SCB block using the ModusToolbox(TM) Device Configurator for templates based on the PDL drivers see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox(TM) tools for HW initialization</a> or manually using the configuration structures.</li>
+<li>For templates based on the PDL drivers:<ul>
+<li>Select and configure the SCB block using the ModusToolbox(TM) Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox(TM) tools for HW initialization</a> or manually using the configuration structures.</li>
+<li>Adjust value of the SPI_BYTE_TO_BYTE constant to align with SPI speed in the transport_spi.c file.</li>
+<li>Check the value of the CY_SPI_SLAVE_SELECT in the transport_spi.c file.</li>
+<li>Adjust SPI interrupt priority in the SPI_INTR_PRIORITY in the transport_spi.c file.</li>
+</ul>
+</li>
 <li>Build and program a project into the device.</li>
 <li>Open the DFU Host Tool. Select the SPI interface. Set SPI mode, shift the direction and speed according to the SCB SPI setup in the previous step.</li>
 <li>Select the *.cyacd2 application image and upload to the device.</li>
 </ul>
 <h2><a class="anchor" id="group_dfu_ucase_usb"></a>
-Firmware Update via USB CDC transports</h2>
+Firmware Update via USB CDC transport</h2>
 <p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for basic steps how to setup a DFU project. Specific steps for the USB transport support:</p><ul>
 <li>Add USB_CDC transport component in project's Makefile: locate <b>COMPONENTS</b> variable and add <b>DFU_USB_CDC</b>: <div class="fragment"><div class="line">COMPONENTS+=DFU_USB_CDC </div></div><!-- fragment --></li>
 <li>Enable and configure the USB Device block using the ModusToolbox(TM) Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox(TM) tools for HW initialization</a> or manually using the configuration structures.</li>
-<li>Generate USB descriptors and USB Middleware structures using the USB Configurator. Open the USB configuration file (cycfg_usb_cdc.cyusbdev) in the DFU \config\CAT1A folder, then click Save to generate configuration files (cycfg_usbdev.c and cycfg_usbdev.h). These files must be included into the build flow (see USB Middleware API Reference <a class="el" href="index.html#group_dfu_more_info">More Information</a>).</li>
+<li>Generate USB descriptors and USB Middleware structures using the USB Configurator. Open the USB configuration file (cycfg_usb_cdc.cyusbdev) in the DFU \export\config\COMPONENT_CAT1\COMPONENT_DFU_USB_CDC folder, then click Save to generate configuration files (cycfg_usbdev.c and cycfg_usbdev.h). These files must be included into the build flow (see USB Middleware API Reference <a class="el" href="index.html#group_dfu_more_info">More Information</a>).</li>
 <li>Build and program a project into the device. Connect your Host to the USB device.</li>
 <li>For the USB CDC class: open the DFU Host Tool. Select the UART interface, because the Host recognizes the USB device as a virtual UART (the name is "DFU USB CDC transport"). UART settings: baud rate - 115200, data bits - 8, stop bits - 1, parity - None.</li>
 <li>Select the *.cyacd2 application image and upload to the device.</li>
+</ul>
+<h2><a class="anchor" id="group_dfu_ucase_emusb"></a>
+Firmware Update via emUSB CDC transport</h2>
+<p>Specific steps for the emUSB transport support:</p><ul>
+<li>Add emUSB_CDC transport components to the project's Makefile: <div class="fragment"><div class="line">COMPONENTS+=USBD_BASE </div></div><!-- fragment --> <div class="fragment"><div class="line">COMPONENTS+=DFU_EMUSB_CDC </div></div><!-- fragment --> <div class="fragment"><div class="line">COMPONENTS+=SOFTFP </div></div><!-- fragment --></li>
 </ul>
 <h2><a class="anchor" id="group_dfu_ucase_checksum"></a>
 Change checksum types</h2>
@@ -503,6 +522,12 @@ Changelog</h1>
 <table class="doxtable">
 <tr>
 <th>Version</th><th>Changes</th><th>Reason for Change </th></tr>
+<tr>
+<td rowspan="3">5.1 </td><td>Added USB CDC transport based on the emUSB-Device middleware for the CAT1A device </td><td>Extending the current feature </td></tr>
+<tr>
+<td>Minor updates in the templates </td><td>Improved the templates usability  </td></tr>
+<tr>
+<td>Corrected the name of the UART object used in the cyhal_uart_set_baud() function </td><td>Now, works correctly the custom baud rate configuring in the UART transport  </td></tr>
 <tr>
 <td rowspan="5">5.0 </td><td>Add support of the MCUBoot flow. </td><td>New functionality.  </td></tr>
 <tr>
@@ -578,7 +603,7 @@ More Information</h1>
 <div id="nav-path" class="navpath">
     <ul>
         <li class="footer">
-            Generated for <b>Device Firmware Update (DFU) Middleware Library 5.0</b> by <b>Cypress Semiconductor Corporation</b>.
+            Generated for <b>Device Firmware Update (DFU) Middleware Library 5.1</b> by <b>Cypress Semiconductor Corporation</b>.
             All rights reserved.
         </li>
     </ul>

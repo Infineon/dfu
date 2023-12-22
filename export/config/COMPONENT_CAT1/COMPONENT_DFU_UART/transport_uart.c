@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_uart.c
-* \version 5.0
+* \version 5.1
 *
 * This file provides the source code of the DFU communication APIs
 * for the UART driver from HAL.
@@ -123,7 +123,7 @@ void UART_UartCyBtldrCommStart(void)
         CY_ASSERT(CY_RSLT_SUCCESS == rslt);
 
     #if (DFU_UART_BAUD != CYHAL_UART_DEFAULT_BAUD)
-        rslt = cyhal_uart_set_baud(obj, DFU_UART_BAUD, NULL);
+        rslt = cyhal_uart_set_baud(&uart_obj, DFU_UART_BAUD, NULL);
         CY_ASSERT(CY_RSLT_SUCCESS == rslt);
     #endif
 

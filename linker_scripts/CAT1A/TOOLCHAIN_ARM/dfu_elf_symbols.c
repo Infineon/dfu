@@ -1,6 +1,6 @@
 /*******************************************************************************
 * \file dfu_elf_symbols.c
-* \version 5.0
+* \version 5.1
 *
 * This file provides inline assembly to add symbols in the an ELF file required
 * by CyMCUElfTool to generate correct CYACD2 image.

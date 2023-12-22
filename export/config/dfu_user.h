@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file dfu_user.h
-* \version 5.0
+* \version 5.1
 *
 * This file provides declarations that can be modified by the user but
 * are used by the DFU SDK.
@@ -46,6 +46,7 @@
 
 #include "cy_flash.h"
 
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -60,60 +61,38 @@ extern "C" {
     #define CY_DFU_LOG_LEVEL CY_DFU_LOG_LEVEL_OFF /**< Defines log level */
 #endif
 
+#define CY_DFU_BASIC_FLOW               (0U) /**< Basic Bootloader flow includes
+                                              * application transfer and bootload. */
+#define CY_DFU_MCUBOOT_FLOW             (1U) /**< MCUBoot compatibility flow includes
+                                              * only application transport. */
+
+/**
+ * Configuration option to select DFU flow. Possible options are:
+ * - \ref CY_DFU_BASIC_FLOW - supported for the CAT1A and CAT2 devices
+ * - \ref CY_DFU_MCUBOOT_FLOW - supported for the CAT1A and CAT1C devices */
 #ifndef CY_DFU_FLOW
-/** Configuration option to select DFU flow */
-#define CY_DFU_FLOW                     (CY_DFU_BASIC_FLOW)
+    #if defined COMPONENT_CAT1A || defined COMPONENT_CAT2
+        #define CY_DFU_FLOW                     (CY_DFU_BASIC_FLOW)
+    #else
+        #define CY_DFU_FLOW                     (CY_DFU_MCUBOOT_FLOW)
+    #endif
 #endif /* CY_DFU_FLOW */
 
-#define CY_DFU_BASIC_FLOW               (0U) /**< Option 1: DFU Basic flow */
-#define CY_DFU_MCUBOOT_FLOW             (1U) /**< Option 2: DFU Transport for MCUBoot flow */
-
-#if (CY_DFU_FLOW == CY_DFU_MCUBOOT_FLOW) && !defined CY_DFU_PRODUCT
-#define CY_DFU_PRODUCT          (0x01020304)  /**< Default value for Product ID*/
-#warning CY_DFU_PRODUCT is set to default value
-#endif /* (CY_DFU_FLOW == CY_DFU_MCUBOOT_FLOW) && !defined CY_DFU_PRODUCT */
+/** Define program row size of the Non-Volatile memory */
+#ifndef CY_NVM_SIZEOF_ROW
+    #ifdef  CY_FLASH_SIZEOF_ROW
+        #define CY_NVM_SIZEOF_ROW       CY_FLASH_SIZEOF_ROW
+    #else
+        #define CY_NVM_SIZEOF_ROW       (512)
+    #endif /* CY_FLASH_SIZEOF_ROW */
+#endif /* CY_NVM_SIZEOF_ROW */
 
 /** The size of a buffer to hold DFU commands */
 /* 16 bytes is a maximum overhead of a DFU packet and additional data for the Program Data command */
-#define CY_DFU_SIZEOF_CMD_BUFFER  (CY_FLASH_SIZEOF_ROW + 16U)
+#define CY_DFU_SIZEOF_CMD_BUFFER  (CY_NVM_SIZEOF_ROW + 16U)
 
 /** The size of a buffer to hold an NVM row of data to write or verify */
-#define CY_DFU_SIZEOF_DATA_BUFFER (CY_FLASH_SIZEOF_ROW + 16U)
-
-/**
-* Set to non-zero for the DFU SDK Program Data command to check
-* if the Golden image is going to be overwritten while updating.
-*/
-#ifndef CY_DFU_OPT_GOLDEN_IMAGE
-    #define CY_DFU_OPT_GOLDEN_IMAGE    (0)
-#endif /* CY_DFU_OPT_GOLDEN_IMAGE */
-
-/**
-* List of Golden Image Application IDs.
-* Here "Golden Image Application" means an application that cannot be changed with
-* CommandProgramData()
-*
-* Usage. Define the list of Golden Image Application IDs without enclosing
-* parenthesis, e.g.
-* \code #define CY_DFU_GOLDEN_IMAGE_IDS()     0U, 1U, 3U \endcode
-* later it is used in cy_dfu.c file:
-* \code uint8_t goldenImages[] = { CY_DFU_GOLDEN_IMAGE_IDS() }; \endcode
-*/
-#ifndef CY_DFU_GOLDEN_IMAGE_IDS
-    #define CY_DFU_GOLDEN_IMAGE_IDS()  0U
-#endif /* CY_DFU_GOLDEN_IMAGE_IDS */
-
-/**
-* The number of applications in the metadata,
-* for 512 bytes in a flash row - 63 is the maximum possible value,
-* because 4 bytes are reserved for the entire metadata CRC.
-*
-* The smallest metadata size if CY_DFU_MAX_APPS * 8 (bytes per one app) + 4 (bytes for CRC-32C)
-*/
-#ifndef CY_DFU_MAX_APPS
-    #define CY_DFU_MAX_APPS            (2U)
-#endif /* CY_DFU_MAX_APPS */
-
+#define CY_DFU_SIZEOF_DATA_BUFFER (CY_NVM_SIZEOF_ROW + 16U)
 
 /** A non-zero value enables the Verify Data DFU command  */
 #ifndef CY_DFU_OPT_VERIFY_DATA
@@ -141,29 +120,10 @@ extern "C" {
 * \note that \c packetBuffer in this case must be 4 bytes aligned, as
 * \c dataBuffer is required to be 4 bytes aligned.
 */
+
 #ifndef CY_DFU_OPT_SEND_DATA
     #define CY_DFU_OPT_SEND_DATA       (1)
 #endif /* CY_DFU_OPT_SEND_DATA */
-
-/** A non-zero value enables the Get Metadata DFU command */
-#ifndef CY_DFU_OPT_GET_METADATA
-    #define CY_DFU_OPT_GET_METADATA    (1)
-#endif /* CY_DFU_OPT_GET_METADATA */
-
-/** A non-zero value enables the Set EI Vector DFU command */
-#ifndef CY_DFU_OPT_SET_EIVECTOR
-    #define CY_DFU_OPT_SET_EIVECTOR    (0)
-#endif /* CY_DFU_OPT_SET_EIVECTOR */
-
-/** A non-zero value allows writing metadata with the Set App Metadata DFU command. */
-#ifndef CY_DFU_METADATA_WRITABLE
-    #define CY_DFU_METADATA_WRITABLE   (1)
-#endif /* CY_DFU_METADATA_WRITABLE */
-
-/** Non-zero value enables the usage of hardware Crypto API */
-#ifndef CY_DFU_OPT_CRYPTO_HW
-    #define CY_DFU_OPT_CRYPTO_HW       (0)
-#endif /* CY_DFU_OPT_CRYPTO_HW */
 
 /** A non-zero value enables the usage of CRC-16 for DFU packet verification */
 #ifndef CY_DFU_OPT_PACKET_CRC
@@ -175,11 +135,71 @@ extern "C" {
     #define CY_DFU_OPT_CUSTOM_CMD      (0)
 #endif /* CY_DFU_OPT_CUSTOM_CMD */
 
+/**
+* The number of applications in the metadata,
+* for 512 bytes in a flash row - 63 is the maximum possible value,
+* because 4 bytes are reserved for the entire metadata CRC.
+*
+* The smallest metadata size if CY_DFU_MAX_APPS * 8 (bytes per one app) + 4 (bytes for CRC-32C)
+*/
+#ifndef CY_DFU_MAX_APPS
+    #define CY_DFU_MAX_APPS            (2U)
+#endif /* CY_DFU_MAX_APPS */
 
-/** \} group_dfu_macro_config */
+/* MCUBoot compatibility flow specific constants */
+#if (CY_DFU_FLOW == CY_DFU_MCUBOOT_FLOW) && !defined(CY_DOXYGEN)
+    #if !defined CY_DFU_PRODUCT
+        #define CY_DFU_PRODUCT          (0x01020304)  /**< Default value for Product ID*/
+        #warning CY_DFU_PRODUCT is set to default value
+    #endif /* !defined CY_DFU_PRODUCT */
+#endif /* CY_DFU_FLOW == CY_DFU_MCUBOOT_FLOW */
 
+/* Basic bootloader flow specific constants */
+#if (CY_DFU_FLOW == CY_DFU_BASIC_FLOW) || defined(CY_DOXYGEN)
 
-#if (CY_DFU_FLOW == CY_DFU_BASIC_FLOW) && !defined(CY_DOXYGEN)
+    /**
+    * Set to non-zero for the DFU SDK Program Data command to check
+    * if the Golden image is going to be overwritten while updating.
+    */
+    #ifndef CY_DFU_OPT_GOLDEN_IMAGE
+        #define CY_DFU_OPT_GOLDEN_IMAGE    (0)
+    #endif /* CY_DFU_OPT_GOLDEN_IMAGE */
+
+    /**
+    * List of Golden Image Application IDs.
+    * Here "Golden Image Application" means an application that cannot be changed with
+    * CommandProgramData()
+    *
+    * Usage. Define the list of Golden Image Application IDs without enclosing
+    * parenthesis, e.g.
+    * \code #define CY_DFU_GOLDEN_IMAGE_IDS()     0U, 1U, 3U \endcode
+    * later it is used in cy_dfu.c file:
+    * \code uint8_t goldenImages[] = { CY_DFU_GOLDEN_IMAGE_IDS() }; \endcode
+    */
+    #ifndef CY_DFU_GOLDEN_IMAGE_IDS
+        #define CY_DFU_GOLDEN_IMAGE_IDS()  0U
+    #endif /* CY_DFU_GOLDEN_IMAGE_IDS */
+
+    /** A non-zero value enables the Get Metadata DFU command */
+    #ifndef CY_DFU_OPT_GET_METADATA
+        #define CY_DFU_OPT_GET_METADATA    (1)
+    #endif /* CY_DFU_OPT_GET_METADATA */
+
+    /** A non-zero value enables the Set EI Vector DFU command */
+    #ifndef CY_DFU_OPT_SET_EIVECTOR
+        #define CY_DFU_OPT_SET_EIVECTOR    (0)
+    #endif /* CY_DFU_OPT_SET_EIVECTOR */
+
+    /** A non-zero value allows writing metadata with the Set App Metadata DFU command. */
+    #ifndef CY_DFU_METADATA_WRITABLE
+        #define CY_DFU_METADATA_WRITABLE   (1)
+    #endif /* CY_DFU_METADATA_WRITABLE */
+
+    /** Non-zero value enables the usage of hardware Crypto API */
+    #ifndef CY_DFU_OPT_CRYPTO_HW
+        #define CY_DFU_OPT_CRYPTO_HW       (0)
+    #endif /* CY_DFU_OPT_CRYPTO_HW */
+
     #if defined(__ARMCC_VERSION)
         #include "dfu_common.h"
 
@@ -209,6 +229,8 @@ extern "C" {
         #error "Not implemented for this compiler"
     #endif /* defined(__CC_ARM) */
 #endif /* (CY_DFU_FLOW == CY_DFU_BASIC_FLOW) && !defined(CY_DOXYGEN) */
+
+/** \} group_dfu_macro_config */
 
 #if defined(__cplusplus)
 }

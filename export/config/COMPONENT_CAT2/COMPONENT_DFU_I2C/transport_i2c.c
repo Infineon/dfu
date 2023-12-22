@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_i2c.c
-* \version 5.0
+* \version 5.1
 *
 * This file provides the source code of the DFU communication APIs
 * for the SCB Component I2C mode.
@@ -104,8 +104,10 @@ bool I2C_initVar = false;
 * Interrupt configuration
 *******************************************************************************/
 
-/** Interrupt priority for Cortex-M4. Valid range: 0 to 7. */
- #define I2C_INTR_PRIORITY               (3U)
+/** Interrupt priority for Cortex-M0. Valid range: 0 to 3. */
+#ifndef I2C_INTR_PRIORITY
+    #define I2C_INTR_PRIORITY               (3U)
+#endif /* I2C_INTR_PRIORITY */
 
 
 /*******************************************************************************

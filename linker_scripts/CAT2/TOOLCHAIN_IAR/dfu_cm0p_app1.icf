@@ -1,6 +1,6 @@
 /*******************************************************************************
 * \file dfu_cm0p_app1.icf
-* \version 5.0
+* \version 5.1
 *
 * Linker file for the IAR compiler.
 * Used for the DFU SDK application 1 firmware project.

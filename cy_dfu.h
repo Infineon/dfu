@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cy_dfu.h
-* \version 5.0
+* \version 5.1
 *
 * Provides API declarations for the DFU Middleware.
 *
@@ -79,13 +79,14 @@
 *   overwrites the working image
 * - Switches applications - passes parameters in RAM when switching
 *   applications
-* - Supports encrypted image files - transfers encrypted images without 
+* - Supports encrypted image files - transfers encrypted images without
 *   decrypting in the middle
 * - Supports many application images - the number of applications is limited only by
 *   the metadata size; each image can be an application loader, for example,
 *   512-byte metadata supports up to 63 applications
 * - Supports customization
 * - Supports the CRC-32 checksum to validate data.
+* - Supports extend of the host command/response protocol with custom commands.
 *
 ********************************************************************************
 * \section section_dfu_quick_start Quick Start Guide
@@ -117,7 +118,7 @@
 * 1. Create a project for CY8CKIT-062-WIFI-BT or CY8CKIT-149 with the DFU loader
 *    application using the Hello_World template application ("Getting started"
 *    section in the Project Creator).
-*    Name it "QSG_DFU_App0_I2C". For details, refer to the ModusToolbox(TM) 3.x 
+*    Name it "QSG_DFU_App0_I2C". For details, refer to the ModusToolbox(TM) 3.x
 *    IDE Quick Start Guide.
 * 2. Create a project for the DFU loadable application in the same way and name
 *    it "QSG_DFU_App1_Hello_World".
@@ -148,7 +149,8 @@
 *    \code COMPONENTS=DFU_USER DFU_I2C \endcode
 *
 * 3. For CY8CKIT-149 kit, configure  the I2C communication interface.
-*    \warning Not needed for the CAT1A device - configuration is done by HAL.
+*    \warning Not needed for the CAT1 devices - configuration is done by HAL.\n
+*     Please check/setup the required pins assignments in the BSP.
 *
 *    Open the ModusToolbox(TM) Device Configurator and enable SCB on the Peripheral
 *    tab under Communication section with the following parameter.
@@ -294,17 +296,13 @@
 * 2. Include the DFU middleware into the project using the ModusToolbox(TM) Library
 *    Manager.
 *
-* 3. Add DFU configuration files **dfu_user.c** and **dfu_user.h** and transport
-*   files **transport_<interface_name>.h** and  **transport_<interface_name>.c**.
-*   In this guide, the I2C interface is used and transport_i2c.h and
-*   **transport_i2c.c** need to be added.
-*   (Use the path in Makefile, copy the files manually)
+* 3. Add the DFU transport components to project's Makefile to enable the transport interface(s).
+*    In our case, I2C is used:
+*   \code COMPONENTS += DFU_I2C \endcode
 *
-* 4. Update project's Makefile to use MCUBoot flow.
-*   \code DEFINES=CY_DFU_FLOW=CY_DFU_MCUBOOT_FLOW \endcode
-*   Add the DFU transport components to enable the transport interface(s). In our case,
-*   I2C is used:
-*   \code COMPONENTS=DFU_I2C \endcode
+* 4. Update project's Makefile to use MCUBoot flow:
+*   \code DEFINES += CY_DFU_FLOW=CY_DFU_MCUBOOT_FLOW \endcode
+*   \code COMPONENTS += DFU_USER \endcode
 *
 * \subsubsection subsubsection_qsg_mcuboot_s2 STEP2: Add DFU logic to main.c
 *
@@ -530,7 +528,9 @@
 ********************************************************************************
 * The following section describes the communication interfaces settings in the Device Configurator
 * required to use the included with DFU middleware communication files with the DFU Host tool.
-* \warning The ModusToolbox(TM) Device Configurator is not used for templates based on the HAL drivers.
+* \warning The ModusToolbox(TM) Device Configurator is not used for templates based on the HAL drivers.\n
+*  Please check/setup the required pins assignments in the BSP.
+*
 *
 * \par I2C
 *      Parameter name         | Value                                |
@@ -551,7 +551,7 @@
 *      Mode                   | Slave
 *      Sub Mode               | Motorola
 *      SCLK Mode              | Any, Sub Mode in DFU Host tool should be the same
-*      Data Rate              | 1000 kbps (For other data rates, adjust the value of the SPI_SPI_BYTE_TO_BYTE macro in the transport_spi.c file)
+*      Data Rate              | 1000 kbps (For other data rates, adjust the value of the SPI_BYTE_TO_BYTE macro in the transport_spi.c file)
 *      Bit Order              | Any, Shift direction in DFU Host tool should be the same
 *      RX Data Width          | 8
 *      TX Data Width          | 8
@@ -597,10 +597,14 @@
 * - Add UART transport component in project's Makefile:
 *    locate **COMPONENTS** variable and add **DFU_UART**:
 *    \code COMPONENTS+=DFU_UART \endcode
-* - Select and configure the SCB block using the ModusToolbox(TM) Device
-*   Configurator for templates based on the PDL drivers
-*   see \ref group_dfu_mtb_cfg or manually using the configuration
-*   structures.
+* - For templates based on the PDL drivers:
+*   - Select and configure the SCB block using the ModusToolbox(TM) Device
+*     Configurator see \ref group_dfu_mtb_cfg or manually using
+*     the configuration structures.
+*   - Adjust value of the UART_BYTE_TO_BYTE_TIMEOUT_US constant to align with UART
+*     speed in the transport_uart.c file.
+*   - Adjust UART interrupt priority in the UART_INTR_PRIORITY in the
+*     transport_uart.c file.
 * - Build and program a project into the device.
 * - Open the DFU Host Tool. Select the UART interface. Set the UART baud rate
 *   according to the SCB UART setup in the previous step.
@@ -615,16 +619,22 @@
 * - Add SPI transport component in project's Makefile:
 *    locate **COMPONENTS** variable and add **DFU_SPI**:
 *    \code COMPONENTS+=DFU_SPI \endcode
-* - Select and configure the SCB block using the ModusToolbox(TM) Device
-*   Configurator for templates based on the PDL drivers
-*   see \ref group_dfu_mtb_cfg or manually using the configuration structures.
+* - For templates based on the PDL drivers:
+*   - Select and configure the SCB block using the ModusToolbox(TM) Device
+*     Configurator see \ref group_dfu_mtb_cfg or manually using
+*     the configuration structures.
+*   - Adjust value of the SPI_BYTE_TO_BYTE constant to align with SPI speed
+*     in the transport_spi.c file.
+*   - Check the value of the CY_SPI_SLAVE_SELECT in the transport_spi.c file.
+*   - Adjust SPI interrupt priority in the SPI_INTR_PRIORITY in the
+*     transport_spi.c file.
 * - Build and program a project into the device.
 * - Open the DFU Host Tool. Select the SPI interface. Set SPI mode, shift the
 *   direction and speed according to the SCB SPI setup in the previous step.
 * - Select the *.cyacd2 application image and upload to the device.
 *
 ********************************************************************************
-* \subsection group_dfu_ucase_usb Firmware Update via USB CDC transports
+* \subsection group_dfu_ucase_usb Firmware Update via USB CDC transport
 ********************************************************************************
 *
 * See \ref section_dfu_quick_start for basic steps how to setup a DFU project.
@@ -636,16 +646,27 @@
 *   see \ref group_dfu_mtb_cfg or manually using the configuration structures.
 * - Generate USB descriptors and USB Middleware structures using the USB Configurator.
 *   Open the USB configuration file (cycfg_usb_cdc.cyusbdev)
-*   in the DFU \\config\\CAT1A folder, then click Save to generate configuration
-*   files (cycfg_usbdev.c and cycfg_usbdev.h). These files must be included into the
-*   build flow (see USB Middleware API Reference \ref group_dfu_more_info).
+*   in the DFU \\export\\config\\COMPONENT_CAT1\\COMPONENT_DFU_USB_CDC folder,
+*   then click Save to generate configuration files (cycfg_usbdev.c and cycfg_usbdev.h).
+*   These files must be included into the build flow
+*   (see USB Middleware API Reference \ref group_dfu_more_info).
 * - Build and program a project into the device. Connect your Host to the USB
 *   device.
 * - For the USB CDC class: open the DFU Host Tool. Select the UART interface,
-*   because the Host recognizes the USB device as a virtual UART 
+*   because the Host recognizes the USB device as a virtual UART
 *   (the name is "DFU USB CDC transport").
 *   UART settings: baud rate - 115200, data bits - 8, stop bits - 1, parity - None.
 * - Select the *.cyacd2 application image and upload to the device.
+*
+********************************************************************************
+* \subsection group_dfu_ucase_emusb Firmware Update via emUSB CDC transport
+********************************************************************************
+*
+* Specific steps for the emUSB transport support:
+* - Add emUSB_CDC transport components to the project's Makefile:
+*    \code COMPONENTS+=USBD_BASE \endcode
+*    \code COMPONENTS+=DFU_EMUSB_CDC \endcode
+*    \code COMPONENTS+=SOFTFP \endcode
 *
 ********************************************************************************
 * \subsection group_dfu_ucase_checksum Change checksum types
@@ -760,6 +781,18 @@
 *
 * <table class="doxtable">
 *   <tr><th>Version</th><th>Changes</th><th>Reason for Change</th></tr>
+*   <tr>
+*     <td rowspan="3">5.1</td>
+*     <td>Added USB CDC transport based on the emUSB-Device middleware for the CAT1A device</td>
+*     <td>Extending the current feature</td>
+*   <tr>
+*     <td>Minor updates in the templates</td>
+*     <td>Improved the templates usability</td>
+*   </tr>
+*   <tr>
+*     <td>Corrected the name of the UART object used in the cyhal_uart_set_baud() function</td>
+*     <td>Now, works correctly the custom baud rate configuring in the UART transport</td>
+*   </tr>
 *   <tr>
 *     <td rowspan="5">5.0</td>
 *     <td>Add support of the MCUBoot flow.</td>
@@ -1302,10 +1335,39 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport);
 void Cy_DFU_TransportStop(void);
 /** \} group_dfu_functions_transport */
 /**
-* \defgroup group_dfu_functions_custom_cmd Custom command
+* \defgroup group_dfu_functions_custom_cmd Custom commands
 * \{
-*   Registration of the user command handler to extern DFU command protocol with
-*   custom commands.
+*
+*   The DFU protocol provides a set of pre-defined commands. The user can also
+*   add custom commands and register the single handler for all custom commands
+*   at the application level. This allows to adjust use case scenarios
+*   per the product needs. The feature is enabled with \ref CY_DFU_OPT_CUSTOM_CMD
+*   set to non-zero value in the dfu_user.h or project Makefile.
+*
+*   \note Custom commands only extend the functionality of the DFU command protocol
+*   and must be issued after entering the updating state (\ref CY_DFU_STATE_UPDATING).
+*
+*   The user commands area preserved in the DFU command protocol:
+*   - \ref CY_DFU_USER_CMD_START
+*   - \ref CY_DFU_USER_CMD_END
+*
+*  An example of the custom commands usage:
+*
+*   1. Add a set of the custom commands to the project.
+*      \snippet snippet/main.c snippet_cy_dfu_UserCommands
+*
+*   2. Define the function to handle the custom commands.
+*   \note A single function is used as the handler for all custom commands.
+*
+*      \snippet snippet/main.c snippet_cy_dfu_UserCommandHandlerDeclaration
+*
+*      \snippet snippet/main.c snippet_cy_dfu_UserCommandHandlerDefinition
+*
+*   3. Register the function to handle custom commands as a callback in the DFU core before use.
+*      \snippet snippet/main.c snippet_cy_dfu_UserCommandHandlerRegister
+*
+*   4. Release the callback function when custom command handling is no longer required.
+*      \snippet snippet/main.c snippet_cy_dfu_UserCommandHandlerUnregister
 */
 
 #if CY_DFU_OPT_CUSTOM_CMD != 0

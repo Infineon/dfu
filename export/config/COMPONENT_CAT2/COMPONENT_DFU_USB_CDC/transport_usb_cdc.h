@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_usb_cdc.h
-* \version 5.0
+* \version 5.1
 *
 * This file provides the constants and parameter values of the DFU communication
 * API implementation for the USB device that implements a virtual COM port

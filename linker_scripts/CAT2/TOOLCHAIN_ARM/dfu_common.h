@@ -1,6 +1,6 @@
 /*******************************************************************************
 * \file dfu_common.h
-* \version 5.0
+* \version 5.1
 *
 * This file provides project configuration macro definitions. They are used
 * in the scatter files and source code files.

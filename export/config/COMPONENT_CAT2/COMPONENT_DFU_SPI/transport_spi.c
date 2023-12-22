@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_spi.c
-* \version 5.0
+* \version 5.1
 *
 * This file provides the source code of the DFU communication APIs
 * for the SCB Component SPI mode.
@@ -97,8 +97,9 @@ static cy_stc_scb_spi_context_t      SPI_context;
 *******************************************************************************/
 
 /** Interrupt priority for Cortex-M0. Valid range: 0 to 3. */
- #define SPI_INTR_PRIORITY               (3U)
-
+#ifndef SPI_INTR_PRIORITY
+    #define SPI_INTR_PRIORITY               (3U)
+#endif /* SPI_INTR_PRIORITY */
 
 /*******************************************************************************
 * UART transport buffers
@@ -118,7 +119,9 @@ static uint32_t SPI_RxBufIdx;
  * two successive checks. Change this depending on the expected inter-byte delay
  * for a given SPI master.
  */
-#define SPI_SPI_BYTE_TO_BYTE   (32U)
+#ifndef SPI_BYTE_TO_BYTE
+    #define SPI_BYTE_TO_BYTE   (32U)
+#endif /* SPI_BYTE_TO_BYTE */
 
 /* Timeout unit in microseconds */
 #define SPI_WAIT_1_MS           (1000U)
@@ -311,7 +314,7 @@ cy_en_dfu_status_t SPI_SpiCyBtldrCommRead(uint8_t pData[], uint32_t size, uint32
                 do
                 {
                     byteCount = SPI_RxBufIdx;
-                    Cy_SysLib_DelayUs(SPI_SPI_BYTE_TO_BYTE);
+                    Cy_SysLib_DelayUs(SPI_BYTE_TO_BYTE);
                 }
                 while (byteCount != SPI_RxBufIdx);
 

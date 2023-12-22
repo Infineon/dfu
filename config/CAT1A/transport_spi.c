@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_spi.c
-* \version 5.0
+* \version 5.1
 *
 * This file provides the source code of the DFU communication APIs
 * for the SCB Component SPI mode.
@@ -134,7 +134,9 @@ static void SPI_Start(void)
  * two successive checks. Change this depending on the expected inter-byte delay
  * for a given SPI master.
  */
-#define SPI_SPI_BYTE_TO_BYTE   (32U)
+#ifndef SPI_BYTE_TO_BYTE
+    #define SPI_BYTE_TO_BYTE   (32U)
+#endif /* SPI_BYTE_TO_BYTE */
 
 /* Timeout unit in microseconds */
 #define SPI_WAIT_1_MS               (1000U)
@@ -245,7 +247,7 @@ cy_en_dfu_status_t SPI_SpiCyBtldrCommRead(uint8_t pData[], uint32_t size, uint32
                 do
                 {
                     byteCount = Cy_SCB_GetNumInRxFifo(CY_DFU_SPI_HW);
-                    Cy_SysLib_DelayUs(SPI_SPI_BYTE_TO_BYTE);
+                    Cy_SysLib_DelayUs(SPI_BYTE_TO_BYTE);
                 }
                 while (byteCount != Cy_SCB_GetNumInRxFifo(CY_DFU_SPI_HW));
 

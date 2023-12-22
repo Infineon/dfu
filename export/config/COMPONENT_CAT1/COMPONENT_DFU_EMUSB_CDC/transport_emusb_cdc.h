@@ -1,9 +1,10 @@
 /***************************************************************************//**
-* \file transport_spi.h
-* \version 5.1
+* \file transport_emusb_cdc.h
+* \version 1.0
 *
-* This file provides constants and parameter values of the DFU
-* communication APIs for the SPI driver.
+* This file provides the constants and parameter values of the DFU communication
+* API implementation for the emUSB-Device that implements a virtual COM port
+* (CDC class).
 *
 ********************************************************************************
 * \copyright
@@ -39,8 +40,8 @@
 * indemnify Cypress against all liability.
 *******************************************************************************/
 
-#if !defined(TRANSPORT_SPI_H)
-#define TRANSPORT_SPI_H
+#if !defined(TRANSPORT_EMUSB_CDC_H)
+#define TRANSPORT_EMUSB_CDC_H
 
 #include "cy_dfu.h"
 
@@ -52,25 +53,25 @@ extern "C" {
 *    Variables with External Linkage
 ***************************************/
 
-extern bool SPI_initVar;
+extern bool USB_DEV_CDC_initVar;
 
 
 /***************************************
 *        Function Prototypes
 ***************************************/
 
-/* SPI DFU physical layer functions */
-void SPI_SpiCyBtldrCommStart(void);
-void SPI_SpiCyBtldrCommStop (void);
-void SPI_SpiCyBtldrCommReset(void);
-cy_en_dfu_status_t SPI_SpiCyBtldrCommRead (uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout);
-cy_en_dfu_status_t SPI_SpiCyBtldrCommWrite(const uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout);
+/* The USB device CDC class DFU physical layer functions */
+void USB_CDC_CyBtldrCommStart(void);
+void USB_CDC_CyBtldrCommStop (void);
+void USB_CDC_CyBtldrCommReset(void);
+cy_en_dfu_status_t USB_CDC_CyBtldrCommRead (uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout);
+cy_en_dfu_status_t USB_CDC_CyBtldrCommWrite(uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* !defined(TRANSPORT_SPI_H) */
+#endif /* !defined(TRANSPORT_EMUSB_CDC_H) */
 
 
 /* [] END OF FILE */

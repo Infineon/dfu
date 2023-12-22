@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Device Firmware Update (DFU) Middleware Library 5.0</title>
+<title>Device Firmware Update (DFU) Middleware Library 5.1</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -31,7 +31,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><a href="https://www.infineon.com/"><img alt="Logo" src="logo.png"/></a></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Device Firmware Update (DFU) Middleware Library 5.0</div>
+   <div id="projectname">Device Firmware Update (DFU) Middleware Library 5.1</div>
   </td>
  </tr>
  </tbody>
@@ -87,17 +87,31 @@ $(document).ready(function(){initNavTree('group__group__dfu__functions__custom__
 
 <div class="header">
   <div class="headertitle">
-<div class="title">Custom command<div class="ingroups"><a class="el" href="group__group__dfu__functions.html">Functions</a></div></div>  </div>
+<div class="title">Custom commands<div class="ingroups"><a class="el" href="group__group__dfu__functions.html">Functions</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
-<p>Registration of the user command handler to extern DFU command protocol with custom commands. </p>
+<p>The DFU protocol provides a set of pre-defined commands. </p>
+<p>The user can also add custom commands and register the single handler for all custom commands at the application level. This allows to adjust use case scenarios per the product needs. The feature is enabled with <a class="el" href="group__group__dfu__macro__config.html#ga7f1f0406892d96657b1e23c78bbd0c7c">CY_DFU_OPT_CUSTOM_CMD</a> set to non-zero value in the dfu_user.h or project Makefile.</p>
+<dl class="section note"><dt>Note</dt><dd>Custom commands only extend the functionality of the DFU command protocol and must be issued after entering the updating state (<a class="el" href="group__group__dfu__macro__state.html#gac52da0b4bc0d00ccef1726e7ab639817">CY_DFU_STATE_UPDATING</a>).</dd></dl>
+<p>The user commands area preserved in the DFU command protocol:</p><ul>
+<li><a class="el" href="group__group__dfu__macro__commands.html#ga9b031f406a26092bf0a9b1981f2a32ae">CY_DFU_USER_CMD_START</a></li>
+<li><a class="el" href="group__group__dfu__macro__commands.html#gaec1b36ea08795d56ba3f63af46fdb280">CY_DFU_USER_CMD_END</a></li>
+</ul>
+<p>An example of the custom commands usage:</p>
+<ol type="1">
+<li>Add a set of the custom commands to the project. <div class="fragment"><div class="line"><span class="comment">/* Custom Commands definition */</span></div><div class="line"><span class="preprocessor">#define USR_CMD_STATUS_OK       (CY_DFU_USER_CMD_START + 1U)</span></div><div class="line"><span class="preprocessor">#define USR_CMD_STATUS_ERR      (CY_DFU_USER_CMD_START + 2U)</span></div></div><!-- fragment --></li>
+<li>Define the function to handle the custom commands. <dl class="section note"><dt>Note</dt><dd>A single function is used as the handler for all custom commands.</dd></dl>
+<div class="fragment"><div class="line"><span class="comment">/* Declaration of the common handler for the Custom Commands */</span></div><div class="line"><a class="code" href="group__group__dfu__enums.html#gafcff247e9cb8dc6c1282873b0d2dae1b">cy_en_dfu_status_t</a> UserCommandHandler(uint32_t command, uint8_t  *packetData, uint32_t dataSize,  uint32_t *rspSize,</div><div class="line">                                        <span class="keyword">struct</span> cy_stc_dfu_params_s *params, <span class="keywordtype">bool</span> *noResponse);</div></div><!-- fragment --> <div class="fragment"><div class="line"><span class="comment">/* Definition of the common handler for the Custom Commands */</span></div><div class="line"><a class="code" href="group__group__dfu__enums.html#gafcff247e9cb8dc6c1282873b0d2dae1b">cy_en_dfu_status_t</a> UserCommandHandler(uint32_t command, uint8_t  *packetData, uint32_t dataSize,  uint32_t *rspSize,</div><div class="line">                                        <span class="keyword">struct</span> cy_stc_dfu_params_s *params, <span class="keywordtype">bool</span> *noResponse)</div><div class="line">{</div><div class="line">    <a class="code" href="group__group__dfu__enums.html#gafcff247e9cb8dc6c1282873b0d2dae1b">cy_en_dfu_status_t</a> status = <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1bae652f76c7eb8948ed28f2c3c73868e1f">CY_DFU_ERROR_UNKNOWN</a>;</div><div class="line"></div><div class="line">    <span class="comment">/* Custom Commands handling */</span></div><div class="line">    <span class="keywordflow">switch</span> (command)</div><div class="line">    {</div><div class="line">        <span class="keywordflow">case</span> USR_CMD_STATUS_OK:</div><div class="line">        {</div><div class="line">            <span class="comment">/* STATUS OK action here */</span></div><div class="line">            (void)params;</div><div class="line"></div><div class="line">            *noResponse = <span class="keyword">true</span>;</div><div class="line">            status = <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23">CY_DFU_SUCCESS</a>;</div><div class="line">        }</div><div class="line">        <span class="keywordflow">break</span>;</div><div class="line"></div><div class="line">        <span class="keywordflow">case</span> USR_CMD_STATUS_ERR:</div><div class="line">        {</div><div class="line">            <span class="keywordflow">if</span> (dataSize == 1U)</div><div class="line">            {</div><div class="line">                <span class="comment">/* STATUS ERR action here */</span></div><div class="line"></div><div class="line">                packetData[0U] = 1U;</div><div class="line">                *rspSize = 1U;</div><div class="line">                status = <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23">CY_DFU_SUCCESS</a>;</div><div class="line">            }</div><div class="line">            <span class="keywordflow">else</span></div><div class="line">            {</div><div class="line">                status = <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1baf5a9d2e477350fb87bdeb68155539051">CY_DFU_ERROR_LENGTH</a>;</div><div class="line">            }</div><div class="line">        }</div><div class="line">        <span class="keywordflow">break</span>;</div><div class="line"></div><div class="line">        <span class="keywordflow">default</span>:</div><div class="line">        {</div><div class="line">            <span class="comment">/* Error handling */</span></div><div class="line"></div><div class="line">            status = <a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1baf79dc4ab2ec0a5a8bf54b7f890e03c79">CY_DFU_ERROR_CMD</a>;</div><div class="line">        }</div><div class="line">        <span class="keywordflow">break</span>;</div><div class="line">    }</div><div class="line"></div><div class="line">    <span class="keywordflow">return</span> status;</div><div class="line">}</div></div><!-- fragment --></li>
+<li>Register the function to handle custom commands as a callback in the DFU core before use. <div class="fragment"><div class="line">    <span class="comment">/* Register of the common handler for the Custom Commands */</span></div><div class="line">    dfuStatus = Cy_DFU_RegisterUserCommand(&amp;dfuParam, UserCommandHandler);</div></div><!-- fragment --></li>
+<li>Release the callback function when custom command handling is no longer required. <div class="fragment"><div class="line">    <span class="comment">/* Unregister of the common handler for the Custom Commands */</span></div><div class="line">    dfuStatus = Cy_DFU_UnRegisterUserCommand(&amp;dfuParam);</div></div><!-- fragment --></li>
+</ol>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part
 <div id="nav-path" class="navpath">
     <ul>
         <li class="footer">
-            Generated for <b>Device Firmware Update (DFU) Middleware Library 5.0</b> by <b>Cypress Semiconductor Corporation</b>.
+            Generated for <b>Device Firmware Update (DFU) Middleware Library 5.1</b> by <b>Cypress Semiconductor Corporation</b>.
             All rights reserved.
         </li>
     </ul>

@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file dfu_user.c
-* \version 5.0
+* \version 5.1
 *
 * This file provides the custom API for a firmware application with
 * DFU SDK.
@@ -62,6 +62,9 @@
     #include "transport_usb_cdc.h"
 #endif  /* COMPONENT_DFU_USB_CDC */
 
+#ifdef COMPONENT_DFU_EMUSB_CDC
+    #include "transport_emusb_cdc.h"
+#endif  /* COMPONENT_DFU_EMUSB_CDC */
 
 #if CY_DFU_FLOW == CY_DFU_BASIC_FLOW
 /*
@@ -320,6 +323,11 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport)
             USB_CDC_CyBtldrCommStart();
             break;
     #endif /* COMPONENT_DFU_USB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_CDC
+        case CY_DFU_USB_CDC:
+            USB_CDC_CyBtldrCommStart();
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_CDC */
 
         default:
             /* Selected interface in not applicable */
@@ -363,6 +371,11 @@ void Cy_DFU_TransportStop(void)
             USB_CDC_CyBtldrCommStop();
             break;
     #endif /* COMPONENT_DFU_USB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_CDC
+        case CY_DFU_USB_CDC:
+            USB_CDC_CyBtldrCommStop();
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_CDC */
 
         default:
             /* Selected interface in not applicable */
@@ -406,6 +419,11 @@ void Cy_DFU_TransportReset(void)
             USB_CDC_CyBtldrCommReset();
             break;
     #endif /* COMPONENT_DFU_USB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_CDC
+        case CY_DFU_USB_CDC:
+            USB_CDC_CyBtldrCommReset();
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_CDC */
 
         default:
             /* Selected interface in not applicable */
@@ -450,6 +468,11 @@ cy_en_dfu_status_t Cy_DFU_TransportRead(uint8_t buffer[], uint32_t size, uint32_
             status = USB_CDC_CyBtldrCommRead(buffer, size, count, timeout);
             break;
     #endif /* COMPONENT_DFU_USB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_CDC
+        case CY_DFU_USB_CDC:
+            status = USB_CDC_CyBtldrCommRead(buffer, size, count, timeout);
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_CDC */
 
         default:
             /* Selected interface in not applicable */
@@ -496,6 +519,11 @@ cy_en_dfu_status_t Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size, uint32
             status = USB_CDC_CyBtldrCommWrite(buffer, size, count, timeout);
             break;
     #endif /* COMPONENT_DFU_USB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_CDC
+        case CY_DFU_USB_CDC:
+            status = USB_CDC_CyBtldrCommWrite(buffer, size, count, timeout);
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_CDC */
 
         default:
             /* Selected interface in not applicable */

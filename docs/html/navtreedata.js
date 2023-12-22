@@ -23,7 +23,7 @@ for the JavaScript code in this file
 */
 var NAVTREE =
 [
-  [ "Device Firmware Update (DFU) Middleware Library 5.0", "index.html", [
+  [ "Device Firmware Update (DFU) Middleware Library 5.1", "index.html", [
     [ "Overview", "index.html#section_mainpage_overview", null ],
     [ "General Description", "index.html#section_dfu_general", null ],
     [ "Quick Start Guide", "index.html#section_dfu_quick_start", [
@@ -52,7 +52,8 @@ var NAVTREE =
       [ "Firmware Update via I2C", "index.html#group_dfu_ucase_i2c", null ],
       [ "Firmware Update via UART", "index.html#group_dfu_ucase_uart", null ],
       [ "Firmware Update via SPI", "index.html#group_dfu_ucase_spi", null ],
-      [ "Firmware Update via USB CDC transports", "index.html#group_dfu_ucase_usb", null ],
+      [ "Firmware Update via USB CDC transport", "index.html#group_dfu_ucase_usb", null ],
+      [ "Firmware Update via emUSB CDC transport", "index.html#group_dfu_ucase_emusb", null ],
       [ "Change checksum types", "index.html#group_dfu_ucase_checksum", null ],
       [ "Multi-application DFU project", "index.html#group_dfu_ucase_multiapp", null ],
       [ "Creation of the CYACD2 file", "index.html#group_dfu_ucase_cyacd2", null ]
