@@ -1,6 +1,7 @@
 var searchData=
 [
   ['cy_5fdfu_5fbasic_5fflow',['CY_DFU_BASIC_FLOW',['../group__group__dfu__macro__config.html#ga2589c41699d15889ea6ede9961688f99',1,'dfu_user.h']]],
+  ['cy_5fdfu_5fcanfd',['CY_DFU_CANFD',['../group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137aeb1c01f0671b11d63a1f21f2787fc990',1,'cy_dfu.h']]],
   ['cy_5fdfu_5fcmd_5fenter',['CY_DFU_CMD_ENTER',['../group__group__dfu__macro__commands.html#gade4dad61ecfa46841e8c233414aef58d',1,'cy_dfu.h']]],
   ['cy_5fdfu_5fcmd_5ferase_5fdata',['CY_DFU_CMD_ERASE_DATA',['../group__group__dfu__macro__commands.html#gafeae8b3b009e4cad8e7bb098fd43856a',1,'cy_dfu.h']]],
   ['cy_5fdfu_5fcmd_5fexit',['CY_DFU_CMD_EXIT',['../group__group__dfu__macro__commands.html#gab810488eee0b2be140ac6d80d1497097',1,'cy_dfu.h']]],
@@ -61,6 +62,7 @@ var searchData=
   ['cy_5fdfu_5fopt_5fverify_5fdata',['CY_DFU_OPT_VERIFY_DATA',['../group__group__dfu__macro__config.html#ga5d9f0c6e9aef143e22b2673918478ee0',1,'dfu_user.h']]],
   ['cy_5fdfu_5fpacket_5fmin_5fsize',['CY_DFU_PACKET_MIN_SIZE',['../group__group__dfu__macro.html#ga25cc6cfb1eed718469ab8d6514279ea1',1,'cy_dfu.h']]],
   ['cy_5fdfu_5freaddata',['Cy_DFU_ReadData',['../group__group__dfu__functions__mem.html#ga9709777e59f6cbdc9ca70c1ca041e414',1,'Cy_DFU_ReadData(uint32_t address, uint32_t length, uint32_t ctl, cy_stc_dfu_params_t *params):&#160;cy_dfu.c'],['../group__group__dfu__functions__mem.html#ga9709777e59f6cbdc9ca70c1ca041e414',1,'Cy_DFU_ReadData(uint32_t address, uint32_t length, uint32_t ctl, cy_stc_dfu_params_t *params):&#160;cy_dfu.c']]],
+  ['cy_5fdfu_5fregisterusercommand',['Cy_DFU_RegisterUserCommand',['../group__group__dfu__functions__custom__cmd.html#ga126d950aefcc83de22e959c554454f01',1,'Cy_DFU_RegisterUserCommand(cy_stc_dfu_params_t *params, Cy_DFU_CustomCommandHandler handler):&#160;cy_dfu.c'],['../group__group__dfu__functions__custom__cmd.html#ga126d950aefcc83de22e959c554454f01',1,'Cy_DFU_RegisterUserCommand(cy_stc_dfu_params_t *params, Cy_DFU_CustomCommandHandler handler):&#160;cy_dfu.c']]],
   ['cy_5fdfu_5frsp_5fsize_5f0',['CY_DFU_RSP_SIZE_0',['../group__group__dfu__macro__response__size.html#ga4ef7793a5b1054343c7acf20931efa8e',1,'cy_dfu.h']]],
   ['cy_5fdfu_5frsp_5fsize_5fverify_5fapp',['CY_DFU_RSP_SIZE_VERIFY_APP',['../group__group__dfu__macro__response__size.html#gac4aae8982692f775949c290d5987cb3c',1,'cy_dfu.h']]],
   ['cy_5fdfu_5fsdk_5fmw_5fversion_5fmajor',['CY_DFU_SDK_MW_VERSION_MAJOR',['../group__group__dfu__macro.html#ga70e30cc482773f5a3694dafc21cbe0b6',1,'cy_dfu.h']]],
@@ -81,7 +83,9 @@ var searchData=
   ['cy_5fdfu_5ftransportstop',['Cy_DFU_TransportStop',['../group__group__dfu__functions__transport.html#gaa979bcdabc0bb7dc392be24a25986ca9',1,'Cy_DFU_TransportStop(void):&#160;cy_dfu.c'],['../group__group__dfu__functions__transport.html#gaa979bcdabc0bb7dc392be24a25986ca9',1,'Cy_DFU_TransportStop(void):&#160;cy_dfu.c']]],
   ['cy_5fdfu_5ftransportwrite',['Cy_DFU_TransportWrite',['../group__group__dfu__functions__transport.html#ga47b4a59a539863b1581d4ddcce701b9e',1,'Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size, uint32_t *count, uint32_t timeout):&#160;cy_dfu.c'],['../group__group__dfu__functions__transport.html#ga47b4a59a539863b1581d4ddcce701b9e',1,'Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size, uint32_t *count, uint32_t timeout):&#160;cy_dfu.c']]],
   ['cy_5fdfu_5fuart',['CY_DFU_UART',['../group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137a6caa0300fd55cb50fba9a40a9ff64f94',1,'cy_dfu.h']]],
+  ['cy_5fdfu_5funregisterusercommand',['Cy_DFU_UnRegisterUserCommand',['../group__group__dfu__functions__custom__cmd.html#ga1739c8c3962de16bbda5d2aa2e3474ee',1,'Cy_DFU_UnRegisterUserCommand(cy_stc_dfu_params_t *params):&#160;cy_dfu.c'],['../group__group__dfu__functions__custom__cmd.html#ga1739c8c3962de16bbda5d2aa2e3474ee',1,'Cy_DFU_UnRegisterUserCommand(cy_stc_dfu_params_t *params):&#160;cy_dfu.c']]],
   ['cy_5fdfu_5fusb_5fcdc',['CY_DFU_USB_CDC',['../group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137a61eb67fb163cf00e3a18942969364164',1,'cy_dfu.h']]],
+  ['cy_5fdfu_5fusb_5fhid',['CY_DFU_USB_HID',['../group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137ad5bbb4e21fa9389a10fc6e09c7a202d6',1,'cy_dfu.h']]],
   ['cy_5fdfu_5fuser_5fcmd_5fend',['CY_DFU_USER_CMD_END',['../group__group__dfu__macro__commands.html#gaec1b36ea08795d56ba3f63af46fdb280',1,'cy_dfu.h']]],
   ['cy_5fdfu_5fuser_5fcmd_5fstart',['CY_DFU_USER_CMD_START',['../group__group__dfu__macro__commands.html#ga9b031f406a26092bf0a9b1981f2a32ae',1,'cy_dfu.h']]],
   ['cy_5fdfu_5fvalidateapp',['Cy_DFU_ValidateApp',['../group__group__dfu__functions__app.html#gae4eed95b94cdb006c79e2036f01d7fc4',1,'Cy_DFU_ValidateApp(uint32_t appId, cy_stc_dfu_params_t *params):&#160;cy_dfu.c'],['../group__group__dfu__functions__app.html#gae4eed95b94cdb006c79e2036f01d7fc4',1,'Cy_DFU_ValidateApp(uint32_t appId, cy_stc_dfu_params_t *params):&#160;cy_dfu.c']]],

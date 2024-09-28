@@ -1,4 +1,4 @@
-# Device Firmware Update (DFU) Middleware Library 5.1
+# Device Firmware Update (DFU) Middleware Library 5.2
 
 ## What's Included?
 
@@ -7,12 +7,15 @@ and the [DFU API Reference](https://infineon.github.io/dfu/html/index.html).
 The revision history of the DFU middleware is also available in the [API Reference Changelog](https://infineon.github.io/dfu/html/index.html#group_dfu_changelog).
 New in this release:
 
-* Added USB CDC transport based on the emUSB-Device middleware for the CAT1A device
+* Added USB HID transport based on the emUSB-Device middleware for the CAT1A device
+* Added CANFD transport based on the PDL driver for the CAT1C device
 * Minor updates in the templates
+
+**Note** Device Firmware Update Host Tool 2.20 does not support CANFD transport. The CANFD support is planned to be added later.
 
 ## Defect Fixes
 
-* Corrected the name of the UART object used in the cyhal_uart_set_baud() function. Now, works correctly the custom baud rate configuring in the UART transport.
+* Fixed address validation for CAT1C device
 
 ## Known Issues
 
@@ -24,14 +27,14 @@ This version of the DFU middleware was validated for compatibility with the foll
 
 | Software and Tools                        | Version |
 | :---------------------------------------  | :----:  |
-| ModusToolbox Software Environment         | 3.1.0   |
-|  - ModusToolbox Device Configurator       | 2.20    |
-|  - Device Firmware Update Host Tool       | 2.0     |
+| ModusToolbox Software Environment         | 3.2.0   |
+|  - ModusToolbox Device Configurator       | 4.20    |
+|  - Device Firmware Update Host Tool       | 2.20    |
 |  - CyMCUElfTool                           | 1.0     |
 | GCC Compiler                              | 11.3.1  |
-| IAR Compiler                              | 9.30.1  |
+| IAR Compiler                              | 9.40.2  |
 | ARM Compiler 6                            | 6.16    |
-| mtb-hal-cat1                              | 2.5.4   |
+| mtb-hal-cat1                              | 2.6.1   |
 
 Usage of the CAT1 HAL flow requires mtb-hal-cat1 2.3.0 or higher.
 Usage of the MCUBoot flow requires DFU Host Tool 2.0 or higher.
@@ -42,4 +45,4 @@ Usage of the CDC Trasnport based on the emUSB-Device middleware requires core-ma
 * [README.md](./README.md)
 
 ---
-© Cypress Semiconductor Corporation (an Infineon company), 2023.
+© Cypress Semiconductor Corporation (an Infineon company), 2023-2024.

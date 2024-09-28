@@ -1,13 +1,13 @@
 /*******************************************************************************
 * \file dfu_common.h
-* \version 5.1
+* \version 5.2
 *
 * This file provides project configuration macro definitions. They are used
 * in the scatter files and source code files.
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials

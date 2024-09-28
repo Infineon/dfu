@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Device Firmware Update (DFU) Middleware Library 5.1</title>
+<title>Device Firmware Update (DFU) Middleware Library 5.2</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -31,7 +31,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><a href="https://www.infineon.com/"><img alt="Logo" src="logo.png"/></a></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Device Firmware Update (DFU) Middleware Library 5.1</div>
+   <div id="projectname">Device Firmware Update (DFU) Middleware Library 5.2</div>
   </td>
  </tr>
  </tbody>
@@ -87,7 +87,7 @@ $(document).ready(function(){initNavTree('index.html','');});
 
 <div class="header">
   <div class="headertitle">
-<div class="title">Device Firmware Update (DFU) Middleware Library 5.1 Documentation</div>  </div>
+<div class="title">Device Firmware Update (DFU) Middleware Library 5.2 Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="section_mainpage_overview"></a>
@@ -123,15 +123,15 @@ Quick Start Guide</h1>
 <h2><a class="anchor" id="subsection_dfu_qsg_basic"></a>
 Basic Bootloader Flow</h2>
 <p>The DFU SDK is used to design updating applications of arbitrary flexibility and complexity. Infineon DFU middleware can be used in various software environments. For details, refer to RELEASE.md file. For a quick start, use the Code Examples. The portfolio of Code Examples continuously extends at <a href="https://github.com/Infineon/Code-Examples-for-ModusToolbox-Software">Infineon GitHub</a>.</p>
-<p>The ModusToolbox(TM) Quick Start Guide (QSG) assumes ModusToolbox(TM) 3.x is installed with all required tools.</p>
-<p>The following steps are to set up and build a basic DFU loader and loadable applications. The DFU loader application uses the I2C transport interface. The steps assume that the user builds an application for CY8CKIT-062-WIFI-BT (CAT1A device) or CY8CKIT-149 kits (CAT2 device) based on a starter Hello_World ModusToolbox(TM) project.</p>
+<p>The ModusToolbox&trade; Quick Start Guide (QSG) assumes ModusToolbox&trade; 3.x is installed with all required tools.</p>
+<p>The following steps are to set up and build a basic DFU loader and loadable applications. The DFU loader application uses the I2C transport interface. The steps assume that the user builds an application for CY8CKIT-062-WIFI-BT (CAT1A device) or CY8CKIT-149 kits (CAT2 device) based on a starter Hello_World ModusToolbox&trade; project.</p>
 <dl class="section note"><dt>Note</dt><dd>For other kits or devices, update default linker scripts with the valid memory addresses. For details, refer to <a class="el" href="index.html#group_dfu_config_linker_scripts">Linker scripts</a>.</dd></dl>
 <h3><a class="anchor" id="ssection_dfu_step_0"></a>
 STEP 0: Projects preparation</h3>
 <ol type="1">
-<li>Create a project for CY8CKIT-062-WIFI-BT or CY8CKIT-149 with the DFU loader application using the Hello_World template application ("Getting started" section in the Project Creator). Name it "QSG_DFU_App0_I2C". For details, refer to the ModusToolbox(TM) 3.x IDE Quick Start Guide.</li>
+<li>Create a project for CY8CKIT-062-WIFI-BT or CY8CKIT-149 with the DFU loader application using the Hello_World template application ("Getting started" section in the Project Creator). Name it "QSG_DFU_App0_I2C". For details, refer to the ModusToolbox&trade; 3.x IDE Quick Start Guide.</li>
 <li>Create a project for the DFU loadable application in the same way and name it "QSG_DFU_App1_Hello_World".</li>
-<li>Include the DFU middleware into each project using the ModusToolbox(TM) Library Manager or download it from GitHub and copy it to the project manually.</li>
+<li>Include the DFU middleware into each project using the ModusToolbox&trade; Library Manager or download it from GitHub and copy it to the project manually.</li>
 <li>Include a DFU header in main.c of each project to get access to DFU API: <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;cy_dfu.h&quot;</span></div></div><!-- fragment --> </li>
 </ol>
 <h3><a class="anchor" id="ssection_dfu_step_1"></a>
@@ -152,7 +152,7 @@ STEP 1: Setup Loader Application QSG_DFU_App0_I2C</h3>
 <li>Update project's Makefile to add DFU user and I2C transport components : locate the <b>COMPONENTS</b> variable and add <b>DFU_USER</b> and <b>DFU_I2C</b>: <div class="fragment"><div class="line">COMPONENTS=DFU_USER DFU_I2C </div></div><!-- fragment --></li>
 <li><p class="startli">For CY8CKIT-149 kit, configure the I2C communication interface. </p><dl class="section warning"><dt>Warning</dt><dd>Not needed for the CAT1 devices - configuration is done by HAL.<br />
  Please check/setup the required pins assignments in the BSP.</dd></dl>
-<p>Open the ModusToolbox(TM) Device Configurator and enable SCB on the Peripheral tab under Communication section with the following parameter.</p>
+<p>Open the ModusToolbox&trade; Device Configurator and enable SCB on the Peripheral tab under Communication section with the following parameter.</p>
 <p class="startli">For CY8CKIT-149, SCB 1 is connected to the KitProg. </p><table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">SCB parameter name  </th><th class="markdownTableHeadNone">Value   </th></tr>
@@ -171,7 +171,7 @@ STEP 1: Setup Loader Application QSG_DFU_App0_I2C</h3>
 <div class="image">
 <img src="dfu_basic_i2c_kit149.png" alt="dfu_basic_i2c_kit149.png"/>
 </div>
-<p class="startli">See <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox(TM) tools for HW initialization</a></p>
+<p class="startli">See <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox&trade; tools for HW initialization</a></p>
 </li>
 </ol>
 <h3><a class="anchor" id="ssection_dfu_step_2"></a>
@@ -253,8 +253,8 @@ Description</h3>
 <h3><a class="anchor" id="subsubsection_qsg_mcuboot_s1"></a>
 STEP1: Projects preparation.</h3>
 <ol type="1">
-<li>Create a ModusToolbox(TM) application for the CAT1A or CAT1C devices. For example, the CY8CKIT-062-WIFI-BT kit can be used as CAT1A or KIT_XMC72_EVK as CAT1C. Create a new application in the ModusToolbox(TM) IDE using an appropriate BSP and an empty application as a template (Empty App). Name it "DFU_App0". For details, refer to the ModusToolbox(TM) 3.x IDE Quick Start Guide.</li>
-<li>Include the DFU middleware into the project using the ModusToolbox(TM) Library Manager.</li>
+<li>Create a ModusToolbox&trade; application for the CAT1A or CAT1C devices. For example, the CY8CKIT-062-WIFI-BT kit can be used as CAT1A or KIT_XMC72_EVK as CAT1C. Create a new application in the ModusToolbox&trade; IDE using an appropriate BSP and an empty application as a template (Empty App). Name it "DFU_App0". For details, refer to the ModusToolbox&trade; 3.x IDE Quick Start Guide.</li>
+<li>Include the DFU middleware into the project using the ModusToolbox&trade; Library Manager.</li>
 <li>Add the DFU transport components to project's Makefile to enable the transport interface(s). In our case, I2C is used: <div class="fragment"><div class="line">COMPONENTS += DFU_I2C </div></div><!-- fragment --></li>
 <li>Update project's Makefile to use MCUBoot flow: <div class="fragment"><div class="line">DEFINES += <a class="code" href="group__group__dfu__macro__config.html#ga7dc6b3120ee56d0f36285f3c1e8dec2d">CY_DFU_FLOW</a>=<a class="code" href="group__group__dfu__macro__config.html#ga1fd9a1a5a6386dc3d01e9b381d97ecdb">CY_DFU_MCUBOOT_FLOW</a> </div></div><!-- fragment --> <div class="fragment"><div class="line">COMPONENTS += DFU_USER </div></div><!-- fragment --></li>
 </ol>
@@ -272,7 +272,7 @@ STEP3: Build and Program Loader DFU_App0</h3>
 <h3><a class="anchor" id="subsubsection_qsg_mcuboot_s4"></a>
 STEP4: Create a loadable application (Application 1).</h3>
 <ol type="1">
-<li>Create a ModusToolbox(TM) application for the same devices as in STEP1. Use an empty application as a template (Empty App). Name it "DFU_App1".</li>
+<li>Create a ModusToolbox&trade; application for the same devices as in STEP1. Use an empty application as a template (Empty App). Name it "DFU_App1".</li>
 <li>Disable the adding the CM0+ core code to the result binary. For the CAT1A device (CY8CKIT-062-WIFI-BT kit), disable the CM0P_SLEEP component in Makefile. <div class="fragment"><div class="line">DISABLE_COMPONENTS=CM0P_SLEEP </div></div><!-- fragment --> For the CAT1C device (KIT_XMC72_EVK kit), disable the XMC7xDUAL_CM0P_SLEEP component in Makefile. <div class="fragment"><div class="line">DISABLE_COMPONENTS=XMC7xDUAL_CM0P_SLEEP </div></div><!-- fragment --></li>
 <li>Update the project post build steps to generate HEX files with an offset to the memory region of the loadable application.</li>
 </ol>
@@ -360,8 +360,8 @@ Linker scripts</h2>
 <p>These files are the linker scripts for the IAR and ARM compilers for the DFU SDK applications.</p>
 <p>Their difference from the default startup linker scripts is similar to the DFU SDK GCC's linker scripts described above.</p>
 <h2><a class="anchor" id="group_dfu_mtb_cfg"></a>
-Use of the ModusToolbox(TM) tools for HW initialization</h2>
-<p>The following section describes the communication interfaces settings in the Device Configurator required to use the included with DFU middleware communication files with the DFU Host tool. </p><dl class="section warning"><dt>Warning</dt><dd>The ModusToolbox(TM) Device Configurator is not used for templates based on the HAL drivers.<br />
+Use of the ModusToolbox™ tools for HW initialization</h2>
+<p>The following section describes the communication interfaces settings in the Device Configurator required to use the included with DFU middleware communication files with the DFU Host tool. </p><dl class="section warning"><dt>Warning</dt><dd>The ModusToolbox&trade; Device Configurator is not used for templates based on the HAL drivers.<br />
  Please check/setup the required pins assignments in the BSP.</dd></dl>
 <dl class="section user"><dt>I2C</dt><dd><table class="markdownTable">
 <tr class="markdownTableHead">
@@ -426,10 +426,112 @@ Use of the ModusToolbox(TM) tools for HW initialization</h2>
 <td class="markdownTableBodyNone">Stop Bits  </td><td class="markdownTableBodyNone">Any, Stop Bits in DFU Host tool should be the same   </td></tr>
 </table>
 </dd></dl>
-<dl class="section user"><dt>USB CDC transports</dt><dd>For a setup of the USB device personality in the ModusToolbox Device Configurator for the USB DFU transport for CY8CKIT-062-WIFI-BT, see the screenshots below. For other kits, verify the USB pins. <div class="image">
+<dl class="section user"><dt>USB CDC transports</dt><dd>To set up the USB device personality in the ModusToolbox&trade; Device Configurator for the USB DFU transport for CY8CKIT-062-WIFI-BT, see the screenshots below. For other kits, verify the USB pins. <div class="image">
 <img src="dfu_usb_cdc.png" alt="dfu_usb_cdc.png"/>
 </div>
 </dd></dl>
+<dl class="section user"><dt>CAN FD</dt><dd></dd></dl>
+<p>The CAN FD transport is supported by the following devices:</p><ul>
+<li>PSoC Control C3 (CAT1B),</li>
+<li>XMC7000 (CAT1C).</li>
+</ul>
+<p>To set up the CAN FD personality in the ModusToolbox&trade; Device Configurator for the CAN FD DFU transport for KIT_XMC72_EVK, see the screenshots below. For other kits, verify the CAN Rx and CAN Tx pins connections.</p>
+<p><b> General settings </b> - set the personality alias and CAN FD mode: </p><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Parameter name  </th><th class="markdownTableHeadNone">Value   </th></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Personality alias name  </td><td class="markdownTableBodyNone">DFU_CANFD   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">CAN FD Mode  </td><td class="markdownTableBodyNone">Enabled   </td></tr>
+</table>
+<div class="image">
+<img src="dfu_canfd1.png" alt="dfu_canfd1.png"/>
+</div>
+<p> <br />
+ <b> Bitrate settings </b> - configure prescaler, time segments and syncronization jump width: </p><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Parameter name  </th><th class="markdownTableHeadNone">Value   </th></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Nominal Prescaler  </td><td class="markdownTableBodyNone" rowspan="4">Set according to nominal bitrate setting in the DFU Host Tool   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Nominal Time Segment 1   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Nominal Time Segment 1   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Nominal Syncronization Jump Width   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Data Prescaler  </td><td class="markdownTableBodyNone" rowspan="4">Set according to data bitrate setting in the DFU Host Tool   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Data Time Segment 1   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Data Time Segment 1   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Data Syncronization Jump Width   </td></tr>
+</table>
+<div class="image">
+<img src="dfu_canfd2.png" alt="dfu_canfd2.png"/>
+</div>
+<p> <br />
+ <b> ID Filter settings </b> - configure standard or extended frame ID filter: </p><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Parameter name  </th><th class="markdownTableHeadNone">Value   </th></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Number of SID Filters  </td><td class="markdownTableBodyNone">1 if standard frame is used, 0 otherwise   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Number of XID Filters  </td><td class="markdownTableBodyNone">1 if extended frame is used, 0 otherwise   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Standard Filter Element Configuration  </td><td class="markdownTableBodyNone">Store into Rx Buffer or as Debug Message   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">SFID1/EFID1  </td><td class="markdownTableBodyNone">As configured in the DFU Host Tool   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Store the Received Message  </td><td class="markdownTableBodyNone">Store Message into an Rx Buffer   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Rx Bufer Element  </td><td class="markdownTableBodyNone">0   </td></tr>
+</table>
+<div class="image">
+<img src="dfu_canfd3.png" alt="dfu_canfd3.png"/>
+</div>
+<p> <br />
+ <b> Global Filter &amp; Rx Buffers settings </b> - configure global filter and Rx buffer: </p><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Parameter name  </th><th class="markdownTableHeadNone">Value   </th></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Accept Non-matcing Frames Standard  </td><td class="markdownTableBodyNone">Reject   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Accept Non-matcing Frames Extended  </td><td class="markdownTableBodyNone">Reject   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Reject Remote Frames Standard  </td><td class="markdownTableBodyNone">Enabled   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Reject Remote Frames Extended  </td><td class="markdownTableBodyNone">Enabled   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Rx Bufer Data Field Size  </td><td class="markdownTableBodyNone">64 Byte Data Field   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Number of Rx Buffers  </td><td class="markdownTableBodyNone">1   </td></tr>
+</table>
+<div class="image">
+<img src="dfu_canfd4.png" alt="dfu_canfd4.png"/>
+</div>
+<p> <br />
+ <b> Tx Buffers &amp; Tx Buffer #0 settings </b> - configure Tx buffer: </p><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Parameter name  </th><th class="markdownTableHeadNone">Value   </th></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Tx Bufer Data Field Size  </td><td class="markdownTableBodyNone">64 Byte Data Field   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Number of Tx Buffers  </td><td class="markdownTableBodyNone">1   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">XTD  </td><td class="markdownTableBodyNone" rowspan="3">As configured in the DFU Host Tool   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Identifier   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">BRS   </td></tr>
+<tr class="markdownTableBody" class="markdownTableRowEven">
+<td class="markdownTableBodyNone">FDF  </td><td class="markdownTableBodyNone">CAN FD Format   </td></tr>
+</table>
+<div class="image">
+<img src="dfu_canfd5.png" alt="dfu_canfd5.png"/>
+</div>
+ <dl class="section note"><dt>Note</dt><dd>DLC and Data will be set by the middleware according to the specific transaction.</dd></dl>
 <h1><a class="anchor" id="section_dfu_design"></a>
 Design Considerations</h1>
 <h2><a class="anchor" id="group_dfu_ucase_i2c"></a>
@@ -440,7 +542,7 @@ Firmware Update via UART</h2>
 <p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for basic steps how to setup a DFU project. Specific steps for the UART transport support:</p><ul>
 <li>Add UART transport component in project's Makefile: locate <b>COMPONENTS</b> variable and add <b>DFU_UART</b>: <div class="fragment"><div class="line">COMPONENTS+=DFU_UART </div></div><!-- fragment --></li>
 <li>For templates based on the PDL drivers:<ul>
-<li>Select and configure the SCB block using the ModusToolbox(TM) Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox(TM) tools for HW initialization</a> or manually using the configuration structures.</li>
+<li>Select and configure the SCB block using the ModusToolbox&trade; Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox&trade; tools for HW initialization</a> or manually using the configuration structures.</li>
 <li>Adjust value of the UART_BYTE_TO_BYTE_TIMEOUT_US constant to align with UART speed in the transport_uart.c file.</li>
 <li>Adjust UART interrupt priority in the UART_INTR_PRIORITY in the transport_uart.c file.</li>
 </ul>
@@ -454,7 +556,7 @@ Firmware Update via SPI</h2>
 <p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for basic steps how to set up a DFU project. The steps for the SPI transport support:</p><ul>
 <li>Add SPI transport component in project's Makefile: locate <b>COMPONENTS</b> variable and add <b>DFU_SPI</b>: <div class="fragment"><div class="line">COMPONENTS+=DFU_SPI </div></div><!-- fragment --></li>
 <li>For templates based on the PDL drivers:<ul>
-<li>Select and configure the SCB block using the ModusToolbox(TM) Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox(TM) tools for HW initialization</a> or manually using the configuration structures.</li>
+<li>Select and configure the SCB block using the ModusToolbox&trade; Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox&trade; tools for HW initialization</a> or manually using the configuration structures.</li>
 <li>Adjust value of the SPI_BYTE_TO_BYTE constant to align with SPI speed in the transport_spi.c file.</li>
 <li>Check the value of the CY_SPI_SLAVE_SELECT in the transport_spi.c file.</li>
 <li>Adjust SPI interrupt priority in the SPI_INTR_PRIORITY in the transport_spi.c file.</li>
@@ -468,7 +570,7 @@ Firmware Update via SPI</h2>
 Firmware Update via USB CDC transport</h2>
 <p>See <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for basic steps how to setup a DFU project. Specific steps for the USB transport support:</p><ul>
 <li>Add USB_CDC transport component in project's Makefile: locate <b>COMPONENTS</b> variable and add <b>DFU_USB_CDC</b>: <div class="fragment"><div class="line">COMPONENTS+=DFU_USB_CDC </div></div><!-- fragment --></li>
-<li>Enable and configure the USB Device block using the ModusToolbox(TM) Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox(TM) tools for HW initialization</a> or manually using the configuration structures.</li>
+<li>Enable and configure the USB Device block using the ModusToolbox&trade; Device Configurator see <a class="el" href="index.html#group_dfu_mtb_cfg">Use of the ModusToolbox&trade; tools for HW initialization</a> or manually using the configuration structures.</li>
 <li>Generate USB descriptors and USB Middleware structures using the USB Configurator. Open the USB configuration file (cycfg_usb_cdc.cyusbdev) in the DFU \export\config\COMPONENT_CAT1\COMPONENT_DFU_USB_CDC folder, then click Save to generate configuration files (cycfg_usbdev.c and cycfg_usbdev.h). These files must be included into the build flow (see USB Middleware API Reference <a class="el" href="index.html#group_dfu_more_info">More Information</a>).</li>
 <li>Build and program a project into the device. Connect your Host to the USB device.</li>
 <li>For the USB CDC class: open the DFU Host Tool. Select the UART interface, because the Host recognizes the USB device as a virtual UART (the name is "DFU USB CDC transport"). UART settings: baud rate - 115200, data bits - 8, stop bits - 1, parity - None.</li>
@@ -478,6 +580,12 @@ Firmware Update via USB CDC transport</h2>
 Firmware Update via emUSB CDC transport</h2>
 <p>Specific steps for the emUSB transport support:</p><ul>
 <li>Add emUSB_CDC transport components to the project's Makefile: <div class="fragment"><div class="line">COMPONENTS+=USBD_BASE </div></div><!-- fragment --> <div class="fragment"><div class="line">COMPONENTS+=DFU_EMUSB_CDC </div></div><!-- fragment --> <div class="fragment"><div class="line">COMPONENTS+=SOFTFP </div></div><!-- fragment --></li>
+</ul>
+<h2><a class="anchor" id="group_dfu_ucase_canfd"></a>
+Firmware Update via CAN FD transport</h2>
+<p>Specific steps for the CAN FD transport support:</p><ul>
+<li>Add the CAN FD transport components to the project Makefile: <div class="fragment"><div class="line">COMPONENTS+=DFU_CANFD </div></div><!-- fragment --></li>
+<li>The CAN FD interrupt priority can be configured using the DFU_CANFD_IRQ_PRIORITY macro, for example: <div class="fragment"><div class="line">DEFINES+=DFU_CANFD_IRQ_PRIORITY=5 </div></div><!-- fragment --></li>
 </ul>
 <h2><a class="anchor" id="group_dfu_ucase_checksum"></a>
 Change checksum types</h2>
@@ -512,7 +620,7 @@ Multi-application DFU project</h2>
 Creation of the CYACD2 file</h2>
 <p>The .cyacd2 file contains downloadable application data created by CyMCUElfTool and used by host programs such as Cypress DFU Host Program and CySmart to send applications to the target DFU module (see <a class="el" href="index.html#group_dfu_more_info">More Information</a>). Refer to the <a href="https://www.infineon.com/an213924">AN213924</a> DFU SDK User Guide for the .cyacd2 file format. See the <a class="el" href="index.html#loadable_DFU_app_steps">Loadable Application Setup</a> section of the <a class="el" href="index.html#section_dfu_quick_start">Quick Start Guide</a> for the steps to convert a general application into a DFU loadable application.</p>
 <p>The steps to create a .cyacd2 file with a CRC application signature:</p><ol type="1">
-<li>Copy the path to the CyMCUElfTool binary. The path can be found in the folder with ModusToolbox tools (for example /ModusToolbox/tools_2.0/cymcuelftool-1.0/bin/cymcuelftool).</li>
+<li>Copy the path to the CyMCUElfTool binary. The path can be found in the folder with ModusToolbox&trade; tools (for example /ModusToolbox/tools_2.0/cymcuelftool-1.0/bin/cymcuelftool).</li>
 <li>Update the application ELF with a CRC checksum (&lt;MCUELFTOOL&gt; - the copied path to the binary): <div class="fragment"><div class="line">&lt;MCUELFTOOL&gt; --sign app.elf CRC --output app_crc.elf </div></div><!-- fragment --></li>
 <li>Generate a .cyacd2 file: <div class="fragment"><div class="line">&lt;MCUELFTOOL&gt; -P app_crc.elf --output app.cyacd2 </div></div><!-- fragment --></li>
 </ol>
@@ -522,6 +630,14 @@ Changelog</h1>
 <table class="doxtable">
 <tr>
 <th>Version</th><th>Changes</th><th>Reason for Change </th></tr>
+<tr>
+<td rowspan="3">5.2 </td><td>Added USB HID transport based on the emUSB-Device middleware for the CAT1A device </td><td>Extending the current feature  </td></tr>
+<tr>
+<td>Added CANFD transport based on the PDL driver for the CAT1C device </td><td>Extending the current feature  </td></tr>
+<tr>
+<td>Minor updates in the templates </td><td>Improved the templates usability  </td></tr>
+<tr>
+<td>Fixed address validation for CAT1C device </td><td>Bugfix  </td></tr>
 <tr>
 <td rowspan="3">5.1 </td><td>Added USB CDC transport based on the emUSB-Device middleware for the CAT1A device </td><td>Extending the current feature </td></tr>
 <tr>
@@ -603,7 +719,7 @@ More Information</h1>
 <div id="nav-path" class="navpath">
     <ul>
         <li class="footer">
-            Generated for <b>Device Firmware Update (DFU) Middleware Library 5.1</b> by <b>Cypress Semiconductor Corporation</b>.
+            Generated for <b>Device Firmware Update (DFU) Middleware Library 5.2</b> by <b>Cypress Semiconductor Corporation</b>.
             All rights reserved.
         </li>
     </ul>

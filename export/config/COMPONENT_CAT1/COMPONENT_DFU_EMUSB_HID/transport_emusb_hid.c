@@ -1,14 +1,9 @@
 /***************************************************************************//**
-* \file transport_emusb_cdc.c
+* \file transport_emusb_hid.c
 * \version 5.2
 *
 * This file provides the source code of the DFU communication API implementation
-* for the emUSB-Device that implements a virtual COM port (CDC class).
-*
-* Note
-* This file supports only the ModusToolbox flow.
-* This file serves as a template and can be modified defining any component
-* name or personality alias.
+* for the emUSB-Device that implements a HID class.
 *
 ********************************************************************************
 * \copyright
@@ -45,44 +40,88 @@
 *******************************************************************************/
 
 #include "USB.h"
-#include "USB_CDC.h"
-#include "transport_emusb_cdc.h"
+#include "USB_HID.h"
+#include "transport_emusb_hid.h"
 
+#include "stdio.h"
 
-/* USER CONFIGURABLE: The USB device COM port data endpoint maximum packet size */
-#ifndef CY_DFU_USB_CDC_ENDPOINT_MAX_PACKET
-    #define CY_DFU_USB_CDC_ENDPOINT_MAX_PACKET   (USB_FS_BULK_MAX_PACKET_SIZE)
-#endif /* #ifndef CY_DFU_USB_CDC_ENDPOINT_MAX_PACKET */
+/* MAX size in bytes for HID data packet */
+#ifndef CY_DFU_USB_HID_INT_MAX_PACKET
+    #define CY_DFU_USB_HID_INT_MAX_PACKET           (USB_FS_INT_MAX_PACKET_SIZE)
+#endif /* #ifndef CY_DFU_USB_HID_INT_MAX_PACKET */
 
-/* Interrupt endpoint size */
-#define CY_DFU_USB_HID_ENDPOINT_SIZE         (USB_FS_INT_MAX_PACKET_SIZE)
+/* Defines the input (device -> host) report size */
+#define INPUT_REPORT_SIZE   (CY_DFU_USB_HID_INT_MAX_PACKET)
+
+/* Defines the output (Host -> device) report size */
+#define OUTPUT_REPORT_SIZE  (CY_DFU_USB_HID_INT_MAX_PACKET)
+
+/* Defines the vendor specific page that
+ * shall be used, allowed values 0x00 - 0xff.
+ * This value must be identical to HOST application.
+*/
+#define VENDOR_PAGE_ID      (0x00)
+
 
 /**
-* USB_DEV_CDC_initVar indicates whether the emUSB-Device has been initialized. The
+* USB_DEV_HID_initVar indicates whether the emUSB-Device has been initialized. The
 * variable is initialized to false and set to true the first time
-* \ref USB_CDC_CyBtldrCommStart is called. This allows  the driver to restart
+* \ref USB_HID_CyBtldrCommStart is called. This allows  the driver to restart
 * without re-initialization after the first call to the
-* \ref USB_CDC_CyBtldrCommStart routine.
-* For re-initialization set \ref USB_DEV_CDC_initVar to false and call
-* \ref USB_CDC_CyBtldrCommStart.
+* \ref USB_HID_CyBtldrCommStart routine.
+* For re-initialization set \ref USB_DEV_HID_initVar to false and call
+* \ref USB_HID_CyBtldrCommStart.
 */
-bool USB_DEV_CDC_initVar = false;
+bool USB_DEV_HID_initVar = false;
 
 /* Data structure for emUSB-Device */
-static const USB_DEVICE_INFO _DeviceInfo =
+static const USB_DEVICE_INFO DeviceInfo =
 {
     0x058B,                    // VendorId
     0xF21D,                    // ProductId
     "Infineon",                // VendorName
-    "DFU USB CDC Transport",   // ProductName
+    "PSoC_DFU_HID_Dev",        // ProductName
     "0132456789"               // SerialNumber
 };
 
-/* Handle for emUSB CDC instance */
-static USB_CDC_HANDLE    hInst;
+/* Data structure for Report descriptor */
+static const U8 HIDReport[] =
+{
+    0x06, VENDOR_PAGE_ID, 0xFF,    // USAGE_PAGE (Vendor Defined Page)
+    0x09, 0x01,                    // USAGE (Vendor Usage 1)
+    0xA1, 0x01,                    // COLLECTION (Application)
+    0x19, 0x00,                    //   USAGE_MINIMUM (0)
+    0x29, OUTPUT_REPORT_SIZE,      //   USAGE_MAXIMUM (64)
+    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+    0x26, 0xFF, 0x00,              //   LOGICAL_MAXIMUM (255)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x95, OUTPUT_REPORT_SIZE,      //   REPORT_COUNT (64)
+    0x91, 0x00,                    //   OUTPUT
+    0x19, 0x00,                    //   USAGE_MINIMUM (0)
+    0x29, INPUT_REPORT_SIZE,       //   USAGE_MAXIMUM (64)
+    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+    0x26, 0xFF, 0x00,              //   LOGICAL_MAXIMUM (255)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x95, INPUT_REPORT_SIZE,       //   REPORT_COUNT (64)
+    0x81, 0x00,                    //   INPUT
+    0xC0                           // END_COLLECTION
+};
+
+
+/* Handle for emUSB HID instance */
+static USB_HID_HANDLE    hInst;
+
+/* Initialization structure for HID interface */
+static USB_HID_INIT_DATA_EX InitData;
 
 /* Buffer for store data in OUT direction (Host to Device) */
-static U8 OutBuffer[CY_DFU_USB_CDC_ENDPOINT_MAX_PACKET];
+static U8 OutBuffer[CY_DFU_USB_HID_INT_MAX_PACKET];
+
+
+/*******************************************************************************
+* Internal function declarations
+*******************************************************************************/
+static void USB_DEV_Start(void);
 
 
 /*******************************************************************************
@@ -93,67 +132,58 @@ static U8 OutBuffer[CY_DFU_USB_CDC_ENDPOINT_MAX_PACKET];
 * enumerated. It invokes USBD_Start().
 *
 * \globalvars
-* \ref USB_DEV_CDC_initVar - Used to check the initial configuration, modified on the
+* \ref USB_DEV_HID_initVar - Used to check the initial configuration, modified on the
 *                        first function call.
 *
 *******************************************************************************/
-static void USB_DEV_Start(void);
 static void USB_DEV_Start(void)
 {
-
-    USB_ADD_EP_INFO EPBulkIn;
-    USB_ADD_EP_INFO EPBulkOut;
     USB_ADD_EP_INFO EPIntIn;
-    USB_CDC_INIT_DATA InitData;
+    USB_ADD_EP_INFO EPIntOut;
 
-    if (!USB_DEV_CDC_initVar)
+    if (!USB_DEV_HID_initVar)
     {
-        memset(&EPBulkIn, 0x0, sizeof(EPBulkIn));
-        memset(&EPBulkOut, 0x0, sizeof(EPBulkOut));
         memset(&EPIntIn, 0x0, sizeof(EPIntIn));
-        memset(&InitData, 0x0, sizeof(InitData));
+        memset(&EPIntOut, 0x0, sizeof(EPIntOut));
 
         /* Initializes the USB device with its settings */
         USBD_Init();
 
-        /* IN direction (Device to Host) endpoint */
-        EPBulkIn.Flags          = 0;                                  // Flags not used.
-        EPBulkIn.InDir          = USB_DIR_IN;                         // IN direction (Device to Host)
-        EPBulkIn.Interval       = 0;                                  // Interval not used for Bulk endpoints.
-        EPBulkIn.MaxPacketSize  = CY_DFU_USB_CDC_ENDPOINT_MAX_PACKET; // Maximum packet size (64 for Bulk in full-speed and 512 for high-speed).
-        EPBulkIn.TransferType   = USB_TRANSFER_TYPE_BULK;             // Endpoint type - Bulk.
-        InitData.EPIn  = USBD_AddEPEx(&EPBulkIn, NULL, 0);
+        /* IN direction (Device to Host) Int endpoint */
+        EPIntIn.Flags           = 0;                             // Flags not used.
+        EPIntIn.InDir           = USB_DIR_IN;                    // IN direction (Device to Host)
+        EPIntIn.Interval        = 1;                             // Interval of 1 ms in full-speed
+        EPIntIn.MaxPacketSize   = CY_DFU_USB_HID_INT_MAX_PACKET; // Maximum packet size (64 for Interrupt).
+        EPIntIn.TransferType    = USB_TRANSFER_TYPE_INT;         // Endpoint type - Interrupt.
+        InitData.EPIn = USBD_AddEPEx(&EPIntIn, NULL, 0);
 
-        /* OUT direction (Device to Host) endpoint */
-        EPBulkOut.Flags         = 0;                                  // Flags not used.
-        EPBulkOut.InDir         = USB_DIR_OUT;                        // OUT direction (Host to Device)
-        EPBulkOut.Interval      = 0;                                  // Interval not used for Bulk endpoints.
-        EPBulkOut.MaxPacketSize = CY_DFU_USB_CDC_ENDPOINT_MAX_PACKET; // Maximum packet size (64 for Bulk in full-speed and 512 for high-speed).
-        EPBulkOut.TransferType  = USB_TRANSFER_TYPE_BULK;             // Endpoint type - Bulk.
-        InitData.EPOut = USBD_AddEPEx(&EPBulkOut, OutBuffer, sizeof(OutBuffer));
+        /* OUT direction (Device to Host) Int endpoint */
+        EPIntOut.Flags          = 0;                             // Flags not used.
+        EPIntOut.InDir          = USB_DIR_OUT;                   // OUT direction (Host to Device)
+        EPIntOut.Interval       = 1;                             // Interval of 1 ms in full-speed
+        EPIntOut.MaxPacketSize  = CY_DFU_USB_HID_INT_MAX_PACKET; // Maximum packet size (64 for Interrupt).
+        EPIntOut.TransferType   = USB_TRANSFER_TYPE_INT;         // Endpoint type - Interrupt.
+        InitData.EPOut = USBD_AddEPEx(&EPIntOut, OutBuffer, sizeof(OutBuffer));
 
-        /* Interrupt endpoint */
-        EPIntIn.Flags           = 0;                                  // Flags not used.
-        EPIntIn.InDir           = USB_DIR_IN;                         // IN direction (Device to Host)
-        EPIntIn.Interval        = 64;                                 // Interval of 8 ms (64 * 125us)
-        EPIntIn.MaxPacketSize   = CY_DFU_USB_HID_ENDPOINT_SIZE;       // Maximum packet size (64 for Interrupt).
-        EPIntIn.TransferType    = USB_TRANSFER_TYPE_INT;              // Endpoint type - Interrupt.
-        InitData.EPInt = USBD_AddEPEx(&EPIntIn, NULL, 0);
+        /* Initialization of the HID interface */
+        InitData.pReport = HIDReport;
+        InitData.NumBytesReport  = sizeof(HIDReport);
+        InitData.pInterfaceName  = "DFU HID";
 
-        /* Adds a CDC class to the stack */
-        hInst = USBD_CDC_Add(&InitData);
+        /* Adds a HID class to the stack */
+        hInst = USBD_HID_AddEx(&InitData);
 
         /* Set data for device enumeration */
-        USBD_SetDeviceInfo(&_DeviceInfo);
+        USBD_SetDeviceInfo(&DeviceInfo);
 
-        USB_DEV_CDC_initVar = true;
+        USB_DEV_HID_initVar = true;
     }
 }
 
 
 
 /*******************************************************************************
-* Function Name: USB_CDC_CyBtldrCommStart
+* Function Name: USB_HID_CyBtldrCommStart
 ****************************************************************************//**
 *
 * Starts the USB device operation.
@@ -165,7 +195,7 @@ static void USB_DEV_Start(void)
 * application when the project uses only PDL.
 *
 *******************************************************************************/
-void USB_CDC_CyBtldrCommStart(void)
+void USB_HID_CyBtldrCommStart(void)
 {
     USB_DEV_Start();
 
@@ -175,13 +205,13 @@ void USB_CDC_CyBtldrCommStart(void)
 
 
 /*******************************************************************************
-* Function Name: USB_CDC_CyBtldrCommStop
+* Function Name: USB_HID_CyBtldrCommStop
 ****************************************************************************//**
 *
 * Disables the USB device component.
 *
 *******************************************************************************/
-void USB_CDC_CyBtldrCommStop(void)
+void USB_HID_CyBtldrCommStop(void)
 {
     /* Stop the USB communication with detaching Device from the HOST */
     USBD_DeInit();
@@ -189,25 +219,25 @@ void USB_CDC_CyBtldrCommStop(void)
 
 
 /*******************************************************************************
-* Function Name: USB_CDC_CyBtldrCommReset
+* Function Name: USB_HID_CyBtldrCommReset
 ****************************************************************************//**
 *
 * Resets the receive and transmits communication buffers.
 *
 *******************************************************************************/
-void USB_CDC_CyBtldrCommReset(void)
+void USB_HID_CyBtldrCommReset(void)
 {
     if (USBD_IsConfigured() > 0U)
     {
         /* Cancel any read or write operation */
-        USBD_CDC_CancelRead(hInst);
-        USBD_CDC_CancelWrite(hInst);
+        USBD_CancelIO(InitData.EPIn);
+        USBD_CancelIO(InitData.EPOut);
     }
 }
 
 
 /*******************************************************************************
-* Function Name: USB_CDC_CyBtldrCommRead
+* Function Name: USB_HID_CyBtldrCommRead
 ****************************************************************************//**
 *
 * Allows the caller to read data from the DFU host (the host writes the
@@ -227,7 +257,7 @@ void USB_CDC_CyBtldrCommReset(void)
 * - See \ref cy_en_dfu_status_t.
 *
 *******************************************************************************/
-cy_en_dfu_status_t USB_CDC_CyBtldrCommRead(uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout)
+cy_en_dfu_status_t USB_HID_CyBtldrCommRead(uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout)
 {
     cy_en_dfu_status_t retCode = CY_DFU_ERROR_TIMEOUT;
 
@@ -237,12 +267,13 @@ cy_en_dfu_status_t USB_CDC_CyBtldrCommRead(uint8_t pData[], uint32_t size, uint3
     if ((USBD_GetState() & (USB_STAT_CONFIGURED | USB_STAT_SUSPENDED)) == USB_STAT_CONFIGURED)
     {
         /* Wait (blocking with timeout) for data to be available for a read */
-        int32_t retVal = USBD_CDC_Receive(hInst, pData, size, timeout);
+        int32_t retVal = USBD_HID_Read(hInst, pData, CY_DFU_USB_HID_INT_MAX_PACKET, timeout);
+        int32_t numBytes = CY_DFU_USB_HID_INT_MAX_PACKET;
 
         /* Data received successfully */
-        if (retVal > 0)
+        if (retVal == numBytes)
         {
-            *count = retVal;
+            *count = numBytes;
             retCode = CY_DFU_SUCCESS;
         }
 
@@ -258,7 +289,7 @@ cy_en_dfu_status_t USB_CDC_CyBtldrCommRead(uint8_t pData[], uint32_t size, uint3
 
 
 /*******************************************************************************
-* Function Name: USB_CDC_CyBtldrCommWrite
+* Function Name: USB_HID_CyBtldrCommWrite
 ****************************************************************************//**
 *
 * Allows the caller to write data to the DFU host (the host reads the
@@ -280,27 +311,28 @@ cy_en_dfu_status_t USB_CDC_CyBtldrCommRead(uint8_t pData[], uint32_t size, uint3
 * - See \ref cy_en_dfu_status_t.
 *
 *******************************************************************************/
-cy_en_dfu_status_t USB_CDC_CyBtldrCommWrite(uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout)
+cy_en_dfu_status_t USB_HID_CyBtldrCommWrite(uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout)
 {
     cy_en_dfu_status_t retCode = CY_DFU_ERROR_TIMEOUT;
 
     CY_ASSERT_L1((pData != NULL) && (size > 0U) && (count != NULL));
-    CY_ASSERT_L1(size <= CY_DFU_USB_CDC_ENDPOINT_MAX_PACKET);
+    CY_ASSERT_L1(size <= CY_DFU_USB_HID_INT_MAX_PACKET);
 
     /* Check Device enumeration */
     if ((USBD_GetState() & (USB_STAT_CONFIGURED | USB_STAT_SUSPENDED)) == USB_STAT_CONFIGURED)
     {
-        /* Wait (blocking with timeout) for an endpoint availability for a write */
-        if (USBD_CDC_WaitForTX(hInst, timeout) == 0U)
+        /* Wait (blocking with timeout, but actual waiting is not expected) for an endpoint availability for a write */
+        if (USBD_HID_WaitForTX(hInst, timeout) == 0U)
         {
-            /* Write data to the Host (blocking with timeout) */
-            int32_t retVal = USBD_CDC_Write(hInst, pData, size, timeout);
-            int32_t numBytes = size;
+            /* Write data to the Host (blocking with timeout until send all data) */
+            memset(pData + size, 0x0, CY_DFU_USB_HID_INT_MAX_PACKET - size);
+            int32_t retVal = USBD_HID_Write(hInst, pData, CY_DFU_USB_HID_INT_MAX_PACKET, timeout);
+            int32_t numBytes = CY_DFU_USB_HID_INT_MAX_PACKET;
 
             /* Data sent successfully */
             if (retVal == numBytes)
             {
-                *count = size;
+                *count = numBytes;
                 retCode = CY_DFU_SUCCESS;
             }
 

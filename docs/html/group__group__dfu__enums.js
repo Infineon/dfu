@@ -16,6 +16,8 @@ var group__group__dfu__enums =
       [ "CY_DFU_I2C", "group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137a74f139ec8e316257d10b026bedb02bdd", null ],
       [ "CY_DFU_UART", "group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137a6caa0300fd55cb50fba9a40a9ff64f94", null ],
       [ "CY_DFU_SPI", "group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137a98e7c687441160fd6dfbb277c16dfdef", null ],
-      [ "CY_DFU_USB_CDC", "group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137a61eb67fb163cf00e3a18942969364164", null ]
+      [ "CY_DFU_USB_CDC", "group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137a61eb67fb163cf00e3a18942969364164", null ],
+      [ "CY_DFU_USB_HID", "group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137ad5bbb4e21fa9389a10fc6e09c7a202d6", null ],
+      [ "CY_DFU_CANFD", "group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137aeb1c01f0671b11d63a1f21f2787fc990", null ]
     ] ]
 ];

@@ -1,12 +1,12 @@
 /***************************************************************************//**
 * \file cy_dfu.c
-* \version 5.1
+* \version 5.2
 *
 *  This file provides the implementation of DFU Middleware.
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -2281,7 +2281,7 @@ static cy_en_dfu_status_t ContinueHelper(uint32_t command, uint8_t *packet, uint
         break;
 
     case CY_DFU_CMD_SEND_DATA:
-        CY_DFU_LOG_DBG("Receive Send Data command");
+        CY_DFU_LOG_INF("Receive Send Data command");
         status = CommandSendData(packet, rspSize, params);
         break;
 #endif /* CY_DFU_NO_CMD_SEND_DATA == 0 */
@@ -2405,7 +2405,7 @@ cy_en_dfu_status_t Cy_DFU_Continue(uint32_t *state, cy_stc_dfu_params_t *params)
 }
 
 
-#if CY_DFU_OPT_CUSTOM_CMD != 0
+#if (CY_DFU_OPT_CUSTOM_CMD != 0) || defined(CY_DOXYGEN)
 /*******************************************************************************
 * Function Name: Cy_DFU_RegisterUserCommand
 ****************************************************************************//**
@@ -2457,6 +2457,6 @@ cy_en_dfu_status_t Cy_DFU_UnRegisterUserCommand(cy_stc_dfu_params_t *params)
     return status;
 }
 
-#endif /* CY_DFU_OPT_CUSTOM_CMD != 0 */
+#endif /* #if (CY_DFU_OPT_CUSTOM_CMD != 0) || defined(CY_DOXYGEN) */
 
 /* [] END OF FILE */

@@ -14,7 +14,7 @@
 ## Features
 
 - Reads firmware images from a host through a number of transport interfaces,
-  e.g. USB, UART, I2C, SPI
+  e.g. USB, UART, I2C, SPI, CANFD
   Supports dynamic switching (during runtime) of the communication interfaces
 - Provides ready-for-use transport interface templates based on HAL drivers for
   PDL drivers for CAT1 devices and CAT2 devices
@@ -78,4 +78,4 @@ For more information, refer to the following links:
 - [Infineon Technologies AG](https://www.infineon.com)
 
 ---
-© Cypress Semiconductor Corporation (an Infineon company), 2023.
+© Cypress Semiconductor Corporation (an Infineon company), 2023-2024.

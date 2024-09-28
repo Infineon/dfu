@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['cy_5fdfu_5fcanfd',['CY_DFU_CANFD',['../group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137aeb1c01f0671b11d63a1f21f2787fc990',1,'cy_dfu.h']]],
   ['cy_5fdfu_5ferror_5faddress',['CY_DFU_ERROR_ADDRESS',['../group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba6f249e03bb0423c688c1112bfb9e8430',1,'cy_dfu.h']]],
   ['cy_5fdfu_5ferror_5fbad_5fparam',['CY_DFU_ERROR_BAD_PARAM',['../group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba0dde34c67acedc3f7deef1d002711a7f',1,'cy_dfu.h']]],
   ['cy_5fdfu_5ferror_5fchecksum',['CY_DFU_ERROR_CHECKSUM',['../group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1bacad1c5902859d988b3de84e954e9b229',1,'cy_dfu.h']]],
@@ -13,5 +14,6 @@ var searchData=
   ['cy_5fdfu_5fspi',['CY_DFU_SPI',['../group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137a98e7c687441160fd6dfbb277c16dfdef',1,'cy_dfu.h']]],
   ['cy_5fdfu_5fsuccess',['CY_DFU_SUCCESS',['../group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23',1,'cy_dfu.h']]],
   ['cy_5fdfu_5fuart',['CY_DFU_UART',['../group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137a6caa0300fd55cb50fba9a40a9ff64f94',1,'cy_dfu.h']]],
-  ['cy_5fdfu_5fusb_5fcdc',['CY_DFU_USB_CDC',['../group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137a61eb67fb163cf00e3a18942969364164',1,'cy_dfu.h']]]
+  ['cy_5fdfu_5fusb_5fcdc',['CY_DFU_USB_CDC',['../group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137a61eb67fb163cf00e3a18942969364164',1,'cy_dfu.h']]],
+  ['cy_5fdfu_5fusb_5fhid',['CY_DFU_USB_HID',['../group__group__dfu__enums.html#gga375b46c7413cecb3fdc63f8d4638d137ad5bbb4e21fa9389a10fc6e09c7a202d6',1,'cy_dfu.h']]]
 ];

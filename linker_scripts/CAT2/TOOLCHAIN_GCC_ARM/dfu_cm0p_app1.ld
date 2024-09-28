@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file dfu_cm0p_app0.ld
-* \version 5.1
+* \version 5.2
 *
 * Linker file for the GNU C compiler.
 * Used for the DFU SDK application 1 firmware project.
@@ -22,7 +22,7 @@
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials

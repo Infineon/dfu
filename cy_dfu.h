@@ -1,12 +1,12 @@
 /***************************************************************************//**
 * \file cy_dfu.h
-* \version 5.1
+* \version 5.2
 *
 * Provides API declarations for the DFU Middleware.
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -101,14 +101,14 @@
 * The portfolio of Code Examples continuously extends at
 * [Infineon GitHub](https://github.com/Infineon/Code-Examples-for-ModusToolbox-Software).
 *
-* The ModusToolbox(TM) Quick Start Guide (QSG) assumes ModusToolbox(TM) 3.x is installed
+* The ModusToolbox&trade; Quick Start Guide (QSG) assumes ModusToolbox&trade; 3.x is installed
 * with all required tools.
 *
 * The following steps are to set up and build a basic DFU loader and loadable
 * applications. The DFU loader application uses the I2C transport interface.
 * The steps assume that the user builds an application for CY8CKIT-062-WIFI-BT
 * (CAT1A device) or CY8CKIT-149 kits (CAT2 device)
-* based on a starter Hello_World ModusToolbox(TM) project.
+* based on a starter Hello_World ModusToolbox&trade; project.
 *
 * \note For other kits or devices, update default linker scripts with the valid
 * memory addresses. For details, refer to \ref group_dfu_config_linker_scripts.
@@ -118,11 +118,11 @@
 * 1. Create a project for CY8CKIT-062-WIFI-BT or CY8CKIT-149 with the DFU loader
 *    application using the Hello_World template application ("Getting started"
 *    section in the Project Creator).
-*    Name it "QSG_DFU_App0_I2C". For details, refer to the ModusToolbox(TM) 3.x
+*    Name it "QSG_DFU_App0_I2C". For details, refer to the ModusToolbox&trade; 3.x
 *    IDE Quick Start Guide.
 * 2. Create a project for the DFU loadable application in the same way and name
 *    it "QSG_DFU_App1_Hello_World".
-* 3. Include the DFU middleware into each project using the ModusToolbox(TM) Library
+* 3. Include the DFU middleware into each project using the ModusToolbox&trade; Library
 *    Manager or download it from GitHub and copy it to the project manually.
 * 4. Include a DFU header in main.c of each project to get access to DFU API:
 *    \snippet snippet/main.c snipped_cy_dfu_include
@@ -152,7 +152,7 @@
 *    \warning Not needed for the CAT1 devices - configuration is done by HAL.\n
 *     Please check/setup the required pins assignments in the BSP.
 *
-*    Open the ModusToolbox(TM) Device Configurator and enable SCB on the Peripheral
+*    Open the ModusToolbox&trade; Device Configurator and enable SCB on the Peripheral
 *    tab under Communication section with the following parameter.
 *
 *    For CY8CKIT-149, SCB 1 is connected to the KitProg.
@@ -287,13 +287,13 @@
 *
 * \subsubsection subsubsection_qsg_mcuboot_s1 STEP1: Projects preparation.
 *
-* 1. Create a ModusToolbox(TM) application for the CAT1A or CAT1C devices. For example,
+* 1. Create a ModusToolbox&trade; application for the CAT1A or CAT1C devices. For example,
 *   the CY8CKIT-062-WIFI-BT kit can be used as CAT1A or KIT_XMC72_EVK as CAT1C.
-*   Create a new application in the ModusToolbox(TM) IDE using an appropriate BSP
+*   Create a new application in the ModusToolbox&trade; IDE using an appropriate BSP
 *   and an empty application as a template (Empty App). Name it "DFU_App0". For details, refer to the
-*   ModusToolbox(TM) 3.x IDE Quick Start Guide.
+*   ModusToolbox&trade; 3.x IDE Quick Start Guide.
 *
-* 2. Include the DFU middleware into the project using the ModusToolbox(TM) Library
+* 2. Include the DFU middleware into the project using the ModusToolbox&trade; Library
 *    Manager.
 *
 * 3. Add the DFU transport components to project's Makefile to enable the transport interface(s).
@@ -321,7 +321,7 @@
 *       changed. CY_DFU_PRODUCT can be defined in the Makefile.
 *
 * \subsubsection subsubsection_qsg_mcuboot_s4 STEP4: Create a loadable application (Application 1).
-* 1. Create a ModusToolbox(TM) application for the same devices as in STEP1. Use an empty
+* 1. Create a ModusToolbox&trade; application for the same devices as in STEP1. Use an empty
 *   application as a template (Empty App). Name it "DFU_App1".
 *
 * 2. Disable the adding the CM0+ core code to the result binary. For the CAT1A device
@@ -524,11 +524,11 @@
 * the DFU SDK GCC's linker scripts described above.
 *
 ********************************************************************************
-* \subsection group_dfu_mtb_cfg Use of the ModusToolbox(TM) tools for HW initialization
+* \subsection group_dfu_mtb_cfg Use of the ModusToolbox&trade; tools for HW initialization
 ********************************************************************************
 * The following section describes the communication interfaces settings in the Device Configurator
 * required to use the included with DFU middleware communication files with the DFU Host tool.
-* \warning The ModusToolbox(TM) Device Configurator is not used for templates based on the HAL drivers.\n
+* \warning The ModusToolbox&trade; Device Configurator is not used for templates based on the HAL drivers.\n
 *  Please check/setup the required pins assignments in the BSP.
 *
 *
@@ -572,10 +572,83 @@
 *      Stop Bits              | Any, Stop Bits in DFU Host tool should be the same
 *
 * \par USB CDC transports
-* For a setup of the USB device personality in the ModusToolbox Device Configurator
+* To set up the USB device personality in the ModusToolbox&trade; Device Configurator
 * for the USB DFU transport for CY8CKIT-062-WIFI-BT, see the screenshots
 * below. For other kits, verify the USB pins.
 * \image html dfu_usb_cdc.png
+*
+* \par CAN FD
+* 
+* The CAN FD transport is supported by the following devices:
+* - PSoC Control C3 (CAT1B),
+* - XMC7000 (CAT1C).
+* 
+* To set up the CAN FD personality in the ModusToolbox&trade; Device Configurator
+* for the CAN FD DFU transport for KIT_XMC72_EVK, see the screenshots
+* below. For other kits, verify the CAN Rx and CAN Tx pins connections.
+* 
+* <b> General settings </b> - set the personality alias and CAN FD mode:
+*      Parameter name         | Value                                |
+*      -----------------------|--------------------------------------
+*      Personality alias name | DFU_CANFD
+*      CAN FD Mode            | Enabled
+* 
+* \image html dfu_canfd1.png
+* \n
+* 
+* <b> Bitrate settings </b> - configure prescaler, time segments and syncronization jump width:
+*      Parameter name         | Value                                |
+*      -----------------------|--------------------------------------
+*      Nominal Prescaler      | Set according to nominal bitrate setting in the DFU Host Tool
+*      Nominal Time Segment 1 | ^
+*      Nominal Time Segment 1 | ^
+*      Nominal Syncronization Jump Width | ^
+*      Data Prescaler         | Set according to data bitrate setting in the DFU Host Tool
+*      Data Time Segment 1    | ^
+*      Data Time Segment 1    | ^
+*      Data Syncronization Jump Width | ^
+* 
+* \image html dfu_canfd2.png
+* \n
+* 
+* <b> ID Filter settings </b> - configure standard or extended frame ID filter:
+*      Parameter name         | Value                                |
+*      -----------------------|--------------------------------------
+*      Number of SID Filters  | 1 if standard frame is used, 0 otherwise
+*      Number of XID Filters  | 1 if extended frame is used, 0 otherwise
+*      Standard Filter Element Configuration | Store into Rx Buffer or as Debug Message
+*      SFID1/EFID1            | As configured in the DFU Host Tool
+*      Store the Received Message | Store Message into an Rx Buffer
+*      Rx Bufer Element       | 0
+* 
+* \image html dfu_canfd3.png
+* \n
+* 
+* <b> Global Filter & Rx Buffers settings </b> - configure global filter and Rx buffer:
+*      Parameter name         | Value                                |
+*      -----------------------|--------------------------------------
+*      Accept Non-matcing Frames Standard | Reject
+*      Accept Non-matcing Frames Extended | Reject
+*      Reject Remote Frames Standard | Enabled
+*      Reject Remote Frames Extended | Enabled
+*      Rx Bufer Data Field Size | 64 Byte Data Field
+*      Number of Rx Buffers   | 1
+* 
+* \image html dfu_canfd4.png
+* \n
+* 
+* <b> Tx Buffers & Tx Buffer #0 settings </b> - configure Tx buffer:
+*      Parameter name         | Value                                |
+*      -----------------------|--------------------------------------
+*      Tx Bufer Data Field Size | 64 Byte Data Field
+*      Number of Tx Buffers   | 1
+*      XTD                    | As configured in the DFU Host Tool
+*      Identifier             | ^
+*      BRS                    | ^
+*      FDF                    | CAN FD Format
+* 
+* \image html dfu_canfd5.png
+* \note DLC and Data will be set by the middleware according to the specific transaction.
 *
 ********************************************************************************
 * \section section_dfu_design Design Considerations
@@ -598,7 +671,7 @@
 *    locate **COMPONENTS** variable and add **DFU_UART**:
 *    \code COMPONENTS+=DFU_UART \endcode
 * - For templates based on the PDL drivers:
-*   - Select and configure the SCB block using the ModusToolbox(TM) Device
+*   - Select and configure the SCB block using the ModusToolbox&trade; Device
 *     Configurator see \ref group_dfu_mtb_cfg or manually using
 *     the configuration structures.
 *   - Adjust value of the UART_BYTE_TO_BYTE_TIMEOUT_US constant to align with UART
@@ -620,7 +693,7 @@
 *    locate **COMPONENTS** variable and add **DFU_SPI**:
 *    \code COMPONENTS+=DFU_SPI \endcode
 * - For templates based on the PDL drivers:
-*   - Select and configure the SCB block using the ModusToolbox(TM) Device
+*   - Select and configure the SCB block using the ModusToolbox&trade; Device
 *     Configurator see \ref group_dfu_mtb_cfg or manually using
 *     the configuration structures.
 *   - Adjust value of the SPI_BYTE_TO_BYTE constant to align with SPI speed
@@ -642,7 +715,7 @@
 * - Add USB_CDC transport component in project's Makefile:
 *    locate **COMPONENTS** variable and add **DFU_USB_CDC**:
 *    \code COMPONENTS+=DFU_USB_CDC \endcode
-* - Enable and configure the USB Device block using the ModusToolbox(TM) Device Configurator
+* - Enable and configure the USB Device block using the ModusToolbox&trade; Device Configurator
 *   see \ref group_dfu_mtb_cfg or manually using the configuration structures.
 * - Generate USB descriptors and USB Middleware structures using the USB Configurator.
 *   Open the USB configuration file (cycfg_usb_cdc.cyusbdev)
@@ -667,6 +740,18 @@
 *    \code COMPONENTS+=USBD_BASE \endcode
 *    \code COMPONENTS+=DFU_EMUSB_CDC \endcode
 *    \code COMPONENTS+=SOFTFP \endcode
+*
+********************************************************************************
+* \subsection group_dfu_ucase_canfd Firmware Update via CAN FD transport
+********************************************************************************
+*
+* Specific steps for the CAN FD transport support:
+* - Add the CAN FD transport components to the project Makefile:
+*    \code COMPONENTS+=DFU_CANFD \endcode
+* 
+* - The CAN FD interrupt priority can be configured using the DFU_CANFD_IRQ_PRIORITY macro,
+* for example:
+*    \code DEFINES+=DFU_CANFD_IRQ_PRIORITY=5 \endcode
 *
 ********************************************************************************
 * \subsection group_dfu_ucase_checksum Change checksum types
@@ -761,7 +846,7 @@
 *
 * The steps to create a .cyacd2 file with a CRC application signature:
 * -# Copy the path to the CyMCUElfTool binary. The path can be found in the
-*    folder with ModusToolbox tools (for example
+*    folder with ModusToolbox&trade; tools (for example
 *    /ModusToolbox/tools_2.0/cymcuelftool-1.0/bin/cymcuelftool).
 * -# Update the application ELF with a CRC checksum (\<MCUELFTOOL\> - the copied
 *     path to the binary):
@@ -781,6 +866,23 @@
 *
 * <table class="doxtable">
 *   <tr><th>Version</th><th>Changes</th><th>Reason for Change</th></tr>
+*   <tr>
+*     <td rowspan="3">5.2</td>
+*     <td>Added USB HID transport based on the emUSB-Device middleware for the CAT1A device</td>
+*     <td>Extending the current feature</td>
+*   </tr>
+*   <tr>
+*     <td>Added CANFD transport based on the PDL driver for the CAT1C device</td>
+*     <td>Extending the current feature</td>
+*   </tr>
+*   <tr>
+*     <td>Minor updates in the templates</td>
+*     <td>Improved the templates usability</td>
+*   </tr>
+*   <tr>
+*     <td>Fixed address validation for CAT1C device</td>
+*     <td>Bugfix</td>
+*   </tr>
 *   <tr>
 *     <td rowspan="3">5.1</td>
 *     <td>Added USB CDC transport based on the emUSB-Device middleware for the CAT1A device</td>
@@ -988,7 +1090,7 @@ extern "C"{
 #define CY_DFU_SDK_MW_VERSION_MAJOR       (5)
 
 /** The DFU SDK minor version */
-#define CY_DFU_SDK_MW_VERSION_MINOR       (0)
+#define CY_DFU_SDK_MW_VERSION_MINOR       (2)
 
 /**
 * \defgroup group_dfu_macro_state DFU State
@@ -1113,6 +1215,8 @@ typedef enum
     CY_DFU_UART    = 0x02U, /**< UART transport interface */
     CY_DFU_SPI     = 0x03U, /**< SPI transport interface */
     CY_DFU_USB_CDC = 0x04U, /**< USB CDC transport interface */
+    CY_DFU_USB_HID = 0x05U, /**< USB HID transport interface */
+    CY_DFU_CANFD   = 0x06U, /**< CAN FD transport interface */
 } cy_en_dfu_transport_t;
 
 
@@ -1370,10 +1474,10 @@ void Cy_DFU_TransportStop(void);
 *      \snippet snippet/main.c snippet_cy_dfu_UserCommandHandlerUnregister
 */
 
-#if CY_DFU_OPT_CUSTOM_CMD != 0
+#if (CY_DFU_OPT_CUSTOM_CMD != 0) || defined(CY_DOXYGEN)
 cy_en_dfu_status_t Cy_DFU_RegisterUserCommand(cy_stc_dfu_params_t *params, Cy_DFU_CustomCommandHandler handler);
 cy_en_dfu_status_t Cy_DFU_UnRegisterUserCommand(cy_stc_dfu_params_t *params);
-#endif /* CY_DFU_OPT_CUSTOM_CMD */
+#endif /* #if (CY_DFU_OPT_CUSTOM_CMD != 0) || defined(CY_DOXYGEN) */
 /** \} group_dfu_functions_custom_cmd */
 
 /** \} group_dfu_functions */

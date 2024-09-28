@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file dfu_user.c
-* \version 5.1
+* \version 5.2
 *
 * This file provides the custom API for a firmware application with
 * DFU SDK.
@@ -9,7 +9,7 @@
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -67,6 +67,13 @@
     #include "transport_emusb_cdc.h"
 #endif  /* COMPONENT_DFU_EMUSB_CDC */
 
+#ifdef COMPONENT_DFU_EMUSB_HID
+    #include "transport_emusb_hid.h"
+#endif  /* COMPONENT_DFU_EMUSB_HID */
+
+#ifdef COMPONENT_DFU_CANFD
+    #include "transport_canfd.h"
+#endif  /* COMPONENT_DFU_CANFD */
 
 /* Global flash object */
 static cyhal_nvm_t flash_obj;
@@ -76,6 +83,7 @@ static cy_en_dfu_transport_t selectedInterface = CY_DFU_UART;
 #ifdef CY_IP_M7CPUSS
     static const cyhal_flash_block_info_t* blocks_info;
     static uint8_t blocks_count;
+    static uint32_t blocks_sector_size;
 #endif
 
 #if CY_DFU_FLOW == CY_DFU_BASIC_FLOW
@@ -145,14 +153,30 @@ static bool AddressValid(uint32_t address, cy_stc_dfu_params_t *params)
                         (address < (CY_EM_EEPROM_BASE + CY_EM_EEPROM_SIZE)));
     CY_UNUSED_PARAMETER(params);
 #else /* MCUBoot flow*/
-    #if defined CY_FLASH_BASE
-        addrValid = (CY_FLASH_BASE <= address) &&
-                                (address < (CY_FLASH_BASE + CY_FLASH_SIZE));
+    #ifdef CY_IP_M7CPUSS
+        blocks_sector_size = 0U;
+        for (uint32_t block_num = 0U; block_num < blocks_count; block_num++)
+        {
+            uint32_t flash_start_address = (&blocks_info[block_num])->start_address;
+            uint32_t flash_size = (&blocks_info[block_num])->size;
+            if ((flash_start_address <= address) && (address < flash_start_address + flash_size))
+            {
+                blocks_sector_size = (&blocks_info[0])->sector_size;
+                break;
+            }
+        }
+        addrValid = (blocks_sector_size > 0U);
     #else
-        CY_UNUSED_PARAMETER(address);
-    #endif
-    CY_UNUSED_PARAMETER(params);
-#endif
+        #if defined CY_FLASH_BASE
+            addrValid = (CY_FLASH_BASE <= address) &&
+                        (address < (CY_FLASH_BASE + CY_FLASH_SIZE));
+        #else
+            CY_DFU_LOG_WRN("Address validation skipped");
+            CY_UNUSED_PARAMETER(address);
+        #endif /* defined CY_FLASH_BASE */
+        CY_UNUSED_PARAMETER(params);
+    #endif /* CY_IP_M7CPUSS */
+#endif /* CY_DFU_FLOW == CY_DFU_BASIC_FLOW */
 
     return addrValid;
 }
@@ -262,25 +286,9 @@ cy_en_dfu_status_t Cy_DFU_WriteData (uint32_t address, uint32_t length, uint32_t
         cy_rslt_t fstatus = CY_RSLT_SUCCESS;
 
         #ifdef CY_IP_M7CPUSS
-
-            uint32_t nvm_sector_size = 0U;
             uint32_t int_status;
-            for (uint32_t block_num = 0; block_num < blocks_count; block_num++)
-            {
-                uint32_t flash_start_address = (&blocks_info[block_num])->start_address;
-                uint32_t flash_size          = (&blocks_info[block_num])->size;
-                if((flash_start_address <= address) && (address < flash_start_address + flash_size))
-                {
-                    nvm_sector_size = (&blocks_info[0])->sector_size;
-                    break;
-                }
-            }
-            if(nvm_sector_size == 0U)
-            {
-                CY_ASSERT(false);
-            }
             int_status = Cy_SysLib_EnterCriticalSection();
-            if(address % nvm_sector_size == 0)
+            if(address % blocks_sector_size == 0U)
             {
                 fstatus = cyhal_flash_erase(&flash_obj, address);
             }
@@ -421,6 +429,16 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport)
             USB_CDC_CyBtldrCommStart();
             break;
     #endif /* COMPONENT_DFU_EMUSB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_HID
+        case CY_DFU_USB_HID:
+            USB_HID_CyBtldrCommStart();
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_HID */
+    #ifdef COMPONENT_DFU_CANFD
+        case CY_DFU_CANFD:
+            CANFD_CanfdCyBtldrCommStart();
+            break;
+    #endif /* COMPONENT_DFU_CANFD */
 
         default:
             /* Selected interface in not applicable */
@@ -471,6 +489,16 @@ void Cy_DFU_TransportStop()
             USB_CDC_CyBtldrCommStop();
             break;
     #endif /* COMPONENT_DFU_EMUSB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_HID
+        case CY_DFU_USB_HID:
+            USB_HID_CyBtldrCommStop();
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_HID */
+    #ifdef COMPONENT_DFU_CANFD
+        case CY_DFU_CANFD:
+            CANFD_CanfdCyBtldrCommStop();
+            break;
+    #endif /* COMPONENT_DFU_CANFD */
 
         default:
             /* Selected interface in not applicable */
@@ -518,6 +546,16 @@ void Cy_DFU_TransportReset(void)
             USB_CDC_CyBtldrCommReset();
             break;
     #endif /* COMPONENT_DFU_EMUSB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_HID
+        case CY_DFU_USB_HID:
+            USB_HID_CyBtldrCommReset();
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_HID */
+    #ifdef COMPONENT_DFU_CANFD
+        case CY_DFU_CANFD:
+            CANFD_CanfdCyBtldrCommReset();
+            break;
+    #endif /* COMPONENT_DFU_CANFD */
 
         default:
             /* Selected interface in not applicable */
@@ -567,6 +605,16 @@ cy_en_dfu_status_t Cy_DFU_TransportRead(uint8_t buffer[], uint32_t size, uint32_
             status = USB_CDC_CyBtldrCommRead(buffer, size, count, timeout);
             break;
     #endif /* COMPONENT_DFU_EMUSB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_HID
+        case CY_DFU_USB_HID:
+            status = USB_HID_CyBtldrCommRead(buffer, size, count, timeout);
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_HID */
+    #ifdef COMPONENT_DFU_CANFD
+        case CY_DFU_CANFD:
+            status = CANFD_CanfdCyBtldrCommRead(buffer, size, count, timeout);
+            break;
+    #endif /* COMPONENT_DFU_CANFD */
 
         default:
             /* Selected interface in not applicable */
@@ -618,6 +666,16 @@ cy_en_dfu_status_t Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size, uint32
             status = USB_CDC_CyBtldrCommWrite(buffer, size, count, timeout);
             break;
     #endif /* COMPONENT_DFU_EMUSB_CDC */
+    #ifdef COMPONENT_DFU_EMUSB_HID
+        case CY_DFU_USB_HID:
+            status = USB_HID_CyBtldrCommWrite(buffer, size, count, timeout);
+            break;
+    #endif /* COMPONENT_DFU_EMUSB_HID */
+    #ifdef COMPONENT_DFU_CANFD
+        case CY_DFU_CANFD:
+            status = CANFD_CanfdCyBtldrCommWrite(buffer, size, count, timeout);
+            break;
+    #endif /* COMPONENT_DFU_CANFD */
 
         default:
             /* Selected interface in not applicable */

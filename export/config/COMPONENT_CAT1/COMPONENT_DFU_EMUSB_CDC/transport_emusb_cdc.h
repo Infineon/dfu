@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_emusb_cdc.h
-* \version 1.0
+* \version 5.2
 *
 * This file provides the constants and parameter values of the DFU communication
 * API implementation for the emUSB-Device that implements a virtual COM port
@@ -8,7 +8,7 @@
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials

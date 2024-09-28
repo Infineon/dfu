@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_spi.c
-* \version 5.1
+* \version 5.2
 *
 * This file provides the source code of the DFU communication APIs
 * for the SCB Component SPI mode.
@@ -15,7 +15,7 @@
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2023), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -56,7 +56,7 @@
 #include "cycfg_peripherals.h"
 
 #if !defined DFU_SPI_HW
-    #error The SPI personality alias must be DFU_SPI to support DFU communication API.
+    #error "The SPI personality alias must be DFU_SPI to support DFU communication API."
 
     /* Dummy configuration to generate only error above during a build */
     #define CY_DFU_SPI_HW           NULL

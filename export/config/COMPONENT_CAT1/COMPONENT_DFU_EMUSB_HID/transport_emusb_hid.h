@@ -1,13 +1,9 @@
-/*******************************************************************************
-* \file dfu_elf_symbols.c
+/***************************************************************************//**
+* \file transport_emusb_hid.h
 * \version 5.2
 *
-* This file provides inline assembly to add symbols in the an ELF file required
-* by CyMCUElfTool to generate correct CYACD2 image.
-*
-* \note
-* This file requires modifications of DFU specific symbols for the
-* application #1.
+* This file provides the constants and parameter values of the DFU communication
+* API implementation for the emUSB-Device that implements a HID class.
 *
 ********************************************************************************
 * \copyright
@@ -43,43 +39,38 @@
 * indemnify Cypress against all liability.
 *******************************************************************************/
 
-#include "dfu_common.h"
+#if !defined(TRANSPORT_EMUSB_HID_H)
+#define TRANSPORT_EMUSB_HID_H
+
+#include "cy_dfu.h"
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+/***************************************
+*    Variables with External Linkage
+***************************************/
+
+extern bool USB_DEV_HID_initVar;
 
 
-/* Symbols that are added to the ELF file */
-__asm
-(
-    /* DFU specific symbols */
-    ".global __cy_app_id \n"
-    ".global __cy_product_id \n"
-    ".global __cy_boot_metadata_addr \n"
-    ".global __cy_boot_metadata_length \n"
+/***************************************
+*        Function Prototypes
+***************************************/
 
-    ".global  __cy_app_core1_start_addr \n"
-    ".global  __cy_checksum_type \n"
-    ".global  __cy_app_verify_start \n"
-    ".global  __cy_app_verify_length \n"
+/* The USB device HID class DFU physical layer functions */
+void USB_HID_CyBtldrCommStart(void);
+void USB_HID_CyBtldrCommStop (void);
+void USB_HID_CyBtldrCommReset(void);
+cy_en_dfu_status_t USB_HID_CyBtldrCommRead (uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout);
+cy_en_dfu_status_t USB_HID_CyBtldrCommWrite(uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout);
 
-    ".equ __cy_boot_metadata_addr,   " CY_STR(CY_BOOT_METADATA_ADDR) "\n"
-    ".equ __cy_boot_metadata_length, " CY_STR(CY_BOOT_METADATA_LENGTH) "\n"
+#if defined(__cplusplus)
+}
+#endif
 
-    ".equ __cy_app_id,               0 \n"
-    ".equ __cy_product_id,           " CY_STR(CY_PRODUCT_ID) "\n"
-    ".equ __cy_checksum_type,        " CY_STR(CY_CHECKSUM_TYPE) "\n"
-    ".equ __cy_app_core1_start_addr, " CY_STR(CY_APP0_FLASH_ADDR) " \n"
-    ".equ __cy_app_verify_start,     " CY_STR(CY_APP0_FLASH_ADDR) " \n"
-    ".equ __cy_app_verify_length,    " CY_STR(CY_APP0_FLASH_LENGTH) " - " CY_STR(CY_BOOT_SIGNATURE_SIZE) "\n"
-
-    /* flash */
-    ".global __cy_memory_0_start    \n"
-    ".global __cy_memory_0_length   \n"
-    ".global __cy_memory_0_row_size \n"
-
-    /* flash */
-    ".equ __cy_memory_0_start,    0x00000000 \n"
-    ".equ __cy_memory_0_length,   0x00020000 \n"
-    ".equ __cy_memory_0_row_size, 0x100 \n"
-);
+#endif /* !defined(TRANSPORT_EMUSB_HID_H) */
 
 
 /* [] END OF FILE */
