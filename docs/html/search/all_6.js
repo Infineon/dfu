@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['global_20variables',['Global Variables',['../group__group__dfu__globals.html',1,'']]]
+  ['handlercmd',['handlerCmd',['../group__group__dfu__data__structs.html#a0d02b956cd547ab0e6ccb067240f75a4',1,'cy_stc_dfu_params_t']]]
 ];

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Device Firmware Update (DFU) Middleware Library 5.2</title>
+<title>Device Firmware Update (DFU) Middleware Library 6.0</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -31,7 +31,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><a href="https://www.infineon.com/"><img alt="Logo" src="logo.png"/></a></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Device Firmware Update (DFU) Middleware Library 5.2</div>
+   <div id="projectname">Device Firmware Update (DFU) Middleware Library 6.0</div>
   </td>
  </tr>
  </tbody>
@@ -101,7 +101,7 @@ Macros</h2></td></tr>
 <tr class="memdesc:gac741694a868d101b9febd62dbea5a8a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines log level. <br /></td></tr>
 <tr class="separator:gac741694a868d101b9febd62dbea5a8a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2589c41699d15889ea6ede9961688f99"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#ga2589c41699d15889ea6ede9961688f99">CY_DFU_BASIC_FLOW</a>&#160;&#160;&#160;(0U)</td></tr>
-<tr class="memdesc:ga2589c41699d15889ea6ede9961688f99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Basic Bootloader flow includes application transfer and bootload.  <a href="#ga2589c41699d15889ea6ede9961688f99">More...</a><br /></td></tr>
+<tr class="memdesc:ga2589c41699d15889ea6ede9961688f99"><td class="mdescLeft">&#160;</td><td class="mdescRight">(NOT SUPPORTED) Basic Bootloader flow includes application transfer and bootload.  <a href="#ga2589c41699d15889ea6ede9961688f99">More...</a><br /></td></tr>
 <tr class="separator:ga2589c41699d15889ea6ede9961688f99"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1fd9a1a5a6386dc3d01e9b381d97ecdb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#ga1fd9a1a5a6386dc3d01e9b381d97ecdb">CY_DFU_MCUBOOT_FLOW</a>&#160;&#160;&#160;(1U)</td></tr>
 <tr class="memdesc:ga1fd9a1a5a6386dc3d01e9b381d97ecdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">MCUBoot compatibility flow includes only application transport.  <a href="#ga1fd9a1a5a6386dc3d01e9b381d97ecdb">More...</a><br /></td></tr>
@@ -147,28 +147,6 @@ Macros</h2></td></tr>
 <tr class="memitem:ga487852a71d1a8c882522140a17a6265e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#ga487852a71d1a8c882522140a17a6265e">CY_DFU_MAX_APPS</a>&#160;&#160;&#160;(2U)</td></tr>
 <tr class="memdesc:ga487852a71d1a8c882522140a17a6265e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of applications in the metadata, for 512 bytes in a flash row - 63 is the maximum possible value, because 4 bytes are reserved for the entire metadata CRC.  <a href="#ga487852a71d1a8c882522140a17a6265e">More...</a><br /></td></tr>
 <tr class="separator:ga487852a71d1a8c882522140a17a6265e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga93f01cd0c868966a20c08369779fc707"><td class="memItemLeft" align="right" valign="top"><a id="ga93f01cd0c868966a20c08369779fc707"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#ga93f01cd0c868966a20c08369779fc707">CY_DFU_OPT_GOLDEN_IMAGE</a>&#160;&#160;&#160;(0)</td></tr>
-<tr class="memdesc:ga93f01cd0c868966a20c08369779fc707"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set to non-zero for the DFU SDK Program Data command to check if the Golden image is going to be overwritten while updating. <br /></td></tr>
-<tr class="separator:ga93f01cd0c868966a20c08369779fc707"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaadc5be8ec2c8b42394ca06ffb123c023"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#gaadc5be8ec2c8b42394ca06ffb123c023">CY_DFU_GOLDEN_IMAGE_IDS</a>()&#160;&#160;&#160;0U</td></tr>
-<tr class="memdesc:gaadc5be8ec2c8b42394ca06ffb123c023"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of Golden Image Application IDs.  <a href="#gaadc5be8ec2c8b42394ca06ffb123c023">More...</a><br /></td></tr>
-<tr class="separator:gaadc5be8ec2c8b42394ca06ffb123c023"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaaca2aef06365626f3af0b14fd6e32731"><td class="memItemLeft" align="right" valign="top"><a id="gaaca2aef06365626f3af0b14fd6e32731"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#gaaca2aef06365626f3af0b14fd6e32731">CY_DFU_OPT_GET_METADATA</a>&#160;&#160;&#160;(1)</td></tr>
-<tr class="memdesc:gaaca2aef06365626f3af0b14fd6e32731"><td class="mdescLeft">&#160;</td><td class="mdescRight">A non-zero value enables the Get Metadata DFU command. <br /></td></tr>
-<tr class="separator:gaaca2aef06365626f3af0b14fd6e32731"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga8ddeedbbaaf29a163d6f97eeaed5cd1b"><td class="memItemLeft" align="right" valign="top"><a id="ga8ddeedbbaaf29a163d6f97eeaed5cd1b"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#ga8ddeedbbaaf29a163d6f97eeaed5cd1b">CY_DFU_OPT_SET_EIVECTOR</a>&#160;&#160;&#160;(0)</td></tr>
-<tr class="memdesc:ga8ddeedbbaaf29a163d6f97eeaed5cd1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">A non-zero value enables the Set EI Vector DFU command. <br /></td></tr>
-<tr class="separator:ga8ddeedbbaaf29a163d6f97eeaed5cd1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga9a6f60e539f696d9fc4b895d0f3a05fe"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#ga9a6f60e539f696d9fc4b895d0f3a05fe">CY_DFU_METADATA_WRITABLE</a>&#160;&#160;&#160;(1)</td></tr>
-<tr class="memdesc:ga9a6f60e539f696d9fc4b895d0f3a05fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">A non-zero value allows writing metadata with the Set App Metadata DFU command.  <a href="#ga9a6f60e539f696d9fc4b895d0f3a05fe">More...</a><br /></td></tr>
-<tr class="separator:ga9a6f60e539f696d9fc4b895d0f3a05fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf26d1e1c21482dd7e3e41c2b24c22637"><td class="memItemLeft" align="right" valign="top"><a id="gaf26d1e1c21482dd7e3e41c2b24c22637"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#gaf26d1e1c21482dd7e3e41c2b24c22637">CY_DFU_OPT_CRYPTO_HW</a>&#160;&#160;&#160;(0)</td></tr>
-<tr class="memdesc:gaf26d1e1c21482dd7e3e41c2b24c22637"><td class="mdescLeft">&#160;</td><td class="mdescRight">Non-zero value enables the usage of hardware Crypto API. <br /></td></tr>
-<tr class="separator:gaf26d1e1c21482dd7e3e41c2b24c22637"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="ga2589c41699d15889ea6ede9961688f99"></a>
@@ -183,7 +161,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Basic Bootloader flow includes application transfer and bootload. </p>
+<p>(NOT SUPPORTED) Basic Bootloader flow includes application transfer and bootload. </p>
 
 </div>
 </div>
@@ -216,10 +194,7 @@ Macros</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Configuration option to select DFU flow. </p>
-<p>Possible options are:</p><ul>
-<li><a class="el" href="group__group__dfu__macro__config.html#ga2589c41699d15889ea6ede9961688f99">CY_DFU_BASIC_FLOW</a> - supported for the CAT1A and CAT2 devices</li>
-<li><a class="el" href="group__group__dfu__macro__config.html#ga1fd9a1a5a6386dc3d01e9b381d97ecdb">CY_DFU_MCUBOOT_FLOW</a> - supported for the CAT1A and CAT1C devices </li>
-</ul>
+<p>CY_DFU_MCUBOOT_FLOW is only one possible option </p>
 
 </div>
 </div>
@@ -260,49 +235,13 @@ Macros</h2></td></tr>
 
 </div>
 </div>
-<a id="gaadc5be8ec2c8b42394ca06ffb123c023"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaadc5be8ec2c8b42394ca06ffb123c023">&#9670;&nbsp;</a></span>CY_DFU_GOLDEN_IMAGE_IDS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define CY_DFU_GOLDEN_IMAGE_IDS</td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td>&#160;&#160;&#160;0U</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>List of Golden Image Application IDs. </p>
-<p>Here "Golden Image Application" means an application that cannot be changed with CommandProgramData()</p>
-<p>Usage. Define the list of Golden Image Application IDs without enclosing parenthesis, e.g. </p><div class="fragment"><div class="line"><span class="preprocessor">#define CY_DFU_GOLDEN_IMAGE_IDS()     0U, 1U, 3U </span></div></div><!-- fragment --><p> later it is used in cy_dfu.c file: </p><div class="fragment"><div class="line">uint8_t goldenImages[] = { <a class="code" href="group__group__dfu__macro__config.html#gaadc5be8ec2c8b42394ca06ffb123c023">CY_DFU_GOLDEN_IMAGE_IDS</a>() }; </div></div><!-- fragment --> 
-</div>
-</div>
-<a id="ga9a6f60e539f696d9fc4b895d0f3a05fe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga9a6f60e539f696d9fc4b895d0f3a05fe">&#9670;&nbsp;</a></span>CY_DFU_METADATA_WRITABLE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define CY_DFU_METADATA_WRITABLE&#160;&#160;&#160;(1)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>A non-zero value allows writing metadata with the Set App Metadata DFU command. </p>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part
 <div id="nav-path" class="navpath">
     <ul>
         <li class="footer">
-            Generated for <b>Device Firmware Update (DFU) Middleware Library 5.2</b> by <b>Cypress Semiconductor Corporation</b>.
+            Generated for <b>Device Firmware Update (DFU) Middleware Library 6.0</b> by <b>Cypress Semiconductor Corporation</b>.
             All rights reserved.
         </li>
     </ul>

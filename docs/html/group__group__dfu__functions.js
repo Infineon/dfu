@@ -1,6 +1,5 @@
 var group__group__dfu__functions =
 [
-    [ "Metadata Management", "group__group__dfu__functions__meta.html", "group__group__dfu__functions__meta" ],
     [ "Application Management", "group__group__dfu__functions__app.html", "group__group__dfu__functions__app" ],
     [ "Memory Operations", "group__group__dfu__functions__mem.html", "group__group__dfu__functions__mem" ],
     [ "Transport Management", "group__group__dfu__functions__transport.html", "group__group__dfu__functions__transport" ],

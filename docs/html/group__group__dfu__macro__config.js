@@ -13,11 +13,5 @@ var group__group__dfu__macro__config =
     [ "CY_DFU_OPT_SEND_DATA", "group__group__dfu__macro__config.html#gab0c72281ffb51f731d90eeea936ac916", null ],
     [ "CY_DFU_OPT_PACKET_CRC", "group__group__dfu__macro__config.html#ga143573a13abbb1bf5c430f6f663492e7", null ],
     [ "CY_DFU_OPT_CUSTOM_CMD", "group__group__dfu__macro__config.html#ga7f1f0406892d96657b1e23c78bbd0c7c", null ],
-    [ "CY_DFU_MAX_APPS", "group__group__dfu__macro__config.html#ga487852a71d1a8c882522140a17a6265e", null ],
-    [ "CY_DFU_OPT_GOLDEN_IMAGE", "group__group__dfu__macro__config.html#ga93f01cd0c868966a20c08369779fc707", null ],
-    [ "CY_DFU_GOLDEN_IMAGE_IDS", "group__group__dfu__macro__config.html#gaadc5be8ec2c8b42394ca06ffb123c023", null ],
-    [ "CY_DFU_OPT_GET_METADATA", "group__group__dfu__macro__config.html#gaaca2aef06365626f3af0b14fd6e32731", null ],
-    [ "CY_DFU_OPT_SET_EIVECTOR", "group__group__dfu__macro__config.html#ga8ddeedbbaaf29a163d6f97eeaed5cd1b", null ],
-    [ "CY_DFU_METADATA_WRITABLE", "group__group__dfu__macro__config.html#ga9a6f60e539f696d9fc4b895d0f3a05fe", null ],
-    [ "CY_DFU_OPT_CRYPTO_HW", "group__group__dfu__macro__config.html#gaf26d1e1c21482dd7e3e41c2b24c22637", null ]
+    [ "CY_DFU_MAX_APPS", "group__group__dfu__macro__config.html#ga487852a71d1a8c882522140a17a6265e", null ]
 ];

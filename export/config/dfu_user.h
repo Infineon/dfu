@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file dfu_user.h
-* \version 5.2
+* \version 6.0
 *
 * This file provides declarations that can be modified by the user but
 * are used by the DFU SDK.
@@ -61,15 +61,14 @@ extern "C" {
     #define CY_DFU_LOG_LEVEL CY_DFU_LOG_LEVEL_OFF /**< Defines log level */
 #endif
 
-#define CY_DFU_BASIC_FLOW               (0U) /**< Basic Bootloader flow includes
+#define CY_DFU_BASIC_FLOW               (0U) /**< (NOT SUPPORTED) Basic Bootloader flow includes
                                               * application transfer and bootload. */
 #define CY_DFU_MCUBOOT_FLOW             (1U) /**< MCUBoot compatibility flow includes
                                               * only application transport. */
 
 /**
- * Configuration option to select DFU flow. Possible options are:
- * - \ref CY_DFU_BASIC_FLOW - supported for the CAT1A and CAT2 devices
- * - \ref CY_DFU_MCUBOOT_FLOW - supported for the CAT1A and CAT1C devices */
+ * Configuration option to select DFU flow. CY_DFU_MCUBOOT_FLOW is only one possible option
+ */
 #ifndef CY_DFU_FLOW
     #if defined COMPONENT_CAT1A || defined COMPONENT_CAT2
         #define CY_DFU_FLOW                     (CY_DFU_BASIC_FLOW)
@@ -150,11 +149,12 @@ extern "C" {
 #if (CY_DFU_FLOW == CY_DFU_MCUBOOT_FLOW) && !defined(CY_DOXYGEN)
     #if !defined CY_DFU_PRODUCT
         #define CY_DFU_PRODUCT          (0x01020304)  /**< Default value for Product ID*/
-        #warning CY_DFU_PRODUCT is set to default value
+        #warning "CY_DFU_PRODUCT is set to default value"
     #endif /* !defined CY_DFU_PRODUCT */
 #endif /* CY_DFU_FLOW == CY_DFU_MCUBOOT_FLOW */
 
-/* Basic bootloader flow specific constants */
+/** \cond INTERNAL */
+/* Basic bootloader flow specific constants. Do not update this section */
 #if (CY_DFU_FLOW == CY_DFU_BASIC_FLOW) || defined(CY_DOXYGEN)
 
     /**
@@ -228,7 +228,8 @@ extern "C" {
     #else
         #error "Not implemented for this compiler"
     #endif /* defined(__CC_ARM) */
-#endif /* (CY_DFU_FLOW == CY_DFU_BASIC_FLOW) && !defined(CY_DOXYGEN) */
+#endif /* (CY_DFU_FLOW == CY_DFU_BASIC_FLOW) && defined(CY_DOXYGEN) */
+/** \endcond*/
 
 /** \} group_dfu_macro_config */
 

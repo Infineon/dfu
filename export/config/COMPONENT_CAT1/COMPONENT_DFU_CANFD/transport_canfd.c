@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_canfd.c
-* \version 5.2
+* \version 6.0
 *
 * This file provides the source code of the DFU communication APIs
 * for the CANFD driver.
@@ -40,6 +40,7 @@
 *******************************************************************************/
 
 #include "cy_canfd.h"
+#include "cy_sysint.h"
 #include "transport_canfd.h"
 
 /* Includes driver configuration */
@@ -67,7 +68,10 @@
 #define CY_DFU_CANFD_CFG_PTR        (&DFU_CANFD_config)
 
 /* USER CONFIGURABLE: Interrupt configuration for the CANFD block */
-#if defined (COMPONENT_CAT1C)
+#if defined (COMPONENT_CAT1B)
+#define CY_DFU_CANFD_CPU_IRQ_NUM    DFU_CANFD_IRQ_0
+#define CY_DFU_CANFD_IRQ_SOURCE     CY_DFU_CANFD_CPU_IRQ_NUM
+#elif defined (COMPONENT_CAT1C)
 #define CY_DFU_CANFD_CPU_IRQ_NUM    NvicMux3_IRQn
 #define CY_DFU_CANFD_IRQ_SOURCE     ((CY_DFU_CANFD_CPU_IRQ_NUM << CY_SYSINT_INTRSRC_MUXIRQ_SHIFT) | DFU_CANFD_IRQ_0)
 #else
@@ -181,6 +185,8 @@ void CANFD_CanfdCyBtldrCommStart(void)
 
         status = Cy_CANFD_Init(CY_DFU_CANFD_HW, CY_DFU_CANFD_CH_NUM, CY_DFU_CANFD_CFG_PTR, &CY_DFU_CANFD_CONTEXT);
         CY_ASSERT(CY_CANFD_SUCCESS == status);
+        /* To avoid the compiler warning in Release mode */
+        (void) status;
 
         Cy_CANFD_SetInterruptMask(CY_DFU_CANFD_HW, CY_DFU_CANFD_CH_NUM, CY_CANFD_RX_BUFFER_NEW_MESSAGE);
 
@@ -213,6 +219,8 @@ void CANFD_CanfdCyBtldrCommStop(void)
 
         status = Cy_CANFD_DeInit(CY_DFU_CANFD_HW, CY_DFU_CANFD_CH_NUM, &CY_DFU_CANFD_CONTEXT);
         CY_ASSERT(CY_CANFD_SUCCESS == status);
+        /* To avoid the compiler warning in Release mode */
+        (void) status;
 
         CANFD_initVar = false;
     }
@@ -287,10 +295,14 @@ cy_en_dfu_status_t CANFD_CanfdCyBtldrCommRead(uint8_t pData[], uint32_t size, ui
             uint32_t address = Cy_CANFD_CalcRxBufAdrs(CY_DFU_CANFD_HW, CY_DFU_CANFD_CH_NUM, CANFD_RX_BUFFER_INDEX, &CY_DFU_CANFD_CONTEXT);
             CY_ASSERT(0UL != address);
 
+
+CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.3','Casting uint8_t* to uint32_t* is safe as input address is always valid and aligned.');
             CANFD_rxBuffer.data_area_f = (uint32_t*)pData;
 
             cy_en_canfd_status_t canfdStatus = Cy_CANFD_GetRxBuffer(CY_DFU_CANFD_HW, CY_DFU_CANFD_CH_NUM, address, &CANFD_rxBuffer);
             CY_ASSERT(CY_CANFD_BAD_PARAM != canfdStatus);
+            /* To avoid the compiler warning in Release mode */
+            (void) canfdStatus;
 
             CANFD_rxBufferAvailable = false;
             Cy_CANFD_AckRxBuf(CY_DFU_CANFD_HW, CY_DFU_CANFD_CH_NUM, CANFD_RX_BUFFER_INDEX);
@@ -336,7 +348,12 @@ cy_en_dfu_status_t CANFD_CanfdCyBtldrCommWrite(const uint8_t pData[], uint32_t s
     {
 
         DFU_CANFD_txBuffer_0.t1_f->dlc = CANFD_SizeToDlc(size);
+
+CY_MISRA_DEVIATE_BLOCK_START('MISRA C-2012 Rule 11.3', 1, \
+'Casting uint8_t* to uint32_t* is safe as input address is always valid and aligned.')
+CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.8','Removing const quilification from the type pointer is safe as the data is not modified in subsequent function calls');
         DFU_CANFD_txBuffer_0.data_area_f = (uint32_t*)pData;
+CY_MISRA_BLOCK_END('MISRA C-2012 Rule 11.3')
 
         if (CY_CANFD_SUCCESS == Cy_CANFD_UpdateAndTransmitMsgBuffer(CY_DFU_CANFD_HW,
                                                                     CY_DFU_CANFD_CH_NUM,

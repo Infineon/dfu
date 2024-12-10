@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file dfu_user.c
-* \version 5.2
+* \version 6.0
 *
 * This file provides the custom API for a firmware application with
 * DFU SDK.
@@ -42,10 +42,10 @@
 *******************************************************************************/
 
 #include <string.h>
-#include "cy_syslib.h"
-#include "cyhal.h"
 #include "cy_dfu.h"
 #include "cy_dfu_logging.h"
+#include "mtb_hal_nvm.h"
+#include "mtb_hal_system.h"
 
 #ifdef COMPONENT_DFU_I2C
     #include "transport_i2c.h"
@@ -59,29 +59,24 @@
     #include "transport_spi.h"
 #endif  /* COMPONENT_DFU_SPI*/
 
-#ifdef COMPONENT_DFU_USB_CDC
-    #include "transport_usb_cdc.h"
-#endif  /* COMPONENT_DFU_USB_CDC */
-
-#ifdef COMPONENT_DFU_EMUSB_CDC
-    #include "transport_emusb_cdc.h"
-#endif  /* COMPONENT_DFU_EMUSB_CDC */
-
-#ifdef COMPONENT_DFU_EMUSB_HID
-    #include "transport_emusb_hid.h"
-#endif  /* COMPONENT_DFU_EMUSB_HID */
-
 #ifdef COMPONENT_DFU_CANFD
     #include "transport_canfd.h"
 #endif  /* COMPONENT_DFU_CANFD */
 
-/* Global flash object */
-static cyhal_nvm_t flash_obj;
+#if !defined(COMPONENT_DFU_I2C) && !defined(COMPONENT_DFU_UART) && !defined(COMPONENT_DFU_SPI) &&\
+    !defined(COMPONENT_DFU_CANFD)
+    #warning "Select at least one of the DFU transports."
+#endif /* !defined(COMPONENT_DFU_I2C) ... !defined(COMPONENT_DFU_CANFD) */
+
+
+#if !defined COMPONENT_CAT1B || !defined COMPONENT_NON_SECURE_DEVICE
+    static mtb_hal_nvm_t nvm_obj;
+#endif /* !defined COMPONENT_CAT1B || !defined COMPONENT_NON_SECURE_DEVICE */
 
 static cy_en_dfu_transport_t selectedInterface = CY_DFU_UART;
 
 #ifdef CY_IP_M7CPUSS
-    static const cyhal_flash_block_info_t* blocks_info;
+    static const mtb_hal_nvm_region_info_t* blocks_info;
     static uint8_t blocks_count;
     static uint32_t blocks_sector_size;
 #endif
@@ -235,7 +230,7 @@ cy_en_dfu_status_t Cy_DFU_WriteData (uint32_t address, uint32_t length, uint32_t
 
     /* Check if the length is valid
      * Note Length = 0 is valid for erase command */
-    if ( (IsMultipleOf(address, CY_NVM_SIZEOF_ROW) == 0U) ||
+    if ( (IsMultipleOf(address, CY_NVM_SIZEOF_ROW) == false) ||
          ( (length != CY_NVM_SIZEOF_ROW) && ( (ctl & CY_DFU_IOCTL_ERASE) == 0U) ) )
     {
         status = CY_DFU_ERROR_LENGTH;
@@ -287,35 +282,45 @@ cy_en_dfu_status_t Cy_DFU_WriteData (uint32_t address, uint32_t length, uint32_t
 
         #ifdef CY_IP_M7CPUSS
             uint32_t int_status;
-            int_status = Cy_SysLib_EnterCriticalSection();
+            int_status = mtb_hal_system_critical_section_enter();
             if(address % blocks_sector_size == 0U)
             {
-                fstatus = cyhal_flash_erase(&flash_obj, address);
+                fstatus = mtb_hal_nvm_erase(&nvm_obj, address);
             }
             if(fstatus == CY_RSLT_SUCCESS)
             {
-                fstatus = cyhal_flash_program(&flash_obj, address, (uint32_t*)params->dataBuffer);
+                fstatus = mtb_hal_nvm_program(&nvm_obj, address, (uint32_t*)params->dataBuffer);
+                if(fstatus != CY_RSLT_SUCCESS)
+                {
+                    status = CY_DFU_ERROR_DATA;
+                    CY_DFU_LOG_ERR("NVM program failed: module=0x%X code=0x%X",
+                                        (unsigned int)CY_RSLT_GET_MODULE(fstatus),
+                                        (unsigned int)CY_RSLT_GET_CODE(fstatus));
+                }
             }
             else
             {
                 status = CY_DFU_ERROR_DATA;
-                CY_DFU_LOG_ERR("Flash erase failed: module=0x%X code=0x%X",
+                CY_DFU_LOG_ERR("NVM erase failed: module=0x%X code=0x%X",
                                     (unsigned int)CY_RSLT_GET_MODULE(fstatus),
                                     (unsigned int)CY_RSLT_GET_CODE(fstatus));
             }
-            Cy_SysLib_ExitCriticalSection(int_status);
+            mtb_hal_system_critical_section_exit(int_status);
         #else
-            fstatus = cyhal_flash_write(&flash_obj, address, (uint32_t*)params->dataBuffer);
+            #if defined COMPONENT_CAT1B && defined COMPONENT_NON_SECURE_DEVICE
+                #error "Add custom non-secure application NVM erase and NVM write calls"
+            #else
+                uint32_t int_status = mtb_hal_system_critical_section_enter();
+CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.3','Casting uint8_t* to uint32_t* is safe as input address is always valid and aligned.');
+                fstatus = mtb_hal_nvm_write(&nvm_obj, address, (uint32_t*)params->dataBuffer);
+                mtb_hal_system_critical_section_exit(int_status);
+                if(fstatus != CY_RSLT_SUCCESS)
+                {
+                    status = CY_DFU_ERROR_DATA;
+                    CY_DFU_LOG_ERR("NVM write failed: fstatus 0x%X ", (unsigned int)fstatus);
+                }
+            #endif /* defined COMPONENT_CAT1B && defined COMPONENT_NON_SECURE_DEVICE */
         #endif /* CY_IP_M7CPUSS */
-        if((CY_DFU_SUCCESS == status) && (fstatus != CY_RSLT_SUCCESS))
-        {
-            status = CY_DFU_ERROR_DATA;
-            CY_DFU_LOG_ERR("Flash write failed: fstatus 0x%X ", (unsigned int)fstatus);
-        }
-        else
-        {
-            status = CY_DFU_SUCCESS;
-        }
     }
 
     if (CY_DFU_SUCCESS != status)
@@ -341,7 +346,7 @@ cy_en_dfu_status_t Cy_DFU_ReadData (uint32_t address, uint32_t length, uint32_t 
     cy_en_dfu_status_t status = CY_DFU_SUCCESS;
 
     /* Check if the length is valid */
-    if (IsMultipleOf(length, CY_NVM_SIZEOF_ROW) == 0U)
+    if (IsMultipleOf(length, CY_NVM_SIZEOF_ROW) == false)
     {
         status = CY_DFU_ERROR_LENGTH;
     }
@@ -357,12 +362,18 @@ cy_en_dfu_status_t Cy_DFU_ReadData (uint32_t address, uint32_t length, uint32_t 
     {
         if ((ctl & CY_DFU_IOCTL_COMPARE) == 0U)
         {
-            cy_rslt_t fstatus = cyhal_flash_read(&flash_obj, address, params->dataBuffer, length);
+        #if defined COMPONENT_CAT1B && defined COMPONENT_NON_SECURE_DEVICE
+            (void)memcpy(params->dataBuffer, (const void*)address, (size_t)length);
+            status = CY_DFU_SUCCESS;
+        #else
+            cy_rslt_t fstatus = mtb_hal_nvm_read(&nvm_obj, address, params->dataBuffer, length);
             status = (fstatus == CY_RSLT_SUCCESS) ? CY_DFU_SUCCESS : CY_DFU_ERROR_DATA;
+        #endif
         }
         else
         {
-            status = ( memcmp(params->dataBuffer, (const void *)address, length) == 0 )
+CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.6','The cast from unsigned int to the pointer does not have any unintended effect, as the casted value represents the memory address');
+            status = ( memcmp((const void *) params->dataBuffer, (const void *)address, length) == 0 )
                     ? CY_DFU_SUCCESS : CY_DFU_ERROR_VERIFY;
         }
     }
@@ -382,23 +393,19 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport)
 {
     selectedInterface = transport;
 
-    /* Initialize flash object */
-    cy_rslt_t result = cyhal_nvm_init(&flash_obj);
-    if (result != CY_RSLT_SUCCESS)
-    {
-        CY_DFU_LOG_ERR("HAL FLash Initialization failed");
-        CY_ASSERT(false);
-    }
+#if defined COMPONENT_CAT1B && defined COMPONENT_NON_SECURE_DEVICE
+    #error "Add custom non-secure application NVM initialization call"
+#endif /* defined COMPONENT_CAT1B && defined COMPONENT_NON_SECURE_DEVICE */
 
 #ifdef CY_IP_M7CPUSS
-    cyhal_flash_info_t flash_info;
+    mtb_hal_nvm_info_t nvm_info;
     /* Enable code flash write function */
     Cy_Flashc_MainWriteEnable();
 
-    /* Get flash characteristics */
-    cyhal_flash_get_info(&flash_obj, &flash_info);
-    blocks_info = flash_info.blocks;
-    blocks_count = flash_info.block_count;
+    /* Get NVM characteristics */
+    ntb_hal_nvm_get_info(&nvm_obj, &nvm_info);
+    blocks_info = nvm_info.regions;
+    blocks_count = nvm_info.region_count;
 #endif
 
     switch (transport)
@@ -419,21 +426,6 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport)
             SPI_SpiCyBtldrCommStart();
             break;
     #endif /* COMPONENT_DFU_SPI */
-    #ifdef COMPONENT_DFU_USB_CDC
-        case CY_DFU_USB_CDC:
-            USB_CDC_CyBtldrCommStart();
-            break;
-    #endif /* COMPONENT_DFU_USB_CDC */
-    #ifdef COMPONENT_DFU_EMUSB_CDC
-        case CY_DFU_USB_CDC:
-            USB_CDC_CyBtldrCommStart();
-            break;
-    #endif /* COMPONENT_DFU_EMUSB_CDC */
-    #ifdef COMPONENT_DFU_EMUSB_HID
-        case CY_DFU_USB_HID:
-            USB_HID_CyBtldrCommStart();
-            break;
-    #endif /* COMPONENT_DFU_EMUSB_HID */
     #ifdef COMPONENT_DFU_CANFD
         case CY_DFU_CANFD:
             CANFD_CanfdCyBtldrCommStart();
@@ -456,11 +448,8 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport)
 * cy_dfu.h file or DFU SDK API Reference Manual for details.
 *
 *******************************************************************************/
-void Cy_DFU_TransportStop()
+void Cy_DFU_TransportStop(void)
 {
-    /* Release flash object */
-    cyhal_nvm_free(&flash_obj);
-
     switch (selectedInterface)
     {
     #ifdef COMPONENT_DFU_I2C
@@ -479,21 +468,6 @@ void Cy_DFU_TransportStop()
             SPI_SpiCyBtldrCommStop();
             break;
     #endif /* COMPONENT_DFU_SPI */
-    #ifdef COMPONENT_DFU_USB_CDC
-        case CY_DFU_USB_CDC:
-            USB_CDC_CyBtldrCommStop();
-            break;
-    #endif /* COMPONENT_DFU_USB_CDC */
-    #ifdef COMPONENT_DFU_EMUSB_CDC
-        case CY_DFU_USB_CDC:
-            USB_CDC_CyBtldrCommStop();
-            break;
-    #endif /* COMPONENT_DFU_EMUSB_CDC */
-    #ifdef COMPONENT_DFU_EMUSB_HID
-        case CY_DFU_USB_HID:
-            USB_HID_CyBtldrCommStop();
-            break;
-    #endif /* COMPONENT_DFU_EMUSB_HID */
     #ifdef COMPONENT_DFU_CANFD
         case CY_DFU_CANFD:
             CANFD_CanfdCyBtldrCommStop();
@@ -536,21 +510,6 @@ void Cy_DFU_TransportReset(void)
             SPI_SpiCyBtldrCommReset();
             break;
     #endif /* COMPONENT_DFU_SPI */
-    #ifdef COMPONENT_DFU_USB_CDC
-        case CY_DFU_USB_CDC:
-            USB_CDC_CyBtldrCommReset();
-            break;
-    #endif /* COMPONENT_DFU_USB_CDC */
-    #ifdef COMPONENT_DFU_EMUSB_CDC
-        case CY_DFU_USB_CDC:
-            USB_CDC_CyBtldrCommReset();
-            break;
-    #endif /* COMPONENT_DFU_EMUSB_CDC */
-    #ifdef COMPONENT_DFU_EMUSB_HID
-        case CY_DFU_USB_HID:
-            USB_HID_CyBtldrCommReset();
-            break;
-    #endif /* COMPONENT_DFU_EMUSB_HID */
     #ifdef COMPONENT_DFU_CANFD
         case CY_DFU_CANFD:
             CANFD_CanfdCyBtldrCommReset();
@@ -595,21 +554,6 @@ cy_en_dfu_status_t Cy_DFU_TransportRead(uint8_t buffer[], uint32_t size, uint32_
             status = SPI_SpiCyBtldrCommRead(buffer, size, count, timeout);
             break;
     #endif /* COMPONENT_DFU_SPI */
-    #ifdef COMPONENT_DFU_USB_CDC
-        case CY_DFU_USB_CDC:
-            status = USB_CDC_CyBtldrCommRead(buffer, size, count, timeout);
-            break;
-    #endif /* COMPONENT_DFU_USB_CDC */
-    #ifdef COMPONENT_DFU_EMUSB_CDC
-        case CY_DFU_USB_CDC:
-            status = USB_CDC_CyBtldrCommRead(buffer, size, count, timeout);
-            break;
-    #endif /* COMPONENT_DFU_EMUSB_CDC */
-    #ifdef COMPONENT_DFU_EMUSB_HID
-        case CY_DFU_USB_HID:
-            status = USB_HID_CyBtldrCommRead(buffer, size, count, timeout);
-            break;
-    #endif /* COMPONENT_DFU_EMUSB_HID */
     #ifdef COMPONENT_DFU_CANFD
         case CY_DFU_CANFD:
             status = CANFD_CanfdCyBtldrCommRead(buffer, size, count, timeout);
@@ -656,21 +600,6 @@ cy_en_dfu_status_t Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size, uint32
             status = SPI_SpiCyBtldrCommWrite(buffer, size, count, timeout);
             break;
     #endif /* COMPONENT_DFU_SPI */
-    #ifdef COMPONENT_DFU_USB_CDC
-        case CY_DFU_USB_CDC:
-            status = USB_CDC_CyBtldrCommWrite(buffer, size, count, timeout);
-            break;
-    #endif /* COMPONENT_DFU_USB_CDC */
-    #ifdef COMPONENT_DFU_EMUSB_CDC
-        case CY_DFU_USB_CDC:
-            status = USB_CDC_CyBtldrCommWrite(buffer, size, count, timeout);
-            break;
-    #endif /* COMPONENT_DFU_EMUSB_CDC */
-    #ifdef COMPONENT_DFU_EMUSB_HID
-        case CY_DFU_USB_HID:
-            status = USB_HID_CyBtldrCommWrite(buffer, size, count, timeout);
-            break;
-    #endif /* COMPONENT_DFU_EMUSB_HID */
     #ifdef COMPONENT_DFU_CANFD
         case CY_DFU_CANFD:
             status = CANFD_CanfdCyBtldrCommWrite(buffer, size, count, timeout);

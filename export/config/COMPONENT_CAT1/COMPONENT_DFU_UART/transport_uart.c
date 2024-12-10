@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_uart.c
-* \version 5.2
+* \version 6.0
 *
 * This file provides the source code of the DFU communication APIs
 * for the UART driver from HAL.
@@ -40,58 +40,46 @@
 *******************************************************************************/
 
 #include "transport_uart.h"
-#include "cyhal_system.h"
-#include "cyhal_uart.h"
-#include "cycfg_pins.h"
+#include "mtb_hal_system.h"
+#include "mtb_hal_uart.h"
 
-/*
-* USER CONFIGURABLE: Byte to byte time interval: calculated basing on current
-* baud rate configuration.
-* Set it to approximately to (50e6 / baud_rate) value in microseconds.
-* E.g. baud_rate = 115200, UART_BYTE_TO_BYTE_TIMEOUT_US ~ 434
-*/
-#ifndef DFU_UART_BAUD
-    #define DFU_UART_BAUD                       CYHAL_UART_DEFAULT_BAUD
-#endif
 #ifndef UART_BYTE_TO_BYTE_TIMEOUT_US
-    #define UART_BYTE_TO_BYTE_TIMEOUT_US        (868U)
+    #define UART_BYTE_TO_BYTE_TIMEOUT_US            (868U)
 #endif
-#ifndef DFU_UART_TX
-    #define DFU_UART_TX                         CYBSP_DEBUG_UART_TX
-#endif
-#ifndef DFU_UART_RX
-    #define DFU_UART_RX                         CYBSP_DEBUG_UART_RX
-#endif
-#ifndef DFU_UART_PARITY
-    #define DFU_UART_PARITY                     CYHAL_UART_PARITY_NONE
-#endif
-#ifndef DFU_UART_DATA_BITS
-    #define DFU_UART_DATA_BITS                  (8U)
-#endif
-#ifndef DFU_UART_STOP_BITS
-    #define DFU_UART_STOP_BITS                  (1U)
-#endif
-
-
-/**
-* UART_initVar indicates whether the UART driver has been initialized. The
-* variable is initialized to false and set to true the first time
-* \ref UART_UartCyBtldrCommStart is called. This allows  the driver to restart
-* without re-initialization after the first call to the
-* \ref UART_UartCyBtldrCommStart routine.
-* For re-initialization set \ref UART_initVar to false and call
-* \ref UART_UartCyBtldrCommStart.
-*/
-bool UART_initVar = false;
-
-/* Global uart object */
-static cyhal_uart_t uart_obj;
-
 
 /* Returns a number of bytes to copy into a DFU buffer */
 #define UART_BYTES_TO_COPY(actBufSize, bufSize) \
                             ( ((uint32_t)(actBufSize) < (uint32_t)(bufSize)) ? \
                                 ((uint32_t) (actBufSize)) : ((uint32_t) (bufSize)) )
+
+/*******************************************************************************
+* Internal variable
+*******************************************************************************/
+/* The pointer to the UART HAL object */
+static mtb_hal_uart_t *uart_obj;
+/* The pointer to initialize/de-initialize the callback function for
+ * UART hardware.
+ */
+static Cy_DFU_TransportUartCallback uart_callback;
+
+
+/*******************************************************************************
+* Function Name: Cy_DFU_TransportUartConfig
+****************************************************************************//**
+*
+* Configure DFU UART Transport
+*
+* Call this function in the user application to provide the HAL object and callback
+* function to DFU transport.
+*
+* \param config Configuration structure
+*
+*******************************************************************************/
+void Cy_DFU_TransportUartConfig(cy_stc_dfu_transport_uart_cfg_t * config)
+{
+    uart_obj = config->uart;
+    uart_callback = config->callback;
+}
 
 
 /*******************************************************************************
@@ -103,35 +91,7 @@ static cyhal_uart_t uart_obj;
 *******************************************************************************/
 void UART_UartCyBtldrCommStart(void)
 {
-    if (!UART_initVar)
-    {
-        cy_rslt_t rslt;
-
-        const cyhal_uart_cfg_t uart_config =
-        {
-            .data_bits      = DFU_UART_DATA_BITS,
-            .stop_bits      = DFU_UART_STOP_BITS,
-            .parity         = DFU_UART_PARITY,
-            .rx_buffer      = NULL,
-            .rx_buffer_size = 0U
-        };
-
-        /* Initialize UART */
-        rslt = cyhal_uart_init(&uart_obj, DFU_UART_TX, DFU_UART_RX, NC, NC,
-                             NULL, &uart_config);
-        /* A UART initialization error - stops the execution */
-        CY_ASSERT(CY_RSLT_SUCCESS == rslt);
-
-    #if (DFU_UART_BAUD != CYHAL_UART_DEFAULT_BAUD)
-        rslt = cyhal_uart_set_baud(&uart_obj, DFU_UART_BAUD, NULL);
-        CY_ASSERT(CY_RSLT_SUCCESS == rslt);
-    #endif
-
-        (void) rslt; /* Avoid warning for release mode */
-
-        /* The transport is configured */
-        UART_initVar = true;
-    }
+    uart_callback(CY_DFU_TRANSPORT_UART_INIT);
 }
 
 
@@ -144,8 +104,7 @@ void UART_UartCyBtldrCommStart(void)
 *******************************************************************************/
 void UART_UartCyBtldrCommStop(void)
 {
-    cyhal_uart_free(&uart_obj);
-    UART_initVar=false;
+    uart_callback(CY_DFU_TRANSPORT_UART_DEINIT);
 }
 
 
@@ -158,9 +117,7 @@ void UART_UartCyBtldrCommStop(void)
 *******************************************************************************/
 void UART_UartCyBtldrCommReset(void)
 {
-    (void)cyhal_uart_write_abort(&uart_obj);
-    (void)cyhal_uart_read_abort(&uart_obj);
-    (void)cyhal_uart_clear(&uart_obj);
+    (void)mtb_hal_uart_clear(uart_obj);
 }
 
 
@@ -190,6 +147,7 @@ cy_en_dfu_status_t UART_UartCyBtldrCommRead(uint8_t pData[], uint32_t size, uint
 {
     cy_en_dfu_status_t status;
     size_t byteCount;
+    cy_rslt_t statusHal;
 
     status = CY_DFU_ERROR_UNKNOWN;
 
@@ -202,15 +160,15 @@ cy_en_dfu_status_t UART_UartCyBtldrCommRead(uint8_t pData[], uint32_t size, uint
         do
         {
             /* Check packet start */
-            if (cyhal_uart_readable(&uart_obj) != 0U)
+            if (mtb_hal_uart_readable(uart_obj) != 0U)
             {
                 /* Wait for end of packet */
                 do
                 {
-                    byteCount = cyhal_uart_readable(&uart_obj);
-                    cyhal_system_delay_us(UART_BYTE_TO_BYTE_TIMEOUT_US);
+                    byteCount = mtb_hal_uart_readable(uart_obj);
+                    mtb_hal_system_delay_us(UART_BYTE_TO_BYTE_TIMEOUT_US);
                 }
-                while (byteCount != cyhal_uart_readable(&uart_obj));
+                while (byteCount != mtb_hal_uart_readable(uart_obj));
 
                 byteCount = UART_BYTES_TO_COPY(byteCount, size);
                 *count = byteCount;
@@ -219,7 +177,10 @@ cy_en_dfu_status_t UART_UartCyBtldrCommRead(uint8_t pData[], uint32_t size, uint
                 break;
             }
 
-            Cy_SysLib_Delay(1U);
+            statusHal = mtb_hal_system_delay_ms(1U);
+            CY_ASSERT(CY_RSLT_SUCCESS == statusHal);
+            /* To avoid the compiler warning in Release mode */
+            (void) statusHal;
             --timeout;
         }
         while (timeout != 0U);
@@ -227,7 +188,7 @@ cy_en_dfu_status_t UART_UartCyBtldrCommRead(uint8_t pData[], uint32_t size, uint
         if (status == CY_DFU_SUCCESS)
         {
             /* Get data from RX buffer into DFU buffer */
-            cy_rslt_t rslt = cyhal_uart_read(&uart_obj, (void*)pData, &byteCount);
+            cy_rslt_t rslt = mtb_hal_uart_read(uart_obj, (void*)pData, &byteCount);
             status = (rslt == CY_RSLT_SUCCESS) ? CY_DFU_SUCCESS : CY_DFU_ERROR_UNKNOWN;
         }
     }
@@ -270,7 +231,7 @@ cy_en_dfu_status_t UART_UartCyBtldrCommWrite(uint8_t pData[], uint32_t size, uin
     {
         /* Transmit data. This function does not wait until data is sent. */
         size_t byteCount = size;
-        cy_rslt_t rslt = cyhal_uart_write(&uart_obj, (void*)pData, &byteCount);
+        cy_rslt_t rslt = mtb_hal_uart_write(uart_obj, (void*)pData, &byteCount);
         status = (rslt == CY_RSLT_SUCCESS) ? CY_DFU_SUCCESS : CY_DFU_ERROR_UNKNOWN;
 
         *count = size;

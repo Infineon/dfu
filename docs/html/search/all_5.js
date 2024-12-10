@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['functions',['Functions',['../group__group__dfu__functions.html',1,'']]]
+  ['global_20variables',['Global Variables',['../group__group__dfu__globals.html',1,'']]]
 ];

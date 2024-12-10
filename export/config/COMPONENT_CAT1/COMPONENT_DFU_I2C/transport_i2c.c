@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_i2c.c
-* \version 5.2
+* \version 6.0
 *
 * This file provides the source code of the DFU communication APIs
 * for the I2C driver from HAL.
@@ -40,115 +40,65 @@
 *******************************************************************************/
 
 #include <string.h>
-#include "cyhal_system.h"
-#include "cyhal_i2c.h"
-#include "cycfg_pins.h"
+#include "mtb_hal_system.h"
+#include "mtb_hal_i2c.h"
 #include "transport_i2c.h"
 
 
 /*******************************************************************************
 * User configuration of I2C device
 *******************************************************************************/
-/* Bus speed, 100kHz */
-#ifndef DFU_I2C_SPEED
-    #define DFU_I2C_SPEED               (100000U)
-#endif
-/* Bus address for slave */
-#ifndef DFU_I2C_ADDR
-    #define DFU_I2C_ADDR                (0x0CU)
-#endif
-/* Pins aliases */
-#ifndef DFU_I2C_SDA
-    #define DFU_I2C_SDA                 CYBSP_I2C_SDA
-#endif
-#ifndef DFU_I2C_SCL
-    #define DFU_I2C_SCL                 CYBSP_I2C_SCL
-#endif
-
 /* Size of Read/Write buffers for I2C DFU  */
 #ifndef DFU_I2C_TX_BUFFER_SIZE
-    #define DFU_I2C_TX_BUFFER_SIZE      (64U)
+    #define DFU_I2C_TX_BUFFER_SIZE      (128U)
 #endif
 #ifndef DFU_I2C_RX_BUFFER_SIZE
-    #define DFU_I2C_RX_BUFFER_SIZE      (64U)
+    #define DFU_I2C_RX_BUFFER_SIZE      (128U)
 #endif
 
-/** Interrupt priority. Check device TRM for valid range e.g. Cortex-M4 0 to 7. */
-#ifndef DFU_I2C_IRQ_PRIORITY
-    #define DFU_I2C_IRQ_PRIORITY        (7U)
-#endif
 
-/**
-* I2C_initVar indicates whether the I2C driver has been initialized. The
-* variable is initialized to false and set to true the first time
-* \ref I2C_I2cCyBtldrCommStart is called. This allows  the driver to restart
-* without re-initialization after the first call to the
-* \ref I2C_I2cCyBtldrCommStart routine.
-* For re-initialization set \ref I2C_initVar to false and call
-* \ref I2C_I2cCyBtldrCommStart.
-*/
-bool I2C_initVar = false;
+/*******************************************************************************
+* Internal variables
+*******************************************************************************/
+/* The pointer to the I2C HAL object */
+static mtb_hal_i2c_t *i2c_target_obj;
 
-/* Global I2C object */
-static cyhal_i2c_t i2c_slave_obj;
+/* The pointer to the initialization/de-initialization callback function
+ * I2C hardware
+ */
+static Cy_DFU_TransportI2cCallback i2c_callback;
 
 /* Writes to this buffer */
-static uint8_t I2C_slaveTxBuf[DFU_I2C_TX_BUFFER_SIZE];
+static uint8_t I2C_targetTxBuf[DFU_I2C_TX_BUFFER_SIZE];
 
 /* Reads from this buffer */
-static uint8_t I2C_slaveRxBuf[DFU_I2C_RX_BUFFER_SIZE];
+static uint8_t I2C_targetRxBuf[DFU_I2C_RX_BUFFER_SIZE];
 
 /* Flag to release buffer to be read */
 static uint32_t I2C_applyBuffer;
 
-
 /*******************************************************************************
 * Internal function declarations
 *******************************************************************************/
-static void I2C_Start(void);
-static void cyhal_i2c_event_callback(void* callback_arg, cyhal_i2c_event_t event);
+static void mtb_hal_i2c_event_callback(void* callback_arg, mtb_hal_i2c_event_t event);
 
 
 /*******************************************************************************
-* Function Name: I2C_Start
+* Function Name: Cy_DFU_TransportI2cConfig
 ****************************************************************************//**
 *
-* Starts SCB I2C operation. Setup interrupt.
+* Configure DFU I2C Transport
 *
-* \globalvars
-* \ref I2C_initVar - used to check initial configuration, modified on first
-*                    function call.
+* Call this function in the user application to provide the HAL object and callback
+* function to DFU transport.
+*
+* \param config Configuration structure
 *
 *******************************************************************************/
-static void I2C_Start(void)
+void Cy_DFU_TransportI2cConfig(cy_stc_dfu_transport_i2c_cfg_t * config)
 {
-    if (!I2C_initVar)
-    {
-        cy_rslt_t rslt;
-
-        /* I2C configuration structure (set of values from defines) */
-        cyhal_i2c_cfg_t i2c_slave_config =
-        {
-            CYHAL_I2C_MODE_SLAVE,   /* .is_slave = true */
-            DFU_I2C_ADDR,           /* .address = 0x0CU */
-            DFU_I2C_SPEED           /* .frequencyhal_hz = 100000U */
-        };
-
-        /* Initialize the I2C block */
-        rslt = cyhal_i2c_init(&i2c_slave_obj, DFU_I2C_SDA, DFU_I2C_SCL, NULL);
-        /* A I2C initialization error - stops the execution */
-        CY_ASSERT(CY_RSLT_SUCCESS == rslt);
-
-        /* Configure the I2C interface in slave mode */
-        rslt = cyhal_i2c_configure(&i2c_slave_obj, &i2c_slave_config);
-        /* A I2C configuration error - stops the execution */
-        CY_ASSERT(CY_RSLT_SUCCESS == rslt);
-
-        (void) rslt; /* Avoid warning for release mode */
-
-        /* The transport is configured */
-        I2C_initVar = true;
-    }
+    i2c_target_obj = config->i2c;
+    i2c_callback = config->callback;
 }
 
 
@@ -161,20 +111,19 @@ static void I2C_Start(void)
 *******************************************************************************/
 void I2C_I2cCyBtldrCommStart(void)
 {
-    I2C_Start();
+    i2c_callback(CY_DFU_TRANSPORT_I2C_INIT);
 
-    /* Register I2C slave event callback */
-    cyhal_i2c_register_callback(&i2c_slave_obj, (cyhal_i2c_event_callback_t)cyhal_i2c_event_callback, NULL);
+    /* Register I2C target event callback */
+    mtb_hal_i2c_register_callback(i2c_target_obj, (mtb_hal_i2c_event_callback_t)mtb_hal_i2c_event_callback, NULL);
 
-    /* Enable I2C events for slave */
-    cyhal_i2c_enable_event(&i2c_slave_obj, (cyhal_i2c_event_t)
-                           (CYHAL_I2C_SLAVE_WRITE_EVENT | CYHAL_I2C_SLAVE_READ_EVENT | CYHAL_I2C_SLAVE_WR_CMPLT_EVENT),
-                            DFU_I2C_IRQ_PRIORITY,
-                            true);
+    /* Enable I2C events for target */
+    mtb_hal_i2c_enable_event(i2c_target_obj, MTB_HAL_I2C_TARGET_WRITE_EVENT, true);
+    mtb_hal_i2c_enable_event(i2c_target_obj, MTB_HAL_I2C_TARGET_READ_EVENT, true);
+    mtb_hal_i2c_enable_event(i2c_target_obj, MTB_HAL_I2C_TARGET_WR_CMPLT_EVENT, true);
 
     /* Manage I2C Rx/Tx buffers */
-    (void)cyhal_i2c_slave_config_read_buffer(&i2c_slave_obj, I2C_slaveTxBuf, DFU_I2C_TX_BUFFER_SIZE);
-    (void)cyhal_i2c_slave_config_write_buffer(&i2c_slave_obj, I2C_slaveRxBuf, DFU_I2C_RX_BUFFER_SIZE);
+    (void)mtb_hal_i2c_target_config_write_buffer(i2c_target_obj, I2C_targetTxBuf, DFU_I2C_TX_BUFFER_SIZE);
+    (void)mtb_hal_i2c_target_config_read_buffer(i2c_target_obj, I2C_targetRxBuf, DFU_I2C_RX_BUFFER_SIZE);
 
     I2C_applyBuffer = 0U;
 }
@@ -189,8 +138,7 @@ void I2C_I2cCyBtldrCommStart(void)
 *******************************************************************************/
 void I2C_I2cCyBtldrCommStop(void)
 {
-    cyhal_i2c_free(&i2c_slave_obj);
-    I2C_initVar=false;
+    i2c_callback(CY_DFU_TRANSPORT_I2C_DEINIT);
 }
 
 
@@ -204,8 +152,8 @@ void I2C_I2cCyBtldrCommStop(void)
 void I2C_I2cCyBtldrCommReset(void)
 {
     /* Manage I2C Rx/Tx buffers */
-    (void)cyhal_i2c_slave_config_read_buffer(&i2c_slave_obj, I2C_slaveTxBuf, DFU_I2C_TX_BUFFER_SIZE);
-    (void)cyhal_i2c_slave_config_write_buffer(&i2c_slave_obj, I2C_slaveRxBuf, DFU_I2C_RX_BUFFER_SIZE);
+    (void)mtb_hal_i2c_target_config_write_buffer(i2c_target_obj, I2C_targetTxBuf, DFU_I2C_TX_BUFFER_SIZE);
+    (void)mtb_hal_i2c_target_config_read_buffer(i2c_target_obj, I2C_targetRxBuf, DFU_I2C_RX_BUFFER_SIZE);
 
     I2C_applyBuffer = 0U;
 }
@@ -244,13 +192,13 @@ cy_en_dfu_status_t I2C_I2cCyBtldrCommRead(uint8_t pData[], uint32_t size, uint32
         status = CY_DFU_ERROR_TIMEOUT;
         dataSize = (uint16_t) size;
 
-        if (CY_RSLT_SUCCESS == cyhal_i2c_slave_read(&i2c_slave_obj, pData, &dataSize, timeout))
+        if (CY_RSLT_SUCCESS == mtb_hal_i2c_target_read(i2c_target_obj, pData, &dataSize, timeout))
         {
             status = CY_DFU_ERROR_UNKNOWN;
             *count = dataSize;
 
-            /* Prepare the slave buffer for next reception */
-            if (CY_RSLT_SUCCESS == cyhal_i2c_slave_config_write_buffer(&i2c_slave_obj, I2C_slaveRxBuf, DFU_I2C_RX_BUFFER_SIZE))
+            /* Prepare the target buffer for next reception */
+            if (CY_RSLT_SUCCESS == mtb_hal_i2c_target_config_read_buffer(i2c_target_obj, I2C_targetRxBuf, DFU_I2C_RX_BUFFER_SIZE))
             {
                 status = CY_DFU_SUCCESS;
             }
@@ -297,7 +245,7 @@ cy_en_dfu_status_t I2C_I2cCyBtldrCommWrite(const uint8_t pData[], uint32_t size,
         dataSize = (uint16_t) size;
 
         /* Copy response into read buffer */
-        if (CY_RSLT_SUCCESS == cyhal_i2c_slave_write(&i2c_slave_obj, pData, &dataSize, 0U))
+        if (CY_RSLT_SUCCESS == mtb_hal_i2c_target_write(i2c_target_obj, pData, &dataSize, 0U))
         {
             /* Read buffer is ready to be released to host */
             *count = dataSize;
@@ -312,7 +260,7 @@ cy_en_dfu_status_t I2C_I2cCyBtldrCommWrite(const uint8_t pData[], uint32_t size,
 
 
 /*******************************************************************************
-* Function Name: cyhal_i2c_event_callback
+* Function Name: mtb_hal_i2c_event_callback
 ****************************************************************************//**
 *
 *  Releases the read buffer to be read when a response is copied to the buffer
@@ -324,24 +272,24 @@ cy_en_dfu_status_t I2C_I2cCyBtldrCommWrite(const uint8_t pData[], uint32_t size,
 *  to be read by the host.
 *
 *******************************************************************************/
-static void cyhal_i2c_event_callback(void* callback_arg, cyhal_i2c_event_t event)
+static void mtb_hal_i2c_event_callback(void* callback_arg, mtb_hal_i2c_event_t event)
 {
     /* To remove unused variable warning */
     (void)callback_arg;
 
-    if ((CYHAL_I2C_SLAVE_READ_EVENT == event) && (0U != I2C_applyBuffer))
+    if ((MTB_HAL_I2C_TARGET_READ_EVENT == event) && (0U != I2C_applyBuffer))
     {
-        /* Address phase, host reads: release read buffer */
-        (void)cyhal_i2c_slave_config_read_buffer(&i2c_slave_obj, I2C_slaveTxBuf, I2C_applyBuffer);
+        /* Address phase, host reads: release write buffer */
+        (void)mtb_hal_i2c_target_config_write_buffer(i2c_target_obj, I2C_targetTxBuf, (uint16_t) I2C_applyBuffer);
         I2C_applyBuffer = 0U;
     }
-    else if (CYHAL_I2C_SLAVE_WRITE_EVENT == event)
+    else if (MTB_HAL_I2C_TARGET_WRITE_EVENT == event)
     {
         /* Address phase, host writes: make read buffer empty so that host will
          * receive only 0xFF (CY_SCB_I2C_DEFAULT_TX) until the DFU
          * application has a valid response packet.
          */
-        (void)cyhal_i2c_slave_abort_read(&i2c_slave_obj);
+        (void)mtb_hal_i2c_target_abort_read(i2c_target_obj);
     }
     else
     {

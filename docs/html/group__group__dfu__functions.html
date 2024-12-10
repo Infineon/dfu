@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Device Firmware Update (DFU) Middleware Library 5.2</title>
+<title>Device Firmware Update (DFU) Middleware Library 6.0</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -31,7 +31,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><a href="https://www.infineon.com/"><img alt="Logo" src="logo.png"/></a></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Device Firmware Update (DFU) Middleware Library 5.2</div>
+   <div id="projectname">Device Firmware Update (DFU) Middleware Library 6.0</div>
   </td>
  </tr>
  </tbody>
@@ -97,11 +97,8 @@ $(document).ready(function(){initNavTree('group__group__dfu__functions.html','')
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="groups"></a>
 API Reference</h2></td></tr>
-<tr class="memitem:group__group__dfu__functions__meta"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__functions__meta.html">Metadata Management</a></td></tr>
-<tr class="memdesc:group__group__dfu__functions__meta"><td class="mdescLeft">&#160;</td><td class="mdescRight">DFU functions for operation over meta data. <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:group__group__dfu__functions__app"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__functions__app.html">Application Management</a></td></tr>
-<tr class="memdesc:group__group__dfu__functions__app"><td class="mdescLeft">&#160;</td><td class="mdescRight">DFU Functions for application management. <br /></td></tr>
+<tr class="memdesc:group__group__dfu__functions__app"><td class="mdescLeft">&#160;</td><td class="mdescRight">DFU functions for the application management. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:group__group__dfu__functions__mem"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__functions__mem.html">Memory Operations</a></td></tr>
 <tr class="memdesc:group__group__dfu__functions__mem"><td class="mdescLeft">&#160;</td><td class="mdescRight">DFU functions for memory operations These IO functions have to be re-implemented in the user's code. <br /></td></tr>
@@ -168,7 +165,7 @@ Only one updating operation can be done at a time - the user's code must ensure 
 <li><a class="el" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1bae652f76c7eb8948ed28f2c3c73868e1f">CY_DFU_ERROR_UNKNOWN</a> either parameter is a NULL pointer.</li>
 </ul>
 </dd></dl>
-<div class="fragment"><div class="line">    <span class="comment">/*</span></div><div class="line"><span class="comment">    * Used to count seconds</span></div><div class="line"><span class="comment">    */</span></div><div class="line">    uint32_t count = 0;</div><div class="line"></div><div class="line">    <span class="comment">/* Status codes for DFU API */</span></div><div class="line">    <a class="code" href="group__group__dfu__enums.html#gafcff247e9cb8dc6c1282873b0d2dae1b">cy_en_dfu_status_t</a> status;</div><div class="line"></div><div class="line">    <span class="comment">/*</span></div><div class="line"><span class="comment">    * DFU state, one of the:</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_NONE</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_UPDATING</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_FINISHED</span></div><div class="line"><span class="comment">    * - CY_DFU_STATE_FAILED</span></div><div class="line"><span class="comment">    */</span></div><div class="line">    uint32_t state;</div><div class="line"></div><div class="line">    <span class="comment">/* Timeout for Cy_DFU_Continue(), in milliseconds */</span></div><div class="line">    <span class="keyword">const</span> uint32_t paramsTimeout = 20u;</div><div class="line"></div><div class="line">    <span class="comment">/* Buffer to store DFU commands */</span></div><div class="line">    CY_ALIGN(4) static uint8_t buffer[<a class="code" href="group__group__dfu__macro__config.html#ga01f0e598d60b05879166f93ef38cecee">CY_DFU_SIZEOF_DATA_BUFFER</a>];</div><div class="line"></div><div class="line">    <span class="comment">/* Buffer for DFU data packets for transport API */</span></div><div class="line">    CY_ALIGN(4) static uint8_t packet[<a class="code" href="group__group__dfu__macro__config.html#ga21b70d16eb321a6d2010b92c8584b782">CY_DFU_SIZEOF_CMD_BUFFER</a> ];</div><div class="line"></div><div class="line">    <span class="comment">/* DFU params, used to configure DFU */</span></div><div class="line">    <a class="code" href="group__group__dfu__data__structs.html#structcy__stc__dfu__params__t">cy_stc_dfu_params_t</a> dfuParams;</div><div class="line"></div><div class="line">    <span class="comment">/* Initialize dfuParams structure */</span></div><div class="line">    dfuParams.timeout          = paramsTimeout;</div><div class="line">    dfuParams.dataBuffer       = &amp;buffer[0];</div><div class="line">    dfuParams.packetBuffer     = &amp;packet[0];</div><div class="line"></div><div class="line">    status = <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line"></div><div class="line">    <span class="comment">/* Stop program execution if DFU init failed */</span></div><div class="line">    CY_ASSERT(<a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23">CY_DFU_SUCCESS</a> == status);</div><div class="line"></div><div class="line">    <span class="comment">/* Set up the device based on configurator selections */</span></div><div class="line">    init_cycfg_all();</div><div class="line"></div><div class="line">    <span class="comment">/* enable interrupts */</span></div><div class="line">    __enable_irq();</div></div><!-- fragment -->
+<div class="fragment"><div class="line"><span class="keyword">static</span> <a class="code" href="group__group__dfu__data__structs.html#structcy__stc__dfu__params__t">cy_stc_dfu_params_t</a> dfuParams;</div><div class="line"><span class="keyword">static</span> <a class="code" href="group__group__dfu__enums.html#gafcff247e9cb8dc6c1282873b0d2dae1b">cy_en_dfu_status_t</a> dfuStatus;</div><div class="line"></div><div class="line"><span class="comment">/*</span></div><div class="line"><span class="comment">* DFU state, one of the:</span></div><div class="line"><span class="comment">* - CY_DFU_STATE_NONE</span></div><div class="line"><span class="comment">* - CY_DFU_STATE_UPDATING</span></div><div class="line"><span class="comment">* - CY_DFU_STATE_FINISHED</span></div><div class="line"><span class="comment">* - CY_DFU_STATE_FAILED</span></div><div class="line"><span class="comment">*/</span></div><div class="line"><span class="keyword">static</span> uint32_t state = <a class="code" href="group__group__dfu__macro__state.html#ga76b0c3dd7c206fa94c2c93c44f1517c0">CY_DFU_STATE_NONE</a>;</div><div class="line"></div><div class="line"><span class="comment">/* Timeout for Cy_DFU_Continue(), in milliseconds */</span></div><div class="line"><span class="keyword">static</span> <span class="keyword">const</span> uint32_t paramsTimeout = 20U;</div><div class="line"></div><div class="line"><span class="comment">/* Buffer to store DFU commands */</span></div><div class="line">CY_ALIGN(4) static uint8_t buffer[<a class="code" href="group__group__dfu__macro__config.html#ga01f0e598d60b05879166f93ef38cecee">CY_DFU_SIZEOF_DATA_BUFFER</a>];</div><div class="line"></div><div class="line"><span class="comment">/* Buffer for DFU data packets for transport API */</span></div><div class="line">CY_ALIGN(4) static uint8_t packet[<a class="code" href="group__group__dfu__macro__config.html#ga21b70d16eb321a6d2010b92c8584b782">CY_DFU_SIZEOF_CMD_BUFFER</a>];</div></div><!-- fragment --><div class="fragment"><div class="line">    <span class="comment">/* Initialize dfuParams structure */</span></div><div class="line">    dfuParams.<a class="code" href="group__group__dfu__data__structs.html#a65c877d47227fa78b629359fab0b417e">timeout</a>          = paramsTimeout;</div><div class="line">    dfuParams.<a class="code" href="group__group__dfu__data__structs.html#af8a1cf06e15fae5ed56840b92938e176">dataBuffer</a>       = &amp;buffer[0];</div><div class="line">    dfuParams.<a class="code" href="group__group__dfu__data__structs.html#a0c50ecc808f04106a5a7fbbc1e4022b6">packetBuffer</a>     = &amp;packet[0];</div><div class="line"></div><div class="line">    dfuStatus = <a class="code" href="group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30">Cy_DFU_Init</a>(&amp;state, &amp;dfuParams);</div><div class="line"></div><div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__group__dfu__enums.html#ggafcff247e9cb8dc6c1282873b0d2dae1ba225cb8ce9902215fa03c9b0c77ac6e23">CY_DFU_SUCCESS</a> != dfuStatus)</div><div class="line">    {</div><div class="line">        CY_DFU_LOG_ERR(<span class="stringliteral">&quot;DFU initialization is failed&quot;</span>);</div><div class="line">        <span class="comment">/* Stop program execution if DFU init failed */</span></div><div class="line">        CY_ASSERT(0U);</div><div class="line">    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="ga6514a9d999be746edc406fcf764d07f5"></a>
@@ -244,7 +241,7 @@ Only one updating operation can be done at a time - the user's code must ensure 
 
 <p>This function computes a CRC-32C for the provided number of bytes contained in the provided buffer. </p>
 <p><br />
-This function is used to validate the Program Data and Verify Data DFU commands and a metadata row. </p><dl class="section note"><dt>Note</dt><dd>Ensure the Crypto block is properly initialized if <a class="el" href="group__group__dfu__macro__config.html#gaf26d1e1c21482dd7e3e41c2b24c22637">CY_DFU_OPT_CRYPTO_HW</a> is set.</dd></dl>
+This function is used to validate the Program Data and Verify Data DFU commands and a metadata row.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">address</td><td>The pointer to a buffer containing the data to compute the checksum for. </td></tr>
@@ -263,7 +260,7 @@ This function is used to validate the Program Data and Verify Data DFU commands 
 <div id="nav-path" class="navpath">
     <ul>
         <li class="footer">
-            Generated for <b>Device Firmware Update (DFU) Middleware Library 5.2</b> by <b>Cypress Semiconductor Corporation</b>.
+            Generated for <b>Device Firmware Update (DFU) Middleware Library 6.0</b> by <b>Cypress Semiconductor Corporation</b>.
             All rights reserved.
         </li>
     </ul>

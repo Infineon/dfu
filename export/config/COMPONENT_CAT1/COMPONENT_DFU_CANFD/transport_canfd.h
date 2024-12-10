@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_canfd.h
-* \version 5.2
+* \version 6.0
 *
 * This file provides constants and parameter values of the DFU
 * communication APIs for the CANFD driver.

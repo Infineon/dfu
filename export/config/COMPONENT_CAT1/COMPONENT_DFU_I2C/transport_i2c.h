@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_i2c.h
-* \version 5.2
+* \version 6.0
 *
 * This file provides constants and parameter values of the DFU
 * communication APIs for the I2C driver.
@@ -43,6 +43,7 @@
 #define TRANSPORT_I2C_H
 
 #include "cy_dfu.h"
+#include "mtb_hal_i2c.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -52,7 +53,29 @@ extern "C" {
 *    Variables with External Linkage
 ***************************************/
 
-extern bool I2C_initVar;
+/** Execute these actions for I2C transport from the user application side.
+ *
+ * \ref Cy_DFU_TransportI2cCallback
+ */
+typedef enum
+{
+    CY_DFU_TRANSPORT_I2C_INIT   = 0x01U, /**< Initialize and enable I2C transport */
+    CY_DFU_TRANSPORT_I2C_DEINIT = 0x02U, /**< De-initialize and disable I2C transport */
+} cy_en_dfu_transport_i2c_action_t;
+
+/** The type for the user I2C callback to execute some actions. Typically, it is
+ * initialization/de-initialization of I2C hardware.
+ * \ref cy_stc_dfu_transport_i2c_cfg_t
+ */
+typedef void (*Cy_DFU_TransportI2cCallback) (cy_en_dfu_transport_i2c_action_t action);
+
+/** Configuration structure for DFU I2C transport */
+typedef struct
+{
+    mtb_hal_i2c_t               *i2c;    /**< The pointer to the HAL I2C object */
+    Cy_DFU_TransportI2cCallback callback; /**< The pointer to the callback function for
+                                             * initialization/de-initialization of I2C hardware */
+} cy_stc_dfu_transport_i2c_cfg_t;
 
 
 /***************************************
@@ -60,6 +83,7 @@ extern bool I2C_initVar;
 ***************************************/
 
 /* I2C DFU physical layer functions */
+void Cy_DFU_TransportI2cConfig(cy_stc_dfu_transport_i2c_cfg_t * config);
 void I2C_I2cCyBtldrCommStart(void);
 void I2C_I2cCyBtldrCommStop (void);
 void I2C_I2cCyBtldrCommReset(void);

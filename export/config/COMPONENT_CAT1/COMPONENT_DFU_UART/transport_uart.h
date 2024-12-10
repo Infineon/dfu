@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_uart.h
-* \version 5.2
+* \version 6.0
 *
 * This file provides constants and parameter values of the DFU
 * communication APIs for the HAL UART driver.
@@ -44,6 +44,7 @@
 
 #include <stdint.h>
 #include "cy_dfu.h"
+#include "mtb_hal_uart.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -53,7 +54,30 @@ extern "C" {
 *    Variables with External Linkage
 ***************************************/
 
-extern bool UART_initVar;
+/** Execute these actions for UART transport from the user application
+ * side.
+ *
+ * \ref Cy_DFU_TransportUartCallback
+ */
+typedef enum
+{
+    CY_DFU_TRANSPORT_UART_INIT   = 0x01U, /**< Initialize and enable UART transport */
+    CY_DFU_TRANSPORT_UART_DEINIT = 0x02U, /**< De-initialize and disable UART transport */
+} cy_en_dfu_transport_uart_action_t;
+
+/** The type for the user UART callback to execute some actions. Typically, it is
+ * initialization/de-initialization of UART hardware.
+ * \ref cy_stc_dfu_transport_uart_cfg_t
+ */
+typedef void (*Cy_DFU_TransportUartCallback) (cy_en_dfu_transport_uart_action_t action);
+
+/** Configuration structure for DFU UART transport */
+typedef struct
+{
+    mtb_hal_uart_t               *uart;    /**< The pointer to the HAL UART object. */
+    Cy_DFU_TransportUartCallback callback; /**< The pointer to the callback function for
+                                             * initialization/de-initialization of UART hardware */
+} cy_stc_dfu_transport_uart_cfg_t;
 
 
 /***************************************
@@ -61,6 +85,7 @@ extern bool UART_initVar;
 ***************************************/
 
 /* UART DFU physical layer functions */
+void Cy_DFU_TransportUartConfig(cy_stc_dfu_transport_uart_cfg_t * config);
 void UART_UartCyBtldrCommStart(void);
 void UART_UartCyBtldrCommStop (void);
 void UART_UartCyBtldrCommReset(void);

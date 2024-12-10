@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cy_dfu.h
-* \version 5.2
+* \version 6.0
 *
 * Provides API declarations for the BWC with Bootloader SDK.
 *

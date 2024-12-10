@@ -7,7 +7,9 @@ var group__group__dfu__data__structs =
       [ "timeout", "group__group__dfu__data__structs.html#a65c877d47227fa78b629359fab0b417e", null ],
       [ "appId", "group__group__dfu__data__structs.html#ac1ea5832fe23467ea98d2760f0d87a6b", null ],
       [ "appVerified", "group__group__dfu__data__structs.html#aa316309fbc14b2984aea6f9545e2c995", null ],
-      [ "initCtl", "group__group__dfu__data__structs.html#af12b92bf3c15d572c0e1746c3742e27d", null ]
+      [ "initCtl", "group__group__dfu__data__structs.html#af12b92bf3c15d572c0e1746c3742e27d", null ],
+      [ "encryptionVector", "group__group__dfu__data__structs.html#a8b396530c1378f4b4e8ae9a4a0d86bd2", null ],
+      [ "handlerCmd", "group__group__dfu__data__structs.html#a0d02b956cd547ab0e6ccb067240f75a4", null ]
     ] ],
     [ "cy_stc_dfu_enter_t", "group__group__dfu__data__structs.html#structcy__stc__dfu__enter__t", [
       [ "enterSiliconId", "group__group__dfu__data__structs.html#a2235d2fe4b40fb392f16a1bea94000ab", null ],

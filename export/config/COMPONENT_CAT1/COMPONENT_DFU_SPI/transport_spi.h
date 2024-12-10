@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_spi.h
-* \version 5.2
+* \version 6.0
 *
 * This file provides constants and parameter values of the DFU
 * communication APIs for the SPI driver.
@@ -43,6 +43,7 @@
 #define TRANSPORT_SPI_H
 
 #include "cy_dfu.h"
+#include "mtb_hal_spi.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -52,7 +53,30 @@ extern "C" {
 *    Variables with External Linkage
 ***************************************/
 
-extern bool SPI_initVar;
+/** Execute these actions for SPI transport from the user application
+ * side.
+ *
+ * \ref Cy_DFU_TransportSpiCallback
+ */
+typedef enum
+{
+    CY_DFU_TRANSPORT_SPI_INIT   = 0x01U, /**< Initialize and enable SPI transport */
+    CY_DFU_TRANSPORT_SPI_DEINIT = 0x02U, /**< De-initialize and disable SPI transport */
+} cy_en_dfu_transport_spi_action_t;
+
+/** The type for the user SPI callback to execute some actions. Typically, it is
+ * initialization/de-initialization of SPI hardware.
+ * \ref cy_stc_dfu_transport_spi_cfg_t
+ */
+typedef void (*Cy_DFU_TransportSpiCallback) (cy_en_dfu_transport_spi_action_t action);
+
+/** Configuration structure for DFU SPI transport */
+typedef struct
+{
+    mtb_hal_spi_t               *spi;    /**< The pointer to the HAL SPI object */
+    Cy_DFU_TransportSpiCallback callback; /**< The pointer to the callback function for
+                                             * initialization/de-initialization of SPI hardware */
+} cy_stc_dfu_transport_spi_cfg_t;
 
 
 /***************************************
@@ -60,6 +84,7 @@ extern bool SPI_initVar;
 ***************************************/
 
 /* SPI DFU physical layer functions */
+void Cy_DFU_TransportSpiConfig(cy_stc_dfu_transport_spi_cfg_t * config);
 void SPI_SpiCyBtldrCommStart(void);
 void SPI_SpiCyBtldrCommStop (void);
 void SPI_SpiCyBtldrCommReset(void);

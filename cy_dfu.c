@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cy_dfu.c
-* \version 5.2
+* \version 6.0
 *
 *  This file provides the implementation of DFU Middleware.
 *
@@ -165,7 +165,7 @@ static uint32_t GetU32(uint8_t const array[]);
 static void     PutU16(uint8_t array[], uint32_t offset, uint32_t value);
 
 /* Because PutU32() is used only when updating the metadata */
-#if (CY_DFU_METADATA_WRITABLE != 0) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW)
+#if (defined(CY_DFU_METADATA_WRITABLE) && (CY_DFU_METADATA_WRITABLE != 0)) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW)
     static void PutU32(uint8_t array[], uint32_t offset, uint32_t value);
 #endif /* (CY_DFU_METADATA_WRITABLE != 0) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW) */
 static uint32_t PacketChecksumIndex(uint32_t size);
@@ -258,7 +258,8 @@ static cy_en_dfu_status_t ContinueHelper(uint32_t command, uint8_t *packet, uint
 * - \ref CY_DFU_SUCCESS if successful.
 * - \ref CY_DFU_ERROR_UNKNOWN either parameter is a NULL pointer.
 *
-* \snippet snippet/main.c snipped_cy_dfu_init
+* \snippet snippet/source/COMPONENT_TEST_CS_COMMON/snippet_common.c DFU_INIT_VAR
+* \snippet snippet/source/COMPONENT_TEST_CS_COMMON/snippet_common.c DFU_INIT_FUNC
 *
 *******************************************************************************/
 cy_en_dfu_status_t Cy_DFU_Init(uint32_t *state, cy_stc_dfu_params_t *params)
@@ -279,6 +280,7 @@ cy_en_dfu_status_t Cy_DFU_Init(uint32_t *state, cy_stc_dfu_params_t *params)
 }
 
 
+/** \cond INTERNAL */
 #if CY_DFU_FLOW == CY_DFU_BASIC_FLOW
 /*******************************************************************************
 * Function Name: Cy_DFU_ExecuteApp
@@ -589,6 +591,7 @@ static bool VerifySecureApp(uint32_t verifyStartAddr, uint32_t verifyLength, uin
 }
 #endif/*(CY_DFU_APP_FORMAT != CY_DFU_BASIC_APP)*/
 #endif /* CY_DFU_FLOW == CY_DFU_BASIC_FLOW */
+/** \endcond*/
 
 
 /*******************************************************************************
@@ -602,6 +605,8 @@ static bool VerifySecureApp(uint32_t verifyStartAddr, uint32_t verifyLength, uin
 *
 * This is a weak function and the user may override it in the user's code by
 * providing a function with the same name.
+*
+* \warning This function do nothing for MCUBoot flow
 *
 * \note It is assumed appId is a valid application number.
 *
@@ -666,6 +671,7 @@ CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.6','Casting int to pointer is safe a
 }
 
 
+/** \cond INTERNAL */
 #if CY_DFU_FLOW == CY_DFU_BASIC_FLOW
 /*******************************************************************************
 * Function Name: Cy_DFU_GetRunningApp
@@ -763,6 +769,7 @@ void Cy_DFU_OnResetApp0(void)
     }
 }
 #endif /* CY_DFU_FLOW == CY_DFU_BASIC_FLOW */
+/** \endcond*/
 
 
 /*******************************************************************************
@@ -1063,7 +1070,7 @@ static void PutU16(uint8_t array[], uint32_t offset, uint32_t value)
 }
 
 
-#if (CY_DFU_METADATA_WRITABLE != 0) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW)
+#if (defined(CY_DFU_METADATA_WRITABLE) && (CY_DFU_METADATA_WRITABLE != 0)) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW)
     /*******************************************************************************
     * Function Name: PutU32
     ****************************************************************************//**
@@ -1416,8 +1423,6 @@ static uint32_t PacketChecksum(const uint8_t buffer[], uint32_t size)
 * in the provided buffer. \n
 * This function is used to validate the Program Data and Verify Data DFU
 * commands and a metadata row.
-* \note Ensure the Crypto block is properly initialized
-* if \ref CY_DFU_OPT_CRYPTO_HW is set.
 *
 * \param address    The pointer to a buffer containing the data to compute
 *                   the checksum for.
@@ -1435,7 +1440,7 @@ uint32_t Cy_DFU_DataChecksum(const uint8_t *address, uint32_t length, cy_stc_dfu
     /* but it may be used in the future, if the Crypto API changes */
     (void)params;
 
-#if CY_DFU_OPT_CRYPTO_HW != 0 /* Use PDL Hardware Crypto API */
+#if defined(CY_DFU_OPT_CRYPTO_HW) && (CY_DFU_OPT_CRYPTO_HW != 0) /* Use PDL Hardware Crypto API */
     /* Note that the length will be < 64KB due to the hardware limitation in the Crypto Block. */
     /* If the block size is bigger, use software implementation instead. */
 
@@ -1616,8 +1621,7 @@ static cy_en_dfu_status_t WritePacket(cy_en_dfu_status_t status, uint8_t *packet
 {
     uint32_t checksum;
     /*
-    * The DFU Host expects only one byte of the status,
-    * its value must be compatible with the PSoC 3/4/5LP Bootloader Component
+    * The DFU Host expects only one byte of the status
     */
     uint32_t statusCode = (uint32_t)status & STATUS_BYTE_MSK;
 
@@ -1986,7 +1990,7 @@ static cy_en_dfu_status_t CommandVerifyApp(uint8_t *packet, uint32_t *rspSize, c
 #endif /* CY_DFU_OPT_VERIFY_APP != 0 */
 
 
-#if ((CY_DFU_METADATA_WRITABLE != 0) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW)) || defined(CY_DOXYGEN)
+#if ((defined(CY_DFU_METADATA_WRITABLE) && (CY_DFU_METADATA_WRITABLE != 0)) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW)) || defined(CY_DOXYGEN)
 /*******************************************************************************
 * Function Name: Cy_DFU_SetAppMetadata
 ****************************************************************************//**
@@ -2073,7 +2077,7 @@ static cy_en_dfu_status_t CommandSetAppMetadata(uint8_t *packet, uint32_t *rspSi
         /* Data offsets 0, 1, 5 are defined in the DFU Packet Structure */
         uint32_t app       =      *( GetPacketData(packet, PACKET_DATA_NO_OFFSET) );
 
-    #if (CY_DFU_METADATA_WRITABLE != 0) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW)
+    #if (defined(CY_DFU_METADATA_WRITABLE) && (CY_DFU_METADATA_WRITABLE != 0)) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW)
         uint32_t verifyAddress = GetU32( GetPacketData(packet, SET_APP_METADATA_OFFSET) );
         uint32_t verifySize   = GetU32( GetPacketData(packet, SET_APP_METADATA_LENGTH_OFFSET) );
 
@@ -2298,14 +2302,14 @@ static cy_en_dfu_status_t ContinueHelper(uint32_t command, uint8_t *packet, uint
         status = CommandSetAppMetadata(packet, rspSize, params);
         break;
 
-#if (CY_DFU_OPT_GET_METADATA != 0) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW)
+#if (defined(CY_DFU_OPT_GET_METADATA) && (CY_DFU_OPT_GET_METADATA != 0)) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW)
     case CY_DFU_CMD_GET_METADATA:
         CY_DFU_LOG_INF("Receive Get App Metadata command");
         status = CommandGetMetadata(packet, rspSize, params);
         break;
 #endif /* (CY_DFU_OPT_GET_METADATA != 0) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW) */
 
-#if (CY_DFU_OPT_SET_EIVECTOR != 0) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW)
+#if (defined(CY_DFU_OPT_SET_EIVECTOR) && (CY_DFU_OPT_SET_EIVECTOR != 0)) && (CY_DFU_FLOW == CY_DFU_BASIC_FLOW)
     case CY_DFU_CMD_SET_EIVECTOR:
         CY_DFU_LOG_INF("Receive Set EI Vector command");
         status = CommandSetEIVector(packet, rspSize, params);

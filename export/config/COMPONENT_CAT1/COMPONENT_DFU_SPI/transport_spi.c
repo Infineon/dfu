@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file transport_spi.c
-* \version 5.2
+* \version 6.0
 *
 * This file provides the source code of the DFU communication APIs
 * for the SPI driver from HAL.
@@ -40,55 +40,40 @@
 *******************************************************************************/
 
 #include <string.h>
-#include "cyhal_system.h"
-#include "cyhal_spi.h"
-#include "cycfg_pins.h"
+#include "mtb_hal_system.h"
+#include "mtb_hal_spi.h"
 #include "transport_spi.h"
 
-/* SPI bus speed, 1 Mbps */
-#ifndef DFU_SPI_BUS_SPEED
-    #define DFU_SPI_BUS_SPEED           (1000000UL)
-#endif
-#ifndef DFU_SPI_BITS_NUM
-    #define DFU_SPI_BITS_NUM            (8U)
-#endif
-#ifndef DFU_SPI_MOSI
-    #define DFU_SPI_MOSI                CYBSP_SPI_MOSI
-#endif
-#ifndef DFU_SPI_MISO
-    #define DFU_SPI_MISO                CYBSP_SPI_MISO
-#endif
-#ifndef DFU_SPI_CLK
-    #define DFU_SPI_CLK                 CYBSP_SPI_CLK
-#endif
-#ifndef DFU_SPI_CS
-    #define DFU_SPI_CS                  CYBSP_SPI_CS
-#endif
-#ifndef DFU_SPI_MODE
-    #define DFU_SPI_MODE                CYHAL_SPI_MODE_00_MSB
-#endif
-#ifndef DFU_SPI_CS_POLARITY
-    #define DFU_SPI_CS_POLARITY         CYHAL_SPI_SSEL_ACTIVE_LOW
-#endif
-
-
-/**
-* SPI_initVar indicates whether the SPI driver has been initialized. The
-* variable is initialized to false and set to true the first time
-* \ref SPI_SpiCyBtldrCommStart is called. This allows  the driver to restart
-* without re-initialization after the first call to the
-* \ref SPI_SpiCyBtldrCommStart routine.
-* For re-initialization set \ref SPI_initVar to false and call
-* \ref SPI_SpiCyBtldrCommStart.
-*/
-bool SPI_initVar = false;
-
-/* Global SPI object */
-static cyhal_spi_t spi_slave_obj;
 
 /*******************************************************************************
-* Internal function declarations
+* Internal variable
 *******************************************************************************/
+/* The pointer to the SPI HAL object */
+static mtb_hal_spi_t *spi_target_obj;
+
+/* The pointer to callback function for initialization/de-initialization of
+ * SPI hardware.
+ */
+static Cy_DFU_TransportSpiCallback spi_callback;
+
+
+/*******************************************************************************
+* Function Name: Cy_DFU_TransportSpiConfig
+****************************************************************************//**
+*
+* Configure DFU SPI Transport
+*
+* Call this function in the user application to provide the HAL object and callback
+* function to DFU transport.
+*
+* \param config Configuration structure
+*
+*******************************************************************************/
+void Cy_DFU_TransportSpiConfig(cy_stc_dfu_transport_spi_cfg_t * config)
+{
+    spi_target_obj = config->spi;
+    spi_callback = config->callback;
+}
 
 
 /*******************************************************************************
@@ -98,39 +83,12 @@ static cyhal_spi_t spi_slave_obj;
 *  Starts the SPI transport.
 *
 * \note
-*  This function does not configure an infrastructure required for the SCB SPI
-*  operation: clocks and pins. For the PSoC Creator and ModusToolbox flows, the
-*  generated files configure clocks and pins. This configuration must be
-*  performed by the application when the project uses only PDL.
+*  This function calls user callback to perform HW configuration of transport.
 *
 *******************************************************************************/
 void SPI_SpiCyBtldrCommStart(void)
 {
-    if (!SPI_initVar)
-    {
-        cy_rslt_t rslt;
-
-        /* Initialize transport */
-        rslt = cyhal_spi_init(&spi_slave_obj, DFU_SPI_MOSI, DFU_SPI_MISO,
-                                DFU_SPI_CLK, DFU_SPI_CS, NULL, DFU_SPI_BITS_NUM, DFU_SPI_MODE, true);
-        /* A SPI initialization error - stops the execution */
-        CY_ASSERT(CY_RSLT_SUCCESS == rslt);
-
-        /* Set the SPI data rate */
-         rslt = cyhal_spi_set_frequency(&spi_slave_obj, DFU_SPI_BUS_SPEED);
-        /* A SPI configuration error - stops the execution */
-        CY_ASSERT(CY_RSLT_SUCCESS == rslt);
-
-        /* Set polarity for active SSEL pin */
-         rslt = cyhal_spi_slave_select_config(&spi_slave_obj, DFU_SPI_CS, DFU_SPI_CS_POLARITY);
-        /* A SPI configuration error - stops the execution */
-        CY_ASSERT(CY_RSLT_SUCCESS == rslt);
-
-        (void) rslt; /* Avoid warning for release mode */
-
-        /* The transport is configured */
-        SPI_initVar = true;
-    }
+    spi_callback(CY_DFU_TRANSPORT_SPI_INIT);
 }
 
 
@@ -143,8 +101,7 @@ void SPI_SpiCyBtldrCommStart(void)
 *******************************************************************************/
 void SPI_SpiCyBtldrCommStop(void)
 {
-    cyhal_spi_free(&spi_slave_obj);
-    SPI_initVar=false;
+    spi_callback(CY_DFU_TRANSPORT_SPI_DEINIT);
 }
 
 
@@ -152,13 +109,12 @@ void SPI_SpiCyBtldrCommStop(void)
 * Function Name: SPI_SpiCyBtldrCommReset
 ****************************************************************************//**
 *
-*  Resets the receive and transmit communication buffers and the slave status.
+*  Resets the receive and transmit communication buffers and the target status.
 *
 *******************************************************************************/
 void SPI_SpiCyBtldrCommReset(void)
 {
-    (void)cyhal_spi_abort_async(&spi_slave_obj);
-    (void)cyhal_spi_clear(&spi_slave_obj);
+    (void) mtb_hal_spi_clear(spi_target_obj);
 }
 
 
@@ -195,7 +151,7 @@ cy_en_dfu_status_t SPI_SpiCyBtldrCommRead(uint8_t pData[], uint32_t size, uint32
         statusLoc = CY_DFU_ERROR_TIMEOUT;
         dataSize = (uint16_t) size;
 
-        if (CY_RSLT_SUCCESS == cyhal_spi_slave_read(&spi_slave_obj, pData, &dataSize, timeout))
+        if (CY_RSLT_SUCCESS == mtb_hal_spi_target_read(spi_target_obj, pData, &dataSize, timeout))
         {
             *count = dataSize;
             statusLoc = CY_DFU_SUCCESS;
@@ -234,18 +190,44 @@ cy_en_dfu_status_t SPI_SpiCyBtldrCommWrite(const uint8_t pData[], uint32_t size,
 {
     cy_en_dfu_status_t statusLoc = CY_DFU_ERROR_BAD_PARAM;
     uint16_t dataSize;
+    cy_rslt_t statusHal;
 
     if ((NULL != pData) && (size > 0U))
     {
         statusLoc = CY_DFU_ERROR_TIMEOUT;
         dataSize = (uint16_t) size;
 
-        cyhal_spi_clear(&spi_slave_obj);
-        if (CY_RSLT_SUCCESS == cyhal_spi_slave_write(&spi_slave_obj, pData, &dataSize, timeout))
+        /* mtb_hal_spi_clear always returns success */
+        (void) mtb_hal_spi_clear(spi_target_obj);
+        /* Check if the DFU Host tool has already started the SPI transfer.
+         * The DFU Host tool starts transfer through specific periods of time.
+         * If mtb_hal_spi_target_write() is called during active data transmission,
+         * the extra byte will be read and recognized as a new DFU packet.
+         */
+        while(mtb_hal_spi_is_busy(spi_target_obj) && (timeout > 0U))
         {
-            *count = dataSize;
-            statusLoc = CY_DFU_SUCCESS;
+            statusHal = mtb_hal_system_delay_ms(1U);
+            CY_ASSERT(CY_RSLT_SUCCESS == statusHal);
+            /* To avoid the compiler warning in Release mode */
+            (void) statusHal;
+            timeout--;
         }
+
+        if (timeout > 0U)
+        {
+            if (CY_RSLT_SUCCESS == mtb_hal_spi_target_write(spi_target_obj, pData, &dataSize, timeout))
+            {
+                *count = dataSize;
+                statusLoc = CY_DFU_SUCCESS;
+            }
+        }
+
+        /* Clear RX buffer to delete the extra byte if the DFU Host tool
+         * starts transmission during the SPI transfer setup from the DFU middleware
+         * side in the cyhal_spi_target_write() function.
+         * mtb_hal_spi_clear always returns success.
+         */
+        (void) mtb_hal_spi_clear(spi_target_obj);
     }
 
     return (statusLoc);

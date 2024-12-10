@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Device Firmware Update (DFU) Middleware Library 5.2</title>
+<title>Device Firmware Update (DFU) Middleware Library 6.0</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -31,7 +31,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><a href="https://www.infineon.com/"><img alt="Logo" src="logo.png"/></a></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Device Firmware Update (DFU) Middleware Library 5.2</div>
+   <div id="projectname">Device Firmware Update (DFU) Middleware Library 6.0</div>
   </td>
  </tr>
  </tbody>
@@ -106,7 +106,7 @@ $(document).ready(function(){initNavTree('group_dfu_MISRA.html','');});
 <tr>
 <td>Test Specification </td><td>MISRA-C:2012 Guidelines for the use of the C language in critical systems </td><td>March 2013  </td></tr>
 <tr>
-<td rowspan="2">MISRA Checking Tool </td><td>Coverity Static Analysis Tool </td><td>2021.9.0  </td></tr>
+<td rowspan="2">MISRA Checking Tool </td><td>Coverity Static Analysis Tool </td><td>2022.12.0  </td></tr>
 </table>
 <h2>Project Deviation</h2>
 <p>The list of deviated required rules is provided in the table below. Advisory rules deviation is not documented, as not required per MISRA specification.</p>
@@ -120,6 +120,8 @@ $(document).ready(function(){initNavTree('group_dfu_MISRA.html','');});
 <tr>
 <td>Rule 5.8 </td><td>Identifiers that define objects or functions with external linkage shall be unique. </td><td>During the code analysis, the same source files are compiled multiple times with device-specific options. All object and function identifiers are actually unique for each specific run.  </td></tr>
 <tr>
+<td>Rule 8.5 </td><td>An external object or function shall be declared once in one and only one file </td><td>False positive. During the code analysis, the same source files are compiled multiple times with device-specific options. All object and function identifiers are actually unique for each specific run.  </td></tr>
+<tr>
 <td>Rule 8.6 </td><td>An identifier with external linkage shall have exactly one external definition  </td><td>Transport functions in DFU core declared as WEAK to enable flexibility and make design extensible. The usage of the WEAK qualifier guarantees that only one definition is used.  </td></tr>
 </table>
 </div></div><!-- contents -->
@@ -128,7 +130,7 @@ $(document).ready(function(){initNavTree('group_dfu_MISRA.html','');});
 <div id="nav-path" class="navpath">
     <ul>
         <li class="footer">
-            Generated for <b>Device Firmware Update (DFU) Middleware Library 5.2</b> by <b>Cypress Semiconductor Corporation</b>.
+            Generated for <b>Device Firmware Update (DFU) Middleware Library 6.0</b> by <b>Cypress Semiconductor Corporation</b>.
             All rights reserved.
         </li>
     </ul>
