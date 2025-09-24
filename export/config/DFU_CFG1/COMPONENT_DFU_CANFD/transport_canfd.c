@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file transport_canfd.c
-* \version 6.0
+* \version 6.1.0
 *
 * This file provides the source code of the DFU communication APIs
 * for the CANFD driver.
 *
 ********************************************************************************
 * \copyright
-* (c) (2024), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2025), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -295,7 +295,6 @@ cy_en_dfu_status_t CANFD_CanfdCyBtldrCommRead(uint8_t pData[], uint32_t size, ui
             uint32_t address = Cy_CANFD_CalcRxBufAdrs(CY_DFU_CANFD_HW, CY_DFU_CANFD_CH_NUM, CANFD_RX_BUFFER_INDEX, &CY_DFU_CANFD_CONTEXT);
             CY_ASSERT(0UL != address);
 
-
 CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.3','Casting uint8_t* to uint32_t* is safe as input address is always valid and aligned.');
             CANFD_rxBuffer.data_area_f = (uint32_t*)pData;
 
@@ -348,13 +347,11 @@ cy_en_dfu_status_t CANFD_CanfdCyBtldrCommWrite(const uint8_t pData[], uint32_t s
     {
 
         DFU_CANFD_txBuffer_0.t1_f->dlc = CANFD_SizeToDlc(size);
-
 CY_MISRA_DEVIATE_BLOCK_START('MISRA C-2012 Rule 11.3', 1, \
 'Casting uint8_t* to uint32_t* is safe as input address is always valid and aligned.')
 CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.8','Removing const quilification from the type pointer is safe as the data is not modified in subsequent function calls');
         DFU_CANFD_txBuffer_0.data_area_f = (uint32_t*)pData;
 CY_MISRA_BLOCK_END('MISRA C-2012 Rule 11.3')
-
         if (CY_CANFD_SUCCESS == Cy_CANFD_UpdateAndTransmitMsgBuffer(CY_DFU_CANFD_HW,
                                                                     CY_DFU_CANFD_CH_NUM,
                                                                     &DFU_CANFD_txBuffer_0,

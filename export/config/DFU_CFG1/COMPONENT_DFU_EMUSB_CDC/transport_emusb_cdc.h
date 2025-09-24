@@ -1,13 +1,14 @@
 /***************************************************************************//**
-* \file transport_spi.h
-* \version 6.0
+* \file transport_emusb_cdc.h
+* \version 6.1.0
 *
-* This file provides constants and parameter values of the DFU
-* communication APIs for the SPI driver.
+* This file provides the constants and parameter values of the DFU communication
+* API implementation for the emUSB-Device that implements a virtual COM port
+* (CDC class).
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2025), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -39,63 +40,59 @@
 * indemnify Cypress against all liability.
 *******************************************************************************/
 
-#if !defined(TRANSPORT_SPI_H)
-#define TRANSPORT_SPI_H
+#if !defined(TRANSPORT_EMUSB_CDC_H)
+#define TRANSPORT_EMUSB_CDC_H
 
 #include "cy_dfu.h"
-#include "mtb_hal_spi.h"
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-/***************************************
-*    Variables with External Linkage
-***************************************/
-
-/** Execute these actions for SPI transport from the user application
+/** Execute these actions for USB CDC transport from the user application
  * side.
  *
- * \ref Cy_DFU_TransportSpiCallback
+ * \ref Cy_DFU_TransportUsbCdcCallback
  */
 typedef enum
 {
-    CY_DFU_TRANSPORT_SPI_INIT   = 0x01U, /**< Initialize and enable SPI transport */
-    CY_DFU_TRANSPORT_SPI_DEINIT = 0x02U, /**< De-initialize and disable SPI transport */
-} cy_en_dfu_transport_spi_action_t;
+    CY_DFU_TRANSPORT_USB_CDC_INIT    = 0x01U, /**< Initialize USB CDC transport */
+    CY_DFU_TRANSPORT_USB_CDC_ENABLE  = 0x02U, /**< Enable USB CDC transport */
+    CY_DFU_TRANSPORT_USB_CDC_DEINIT  = 0x03U, /**< De-initialize USB CDC transport */
+    CY_DFU_TRANSPORT_USB_CDC_DISABLE = 0x04U, /**< Disable USB CDC transport */
+} cy_en_dfu_transport_usb_cdc_action_t;
 
-/** The type for the user SPI callback to execute some actions. Typically, it is
- * initialization/de-initialization of SPI hardware.
- * \ref cy_stc_dfu_transport_spi_cfg_t
+/** The type for the user USB CDC callback to execute some actions. Typically, it is
+ * initialization/de-initialization of USB CDC hardware.
+ * \ref cy_stc_dfu_transport_usb_cdc_cfg_t
  */
-typedef void (*Cy_DFU_TransportSpiCallback) (cy_en_dfu_transport_spi_action_t action);
+typedef void (*Cy_DFU_TransportUsbCdcCallback) (cy_en_dfu_transport_usb_cdc_action_t action);
 
-/** Configuration structure for DFU SPI transport */
+/** Configuration structure for DFU USB CDC transport */
 typedef struct
 {
-    mtb_hal_spi_t               *spi;    /**< The pointer to the HAL SPI object */
-    Cy_DFU_TransportSpiCallback callback; /**< The pointer to the callback function for
-                                             * initialization/de-initialization of SPI hardware */
-} cy_stc_dfu_transport_spi_cfg_t;
+    Cy_DFU_TransportUsbCdcCallback callback; /**< The pointer to the callback function for
+                                             * initialization/de-initialization of USB CDC hardware */
+} cy_stc_dfu_transport_usb_cdc_cfg_t;
 
 
 /***************************************
 *        Function Prototypes
 ***************************************/
 
-/* SPI DFU physical layer functions */
-void Cy_DFU_TransportSpiConfig(cy_stc_dfu_transport_spi_cfg_t * config);
-void SPI_SpiCyBtldrCommStart(void);
-void SPI_SpiCyBtldrCommStop (void);
-void SPI_SpiCyBtldrCommReset(void);
-cy_en_dfu_status_t SPI_SpiCyBtldrCommRead (uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout);
-cy_en_dfu_status_t SPI_SpiCyBtldrCommWrite(const uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout);
+/* The USB device CDC class DFU physical layer functions */
+void Cy_DFU_TransportUsbCdcConfig(cy_stc_dfu_transport_usb_cdc_cfg_t * config);
+void USB_CDC_CyBtldrCommStart(void);
+void USB_CDC_CyBtldrCommStop (void);
+void USB_CDC_CyBtldrCommReset(void);
+cy_en_dfu_status_t USB_CDC_CyBtldrCommRead (uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout);
+cy_en_dfu_status_t USB_CDC_CyBtldrCommWrite(const uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* !defined(TRANSPORT_SPI_H) */
+#endif /* !defined(TRANSPORT_EMUSB_CDC_H) */
 
 
 /* [] END OF FILE */

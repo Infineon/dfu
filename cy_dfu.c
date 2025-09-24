@@ -1,12 +1,12 @@
 /***************************************************************************//**
 * \file cy_dfu.c
-* \version 6.0
+* \version 6.1.0
 *
 *  This file provides the implementation of DFU Middleware.
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2025), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -53,8 +53,14 @@ CY_SECTION(".cy_boot_noinit.appId") __USED static uint8_t cy_dfu_appId;
 
 /* The timeout for Cy_DFU_Continue(), in milliseconds */
 #define UPDATE_TIMEOUT                      (20U)
+
 /* The timeout for the default Cy_DFU__TransportWrite() call in milliseconds */
-#define TRANSPORT_WRITE_TIMEOUT             (150U)
+#if defined CY_DFU_TRANSPORT_WRITE_TIMEOUT
+    #define TRANSPORT_WRITE_TIMEOUT             (CY_DFU_TRANSPORT_WRITE_TIMEOUT)
+#else
+    #define TRANSPORT_WRITE_TIMEOUT             (150U)
+#endif /* CY_DFU_TRANSPORT_WRITE_TIMEOUT */
+
 /* The number of bytes per app in the metadata section */
 #define METADATA_BYTES_PER_APP              (8U)
 
@@ -1587,7 +1593,7 @@ static cy_en_dfu_status_t ReadVerifyPacket(uint8_t packet[], bool *noResponse, u
     cy_en_dfu_status_t status;
     uint32_t numberRead = 0U;
 
-    status = Cy_DFU_TransportRead( packet, CY_DFU_SIZEOF_CMD_BUFFER, &numberRead, timeout );
+    status = (cy_en_dfu_status_t)Cy_DFU_TransportRead( packet, CY_DFU_SIZEOF_CMD_BUFFER, &numberRead, timeout );
 
     if (status == CY_DFU_ERROR_TIMEOUT)
     {
@@ -1760,7 +1766,7 @@ static cy_en_dfu_status_t CopyToDataBuffer(uint8_t dataBuffer[], uint32_t *dataO
     if ( (dataBuffer != NULL) && (dataOffset != NULL) && (packet != NULL) )
     {
         status = CY_DFU_ERROR_LENGTH;
-        if ( (*dataOffset + packetSize) <= CY_DFU_SIZEOF_DATA_BUFFER )
+        if (((uint32_t)(*dataOffset + packetSize)) <= CY_DFU_SIZEOF_DATA_BUFFER )
         {
             status = CY_DFU_SUCCESS;
             (void) memcpy( &dataBuffer[*dataOffset], packet, packetSize);
@@ -2285,7 +2291,7 @@ static cy_en_dfu_status_t ContinueHelper(uint32_t command, uint8_t *packet, uint
         break;
 
     case CY_DFU_CMD_SEND_DATA:
-        CY_DFU_LOG_INF("Receive Send Data command");
+        CY_DFU_LOG_DBG("Receive Send Data command");
         status = CommandSendData(packet, rspSize, params);
         break;
 #endif /* CY_DFU_NO_CMD_SEND_DATA == 0 */
@@ -2318,7 +2324,8 @@ static cy_en_dfu_status_t ContinueHelper(uint32_t command, uint8_t *packet, uint
 
     default:
     #if CY_DFU_OPT_CUSTOM_CMD != 0
-        if((NULL != params->handlerCmd) && (command >= CY_DFU_USER_CMD_START))
+        if((NULL != params->handlerCmd) &&
+            (CY_DFU_USER_CMD_START <= command) && (command <= CY_DFU_USER_CMD_LAST))
         {
             status = params->handlerCmd(command, GetPacketData(packet, PACKET_DATA_NO_OFFSET), GetPacketDSize(packet),
                                         rspSize, params, noResponse);

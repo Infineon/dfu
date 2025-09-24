@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Device Firmware Update (DFU) Middleware Library 6.0</title>
+<title>Device Firmware Update (DFU) Middleware Library 6.1</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -31,7 +31,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><a href="https://www.infineon.com/"><img alt="Logo" src="logo.png"/></a></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Device Firmware Update (DFU) Middleware Library 6.0</div>
+   <div id="projectname">Device Firmware Update (DFU) Middleware Library 6.1</div>
   </td>
  </tr>
  </tbody>
@@ -90,7 +90,7 @@ $(document).ready(function(){initNavTree('group__group__dfu__functions.html','')
 <a href="#groups">API Reference</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">Functions</div>  </div>
+<div class="title">Functions<div class="ingroups"><a class="el" href="group__group__dfu__macro.html">Macros</a> &raquo; <a class="el" href="group__group__dfu__macro__config.html">User Config Macros</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">General Description</h2>
@@ -121,6 +121,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga0e8abd7c08bb69765fc628249c4268fb"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__functions.html#ga0e8abd7c08bb69765fc628249c4268fb">Cy_DFU_DataChecksum</a> (const uint8_t *address, uint32_t length, <a class="el" href="group__group__dfu__data__structs.html#structcy__stc__dfu__params__t">cy_stc_dfu_params_t</a> *params)</td></tr>
 <tr class="memdesc:ga0e8abd7c08bb69765fc628249c4268fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function computes a CRC-32C for the provided number of bytes contained in the provided buffer.  <a href="#ga0e8abd7c08bb69765fc628249c4268fb">More...</a><br /></td></tr>
 <tr class="separator:ga0e8abd7c08bb69765fc628249c4268fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa5a0026aed4c8646d36c3b80933e67d8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__functions.html#gaa5a0026aed4c8646d36c3b80933e67d8">Cy_DFU_AddExtMemory</a> (mtb_serial_memory_t *serialMemObj)</td></tr>
+<tr class="memdesc:gaa5a0026aed4c8646d36c3b80933e67d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function receives and stores an object for external memory.  <a href="#gaa5a0026aed4c8646d36c3b80933e67d8">More...</a><br /></td></tr>
+<tr class="separator:gaa5a0026aed4c8646d36c3b80933e67d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ga803512d54a676efd3ecfd12f531c2e30"></a>
@@ -254,13 +257,40 @@ This function is used to validate the Program Data and Verify Data DFU commands 
 
 </div>
 </div>
+<a id="gaa5a0026aed4c8646d36c3b80933e67d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa5a0026aed4c8646d36c3b80933e67d8">&#9670;&nbsp;</a></span>Cy_DFU_AddExtMemory()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Cy_DFU_AddExtMemory </td>
+          <td>(</td>
+          <td class="paramtype">mtb_serial_memory_t *&#160;</td>
+          <td class="paramname"><em>serialMemObj</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function receives and stores an object for external memory. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">serialMemObj</td><td>The pointer to an object for serial memory middleware</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>This function is applicable only when <a class="el" href="group__group__dfu__macro__config.html#ga91868282a9bdab7239220b837c68c628">CY_DFU_OPT_EXTERNAL_MEMORY</a> is not equal to zero. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part
 <div id="nav-path" class="navpath">
     <ul>
         <li class="footer">
-            Generated for <b>Device Firmware Update (DFU) Middleware Library 6.0</b> by <b>Cypress Semiconductor Corporation</b>.
+            Generated for <b>Device Firmware Update (DFU) Middleware Library 6.1</b> by <b>Cypress Semiconductor Corporation</b>.
             All rights reserved.
         </li>
     </ul>

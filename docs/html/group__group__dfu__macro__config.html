@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Device Firmware Update (DFU) Middleware Library 6.0</title>
+<title>Device Firmware Update (DFU) Middleware Library 6.1</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -31,7 +31,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><a href="https://www.infineon.com/"><img alt="Logo" src="logo.png"/></a></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Device Firmware Update (DFU) Middleware Library 6.0</div>
+   <div id="projectname">Device Firmware Update (DFU) Middleware Library 6.1</div>
   </td>
  </tr>
  </tbody>
@@ -87,6 +87,7 @@ $(document).ready(function(){initNavTree('group__group__dfu__macro__config.html'
 
 <div class="header">
   <div class="summary">
+<a href="#groups">API Reference</a> &#124;
 <a href="#define-members">Macros</a>  </div>
   <div class="headertitle">
 <div class="title">User Config Macros<div class="ingroups"><a class="el" href="group__group__dfu__macro.html">Macros</a></div></div>  </div>
@@ -94,6 +95,11 @@ $(document).ready(function(){initNavTree('group__group__dfu__macro__config.html'
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">General Description</h2>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="groups"></a>
+API Reference</h2></td></tr>
+<tr class="memitem:group__group__dfu__functions"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__functions.html">Functions</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:gac741694a868d101b9febd62dbea5a8a0"><td class="memItemLeft" align="right" valign="top"><a id="gac741694a868d101b9febd62dbea5a8a0"></a>
@@ -110,7 +116,7 @@ Macros</h2></td></tr>
 <tr class="memdesc:ga7dc6b3120ee56d0f36285f3c1e8dec2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration option to select DFU flow.  <a href="#ga7dc6b3120ee56d0f36285f3c1e8dec2d">More...</a><br /></td></tr>
 <tr class="separator:ga7dc6b3120ee56d0f36285f3c1e8dec2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga91185a5c699cc02652d7581bf82d55bc"><td class="memItemLeft" align="right" valign="top"><a id="ga91185a5c699cc02652d7581bf82d55bc"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#ga91185a5c699cc02652d7581bf82d55bc">CY_NVM_SIZEOF_ROW</a>&#160;&#160;&#160;(512)</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#ga91185a5c699cc02652d7581bf82d55bc">CY_NVM_SIZEOF_ROW</a>&#160;&#160;&#160;(512U)</td></tr>
 <tr class="memdesc:ga91185a5c699cc02652d7581bf82d55bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define program row size of the Non-Volatile memory. <br /></td></tr>
 <tr class="separator:ga91185a5c699cc02652d7581bf82d55bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga21b70d16eb321a6d2010b92c8584b782"><td class="memItemLeft" align="right" valign="top"><a id="ga21b70d16eb321a6d2010b92c8584b782"></a>
@@ -147,6 +153,14 @@ Macros</h2></td></tr>
 <tr class="memitem:ga487852a71d1a8c882522140a17a6265e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#ga487852a71d1a8c882522140a17a6265e">CY_DFU_MAX_APPS</a>&#160;&#160;&#160;(2U)</td></tr>
 <tr class="memdesc:ga487852a71d1a8c882522140a17a6265e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of applications in the metadata, for 512 bytes in a flash row - 63 is the maximum possible value, because 4 bytes are reserved for the entire metadata CRC.  <a href="#ga487852a71d1a8c882522140a17a6265e">More...</a><br /></td></tr>
 <tr class="separator:ga487852a71d1a8c882522140a17a6265e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac9712f0d7a101cb3f2182ba478a92a86"><td class="memItemLeft" align="right" valign="top"><a id="gac9712f0d7a101cb3f2182ba478a92a86"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#gac9712f0d7a101cb3f2182ba478a92a86">CY_DFU_TRANSPORT_WRITE_TIMEOUT</a>&#160;&#160;&#160;(150U)</td></tr>
+<tr class="memdesc:gac9712f0d7a101cb3f2182ba478a92a86"><td class="mdescLeft">&#160;</td><td class="mdescRight">The timeout for the default <a class="el" href="group__group__dfu__functions__transport.html#ga47b4a59a539863b1581d4ddcce701b9e" title="This function must be implemented in the user&#39;s code. ">Cy_DFU_TransportWrite()</a> call in milliseconds. <br /></td></tr>
+<tr class="separator:gac9712f0d7a101cb3f2182ba478a92a86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga91868282a9bdab7239220b837c68c628"><td class="memItemLeft" align="right" valign="top"><a id="ga91868282a9bdab7239220b837c68c628"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__group__dfu__macro__config.html#ga91868282a9bdab7239220b837c68c628">CY_DFU_OPT_EXTERNAL_MEMORY</a>&#160;&#160;&#160;(0)</td></tr>
+<tr class="memdesc:ga91868282a9bdab7239220b837c68c628"><td class="mdescLeft">&#160;</td><td class="mdescRight">A non-zero value enables the external memory support and automatically disables internal memory support. <br /></td></tr>
+<tr class="separator:ga91868282a9bdab7239220b837c68c628"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="ga2589c41699d15889ea6ede9961688f99"></a>
@@ -241,7 +255,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath">
     <ul>
         <li class="footer">
-            Generated for <b>Device Firmware Update (DFU) Middleware Library 6.0</b> by <b>Cypress Semiconductor Corporation</b>.
+            Generated for <b>Device Firmware Update (DFU) Middleware Library 6.1</b> by <b>Cypress Semiconductor Corporation</b>.
             All rights reserved.
         </li>
     </ul>

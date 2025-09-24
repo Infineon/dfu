@@ -1,13 +1,13 @@
 /***************************************************************************//**
-* \file transport_canfd.h
-* \version 6.0
+* \file transport_uart.h
+* \version 6.1.0
 *
 * This file provides constants and parameter values of the DFU
-* communication APIs for the CANFD driver.
+* communication APIs for the HAL UART driver.
 *
 ********************************************************************************
 * \copyright
-* (c) (2024), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2025), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -39,10 +39,12 @@
 * indemnify Cypress against all liability.
 *******************************************************************************/
 
-#if !defined(TRANSPORT_CANFD_H)
-#define TRANSPORT_CANFD_H
+#if !defined(TRANSPORT_UART_H)
+#define TRANSPORT_UART_H
 
+#include <stdint.h>
 #include "cy_dfu.h"
+#include "mtb_hal_uart.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -52,25 +54,49 @@ extern "C" {
 *    Variables with External Linkage
 ***************************************/
 
-extern bool CANFD_initVar;
+/** Execute these actions for UART transport from the user application
+ * side.
+ *
+ * \ref Cy_DFU_TransportUartCallback
+ */
+typedef enum
+{
+    CY_DFU_TRANSPORT_UART_INIT   = 0x01U, /**< Initialize and enable UART transport */
+    CY_DFU_TRANSPORT_UART_DEINIT = 0x02U, /**< De-initialize and disable UART transport */
+} cy_en_dfu_transport_uart_action_t;
+
+/** The type for the user UART callback to execute some actions. Typically, it is
+ * initialization/de-initialization of UART hardware.
+ * \ref cy_stc_dfu_transport_uart_cfg_t
+ */
+typedef void (*Cy_DFU_TransportUartCallback) (cy_en_dfu_transport_uart_action_t action);
+
+/** Configuration structure for DFU UART transport */
+typedef struct
+{
+    mtb_hal_uart_t               *uart;    /**< The pointer to the HAL UART object. */
+    Cy_DFU_TransportUartCallback callback; /**< The pointer to the callback function for
+                                             * initialization/de-initialization of UART hardware */
+} cy_stc_dfu_transport_uart_cfg_t;
 
 
 /***************************************
 *        Function Prototypes
 ***************************************/
 
-/* CANFD DFU physical layer functions */
-void CANFD_CanfdCyBtldrCommStart(void);
-void CANFD_CanfdCyBtldrCommStop(void);
-void CANFD_CanfdCyBtldrCommReset(void);
-cy_en_dfu_status_t CANFD_CanfdCyBtldrCommRead(uint8_t pData[], uint32_t size, uint32_t* count, uint32_t timeout);
-cy_en_dfu_status_t CANFD_CanfdCyBtldrCommWrite(const uint8_t pData[], uint32_t size, uint32_t* count, uint32_t timeout);
+/* UART DFU physical layer functions */
+void Cy_DFU_TransportUartConfig(cy_stc_dfu_transport_uart_cfg_t * config);
+void UART_UartCyBtldrCommStart(void);
+void UART_UartCyBtldrCommStop (void);
+void UART_UartCyBtldrCommReset(void);
+cy_en_dfu_status_t UART_UartCyBtldrCommRead (uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout);
+cy_en_dfu_status_t UART_UartCyBtldrCommWrite(uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* !defined(TRANSPORT_CANFD_H) */
+#endif /* !defined(TRANSPORT_UART_H) */
 
 
 /* [] END OF FILE */

@@ -1,4 +1,4 @@
-# Device Firmware Update (DFU) Middleware Library 6.0
+# Device Firmware Update (DFU) Middleware Library 6.1
 
 ## What's Included?
 
@@ -7,11 +7,9 @@ and the [DFU API Reference](https://infineon.github.io/dfu/html/index.html).
 The revision history of the DFU middleware is also available in the [API Reference Changelog](https://infineon.github.io/dfu/html/index.html#group_dfu_changelog).
 
 New in this release:
-* Migration DFU middleware to HAL-Next flow
-* Adding support of PSOC Control C3 device
-* Temporary removed support of devices not compatible with the  HAL-Next flow (PSOC 4, PSOC 6, XMC7000)
+* PSOC™ Edge E84 MCUs
 
-The DFU middleware 5.2.0 release to be used with the classic HAL flow and devices dropped from the 6.0 version (PSOC 4, PSOC 6, XMC7000).
+The DFU middleware 5.2.0 release to be used with the classic HAL flow and devices dropped from the 6.0 and 6.1 versions (PSOC 4, PSOC 6, XMC7000).
 
 ## Defect Fixes
 
@@ -27,14 +25,16 @@ This version of the DFU middleware was validated for compatibility with the foll
 
 | Software and Tools                        | Version |
 | :---------------------------------------  | :----:  |
-| ModusToolbox Software Environment         | 3.3.0   |
-|  - ModusToolbox Device Configurator       | 5.10    |
-|  - Device Firmware Update Host Tool       | 2.50    |
-| GCC Compiler                              | 11.3.1  |
+| ModusToolbox Software Environment         | 3.6.0   |
+|  - ModusToolbox Device Configurator       | 5.50.0  |
+|  - Device Firmware Update Host Tool       | 2.80.0  |
+| GCC Compiler                              | 14.2.1  |
 | IAR Compiler                              | 9.50.2  |
 | ARM Compiler 6                            | 6.22    |
-| mtb-pdl-cat1                              | 3.13.0  |
+| LLVM ARM Compiler                         | 19.1.5  |
 | mtb-hal-psc3                              | 1.0.0   |
+| emUSB-Device                              | 2.0.0   |
+| MTB Device Support package for PSE84      | 1.0.0   |
 
 
 Usage of the MCUBoot flow requires DFU Host Tool 2.0 or higher.
@@ -44,4 +44,4 @@ Usage of the MCUBoot flow requires DFU Host Tool 2.0 or higher.
 * [README.md](./README.md)
 
 ---
-© Cypress Semiconductor Corporation (an Infineon company), 2023-2024.
+© Cypress Semiconductor Corporation (an Infineon company), 2023-2025.

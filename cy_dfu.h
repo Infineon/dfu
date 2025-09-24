@@ -1,12 +1,12 @@
 /***************************************************************************//**
 * \file cy_dfu.h
-* \version 6.0
+* \version 6.1.0
 *
 * Provides API declarations for the DFU Middleware.
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2025), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -63,12 +63,12 @@
 *
 * The DFU SDK has the following features:
 * - Reads firmware images from a host through a number of transport interfaces,
-*   e.g. UART, I2C, SPI, CANFD
+*   e.g. USB, UART, I2C, SPI, CANFD
 * - Supports dynamic switching (during runtime) of the communication interfaces
 * - Provides ready-for-use transport interface templates based on HAL/PDL drivers
-*   for CAT1 devices
+*   for PSOC Control C3 and PSE84 devices
 * - Supported flow: MCUBoot compatibility
-* - Device support: CAT1B (PSOC Control C3)
+* - Device support: PSOC Control C3 and PSE84
 * - Programs a firmware image to the specified address in internal flash,
 *   XIP region or any external memory that supports the DFU API
 * - Validates applications
@@ -84,6 +84,8 @@
 ********************************************************************************
 * \subsection subsection_dfu_qsg_mcuboot DFU Transport (MCUBoot compatible) flow
 ********************************************************************************
+* See the AN235935 - Getting started with PSOC&trade; Edge E84 on ModusToolbox&trade; software
+for more details on the  PSOC&trade; Edge E84 MCU and MCUBoot.
 *
 * \subsubsection subsubsection_qsg_mcuboot_description Description
 * The DFU supports the usage of the MCUBoot as a bootloader and provides a transport layer
@@ -92,16 +94,17 @@
 *
 * \subsubsection subsubsection_qsg_mcuboot_s1 STEP1: Projects preparation.
 *
-* 1. Create a ModusToolbox&trade; application for the CAT1B device.\n
+* 1. Create a ModusToolbox&trade; application for the PSOC Control C3 or PSE84 devices.\n
 *   For example:
-*   - the KIT_PSC3M5_EVK can be used as CAT1B;
+*   - the KIT_PSC3M5_EVK can be used for PSOC Control C3 device;
+*   - the KIT_PSE84_EVAL_EPC2 can be used for PSE84 device.
 *
 *   Create a new application in the ModusToolbox&trade; IDE using an appropriate BSP
 *   and an empty application as a template (Empty App). Name it "DFU_App0". For details, refer to the
 *   ModusToolbox&trade; 3.x IDE Quick Start Guide.
 *
 *   \note The ModusToolbox&trade; PSOC Edge Protect Bootloader application
-*   must be used as a base project for the KIT_PSC3M5_EVK application loader.
+*   must be used as a base project for the KIT_PSE84_EVAL_EPC2 and the KIT_PSC3M5_EVK application loader.
 *   Please refer to the project documentation for set-up and configuration.
 *
 * 2. Include the DFU middleware into the project using the ModusToolbox&trade; Library
@@ -111,25 +114,44 @@
 *    In our case, I2C is used:
 *   \code COMPONENTS += DFU_I2C \endcode
 *
-* 4. Add the DFU User component:
+* 4. Update project's Makefile to use MCUBoot flow:
+*   \code DEFINES += CY_DFU_FLOW=CY_DFU_MCUBOOT_FLOW \endcode
 *   \code COMPONENTS += DFU_USER \endcode
 *
-* 5. Update project's Makefile to use MCUBoot flow:
-*   \code DEFINES += CY_DFU_FLOW=CY_DFU_MCUBOOT_FLOW \endcode
+* 5. To download an image to the external memory, add the next defines to the project's Makefile:
+*   \code DEFINES += CY_DFU_OPT_EXTERNAL_MEMORY=1 \endcode
+*   \code DEFINES += CY_FLASH_SIZEOF_ROW=0x100 \endcode
+*   \note The application base address and size must be set in accordance with memory layout
+*   in the project.
+*   \code DEFINES += CY_DFU_APP_ADDRESS=0x70380000 \endcode
+*   \code DEFINES += CY_DFU_APP_SIZE=0x10000 \endcode
 *
 * \subsubsection subsubsection_qsg_mcuboot_s2 STEP2: Add DFU logic to main.c
 *
-* 1. Include the required headers:
+* 1. Include the required headers.
 *    \snippet snippet/source/COMPONENT_TEST_CS_COMMON/snippet_common.c DFU_INCLUDE
-* 2. Initialize the variables:
+* 2. Initialize the variables and call the DFU initialization function:
 *    \snippet snippet/source/COMPONENT_TEST_CS_COMMON/snippet_common.c DFU_INIT_VAR
-* 3. Call the DFU initialization function:
+* 3. Call the DFU initialization function
 *    \snippet snippet/source/COMPONENT_TEST_CS_COMMON/snippet_common.c DFU_INIT_FUNC
 * 4. Initialize the DFU transport layer. Refer to the \ref group_dfu_ucase_i2c section.
-* 5. Start the I2C transport:
+* 5. For a device with external memory (for example PSE84), initialize the serial-memory
+*    middleware and provide a pointer to the serial-memory object for DFU.
+*    \snippet snippet/source/COMPONENT_TEST_CS_COMMON/snippet_common.c DFU_EXT_MEM_INIT
+*    \note Configure the SMIF HW resource in the Device Configurator. In this example, the DFU_EXT_MEM
+*    alias is used.
+* 6. Start the I2C transport
 *    \snippet snippet/source/COMPONENT_DFU_I2C/i2c_transport_snippet.c DFU_I2C_START
-* 6. Update the main loop with the Host Command/Response protocol processing:
+* 7. Update the main loop with the Host Command/Response protocol processing:
 *  \snippet snippet/source/COMPONENT_TEST_CS_COMMON/snippet_common.c DFU_CMD_PROCESS
+*  \warning The DFU main routine provided in the snippet above, must be placed before start the firmware images
+*  detected by the PSOC Edge Protect Bootloader, just before following line in the main.c:
+*  \code BOOT_LOG_INF("boot_go_for_image_id"); \endcode
+*  Also the DFU main routine must be placed within a loop:
+*  \code while ((CY_DFU_STATE_NONE == state) || (CY_DFU_STATE_UPDATING == state)) \endcode
+*  \code {
+*     ...
+*  } \endcode
 *
 * \note To use DFU logging, initialize the retarget-io middleware
 *
@@ -141,6 +163,8 @@
 * \subsubsection subsubsection_qsg_mcuboot_s4 STEP4: Create a loadable application (Application 1).
 * 1. Create a ModusToolbox&trade; application for the same devices as in STEP1. Use an empty
 *   application as a template (Empty App). Name it "DFU_App1".
+*   \note For creation of the loadable application for KIT_PSE84_EVAL_EPC2, refer to
+*   the PSOC Edge Protect Bootloader documentation.
 *
 * 2. Update the project post build steps to generate HEX files with an offset
 *   to the memory region of the loadable application.
@@ -175,12 +199,21 @@
 * Supported transports:
 *
 * <table class="doxtable">
-*   <tr><th>Devices</th><th>I2C (HAL-Next)</th><th>UART (HAL-Next)</th><th>SPI (HAL-Next)</th><th>CANFD (PDL)</th></tr>
+*   <tr><th>Devices</th><th>I2C (HAL-Next)</th><th>UART (HAL-Next)</th><th>SPI (HAL-Next)</th><th>CANFD (PDL)</th><th>USB: CDC and HID (emUSB-Device middleware)</th></tr>
 *   <tr>
-*     <td>CAT1B (PSOC Control C3)</td>
+*     <td>PSOC Control C3</td>
 *     <td>Supported</td>
 *     <td>Supported</td>
 *     <td>Supported</td>
+*     <td>Supported</td>
+*     <td>Not Supported</td>
+*   </tr>
+*   <tr>
+*     <td>PSE84</td>
+*     <td>Supported</td>
+*     <td>Supported</td>
+*     <td>Supported</td>
+*     <td>Not Supported</td>
 *     <td>Supported</td>
 *   </tr>
 * </table>
@@ -214,6 +247,23 @@
 * \note Check the next subsections for code snippets with transports configuration
 *
 ********************************************************************************
+* \subsubsection group_dfu_transport_dyn_switch Dynamic switching for DFU transports
+********************************************************************************
+*
+* The DFU middleware supports dynamic switching of configured transports. This can
+* be achieved by calling the \ref Cy_DFU_TransportStart() function with a new type
+* of transport. Typically, on the supported device, the SPI, UART and I2C protocols
+* use the same pins and are implemented on the same HW block. The Device
+* Configurator supports only one configuration for one instance of HW block.
+* This complicates the application design if the dynamic switching of the SPI,
+* UART and I2C protocols is required and for these protocols, the same HW IP block
+* and the same pins are used. For this case, for HW resource in the user
+* application, create separate configurations for each transport including pins
+* and clocks - at least, peripheral clock dividers. Also, the user application must
+* ensure that the HW resources required for transport operation are reserved
+* including SCB, pins, clock dividers and others.
+*
+********************************************************************************
 * \subsubsection group_dfu_ucase_i2c Firmware Update via I2C
 ********************************************************************************
 *
@@ -226,6 +276,25 @@
 * - The I2C transport requires configured interrupt routine
 * - To add transport to build, add **DFU_I2C** to **COMPONENTS** variable in the
 * Makefile: \code COMPONENTS+=DFU_I2C \endcode
+*
+* To set up the I2C personality in the ModusToolbox&trade; Device Configurator
+* for the I2C DFU transport for PSE84 MCU, see the screenshot below.
+*
+* <b> Serial Communication Block, Parameters </b> - set the personality alias and I2C mode for the alternate serial interface:
+*      Parameter name         | Value                                |
+*      -----------------------|--------------------------------------
+*      Personality alias name | DFU_I2C
+*      Mode                   | Slave
+*      Data rate (kbps)       | 400
+*      Use TX/RX FIFOs        | Enabled
+*      Slave Address (7-bit)  | 53
+*      Clock                  | Set according to data bitrate setting
+*      SCL                    | P9.3
+*      SDA                    | P9.2
+*
+* \n
+* \image html dfu_alt_i2c.png
+* \n
 *
 * **The Example of I2C transport configuration:**
 * - Include the required header files:
@@ -243,9 +312,6 @@
 * - Configure I2C HW using PDL initialization APIs, then set up the HAL driver and
 * configure the I2C interrupt
 * \snippet snippet/source/COMPONENT_DFU_I2C/i2c_transport_snippet.c DFU_I2C_HN_TRANSPORT_CONF
-*
-* \note Select the I2C HW and configure it in the Device Configurator,
-* then, write the next name for the DFU_I2C example.
 *
 ********************************************************************************
 * \subsubsection group_dfu_ucase_uart Firmware Update via UART
@@ -303,13 +369,73 @@
 * write the next name for the DFU_SPI example.
 *
 ********************************************************************************
+* \subsection group_dfu_ucase_emusb Firmware Update via emUSB CDC and HID transports
+********************************************************************************
+*
+* The CDC and HID transports are based on [<b>emUSB-Device middleware </b>] (https://github.com/Infineon/emusb-device).
+* The configuration of USB for the DFU middleware is similar to a standard use case,
+* but the configuration steps are divided into those implemented in transport and
+* the other to be done in the user application.
+*
+* As the emUSB-Device middleware supports the composite device feature, the transports
+* are designed to not reserve the whole USB only for the DFU middleware purpose. Also, both
+* the CDC and HID transports can be configured together: both interfaces can be visible
+* and ready to transmit data. But only one interface can be used for communication at the
+* same time. To select the required transport, call \ref Cy_DFU_TransportStart.
+*
+* To use the CDC or HID transports, add the corresponding components to project's Makefile:
+* * For CDC:
+*   \code COMPONENTS+=DFU_EMUSB_CDC \endcode
+* * For HID:
+*   \code COMPONENTS+=DFU_EMUSB_HID \endcode
+*
+* \note Also, update the components with USBD_BASE: \code COMPONENTS+=USBD_BASE \endcode
+*
+* \note Typically, the emUSB-Device middleware is not added to your project automatically,
+* so add it manually by the Library Manager.
+*
+********************************************************************************
+* \subsubsection group_dfu_ucase_emusb_cdc CDC transport configuration
+********************************************************************************
+*
+* - Include the required header files:
+* \snippet snippet/source/COMPONENT_DFU_EMUSB_CDC/emusb_cdc_transport_snippet.c DFU_EMUSB_CDC_TRANSPORT_INCLUDE
+* - Add USB Device Info structure
+* \snippet snippet/source/COMPONENT_DFU_EMUSB_CDC/emusb_cdc_transport_snippet.c DFU_EMUSB_CDC_TRANSPORT_DEVICE_INFO
+* - Implement the callback for emUSB transport
+* \snippet snippet/source/COMPONENT_DFU_EMUSB_CDC/emusb_cdc_transport_snippet.c DFU_EMUSB_CDC_TRANSPORT_CALLBACK
+* - Configure the emUSB CDC transport
+* \snippet snippet/source/COMPONENT_DFU_EMUSB_CDC/emusb_cdc_transport_snippet.c DFU_EMUSB_CDC_HW_TRANSPORT_CONF
+* - Select the CDC transport
+* \snippet snippet/source/COMPONENT_DFU_EMUSB_CDC/emusb_cdc_transport_snippet.c DFU_EMUSB_CDC_START
+*
+* \note Also, enable and configure the USB personality in the Device Configurator.
+*
+********************************************************************************
+* \subsubsection group_dfu_ucase_emusb_hid HID transport configuration
+********************************************************************************
+*
+* - Include the required header files:
+* \snippet snippet/source/COMPONENT_DFU_EMUSB_HID/emusb_hid_transport_snippet.c DFU_EMUSB_HID_TRANSPORT_INCLUDE
+* - Add USB Device Info structure
+* \snippet snippet/source/COMPONENT_DFU_EMUSB_HID/emusb_hid_transport_snippet.c DFU_EMUSB_HID_TRANSPORT_DEVICE_INFO
+* - Implement the callback for emUSB transport
+* \snippet snippet/source/COMPONENT_DFU_EMUSB_HID/emusb_hid_transport_snippet.c DFU_EMUSB_HID_TRANSPORT_CALLBACK
+* - Configure the emUSB HID transport
+* \snippet snippet/source/COMPONENT_DFU_EMUSB_HID/emusb_hid_transport_snippet.c DFU_EMUSB_HID_HW_TRANSPORT_CONF
+* - Select the HID transport
+* \snippet snippet/source/COMPONENT_DFU_EMUSB_HID/emusb_hid_transport_snippet.c DFU_EMUSB_HID_START
+*
+* \note Also, enable and configure the USB personality in the Device Configurator
+*
+********************************************************************************
 * \subsection group_dfu_ucase_canfd Firmware Update via CAN FD transport
 ********************************************************************************
 *
 * Specific steps for the CAN FD transport support:
 * - Add the CAN FD transport components to the project Makefile:
 *    \code COMPONENTS+=DFU_CANFD \endcode
-* 
+*
 * - The CAN FD interrupt priority can be configured using the DFU_CANFD_IRQ_PRIORITY macro,
 * for example:
 *    \code DEFINES+=DFU_CANFD_IRQ_PRIORITY=3 \endcode
@@ -321,7 +447,7 @@
 * To set up the CAN FD personality in the ModusToolbox&trade; Device Configurator
 * for the CAN FD DFU transport for PSOC Control C3, see the screenshots
 * below. For other devices, verify the CAN Rx and CAN Tx pins connections.
-* 
+*
 * <b> General settings </b> - set the personality alias and CAN FD mode:
 *      Parameter name         | Value                                |
 *      -----------------------|--------------------------------------
@@ -342,10 +468,10 @@
 *      Data Time Segment 1    | ^
 *      Data Time Segment 1    | ^
 *      Data Syncronization Jump Width | ^
-* 
+*
 * \image html dfu_canfd2.png
 * \n
-* 
+*
 * <b> ID Filter settings </b> - configure standard or extended frame ID filter:
 *      Parameter name         | Value                                |
 *      -----------------------|--------------------------------------
@@ -355,10 +481,10 @@
 *      SFID1/EFID1            | As configured in the DFU Host Tool
 *      Store the Received Message | Store Message into an Rx Buffer
 *      Rx Bufer Element       | 0
-* 
+*
 * \image html dfu_canfd3.png
 * \n
-* 
+*
 * <b> Global Filter & Rx Buffers settings </b> - configure global filter and Rx buffer:
 *      Parameter name         | Value                                |
 *      -----------------------|--------------------------------------
@@ -368,10 +494,10 @@
 *      Reject Remote Frames Extended | Enabled
 *      Rx Bufer Data Field Size | 64 Byte Data Field
 *      Number of Rx Buffers   | 1
-* 
+*
 * \image html dfu_canfd4.png
 * \n
-* 
+*
 * <b> Tx Buffers & Tx Buffer #0 settings </b> - configure Tx buffer:
 *      Parameter name         | Value                                |
 *      -----------------------|--------------------------------------
@@ -381,10 +507,48 @@
 *      Identifier             | ^
 *      BRS                    | ^
 *      FDF                    | CAN FD Format
-* 
+*
 * \image html dfu_canfd5.png
 * \note DLC and Data will be set by the middleware according to the specific transaction.
 *
+********************************************************************************
+* \subsection group_dfu_logging DFU logging
+********************************************************************************
+* The DFU Middleware provides the possibility to the enable logging feature.
+* The logging can be enabled by adding CY_DFU_LOG_LEVEL with selected log level
+* to DEFINES variable in Makefile:
+* \code DEFINES+=CY_DFU_LOG_LEVEL=CY_DFU_LOG_LEVEL_INFO \endcode
+* See the available log levels - \ref group_dfu_macro_log.
+*
+* By default, the logs are printed by the retarget-io middleware. So, initialize
+* this middleware on the application level. If another output method is required,
+* redirect the DFU logging by adding CY_DFU_CUSTOM_LOG to DEFINES variable in
+* Makefile and provide custom implementation of the Cy_DFU_Log() function. Also,
+* you can redefine the buffer size by CY_DFU_LOG_BUF.
+*
+* \note If you select CY_DFU_LOG_LEVEL_INFO or CY_DFU_LOG_LEVEL_DEBUG as log levels,
+* too many log messages can be printed which leads to different fails (For example,
+* a timeout from the DFU Host tool side). Especially, this is applicable when the DFU
+* transport works at a speed faster than the logging and the size of packets is small.
+* Recommended:
+* - Increase the data speed of the logging method and decrease the DFU transport speed
+* - Increase the packet size
+* - Use a smaller image size
+* - Add or increase a timeout for the command in the DFU Host tool.
+*
+********************************************************************************
+* \subsection group_dfu_packet DFU packet size increasing (I2C, SPI, UART)
+********************************************************************************
+* The DFU middleware supports the packet size increasing. The default packet size
+* is 32 bytes.The packet size can be increased up to 4048 bytes (see DFUH Tool for packet max size).
+* To increase the packet size:
+* - Create a new .mtbdfu file with the desired packet size (see DFUH Tool User Guide for details)
+* - Packet size could be define for Send Data command in the .mtbdfu file in dataLength value
+* - The dataLength should not be greater than flashRowLength
+* - Ensure that \ref CY_NVM_SIZEOF_ROW value is equal to flashRowLength in .mtbdfu file
+* - For I2C interface ensure that DFU_I2C_RX_BUFFER_SIZE is enough to handle the increased packet size
+*   It should be at least size of dataLength + 16 bytes to handle max size packet
+*   For max packet size like 4K timeout may need to be increased (CY_DFU_TRANSPORT_WRITE_TIMEOUT and cy_stc_dfu_params_t)
 ********************************************************************************
 * \subsection group_dfu_ucase_checksum Change checksum types
 ********************************************************************************
@@ -407,6 +571,11 @@
 *
 * <table class="doxtable">
 *   <tr><th>Version</th><th>Changes</th><th>Reason for Change</th></tr>
+*   <tr>
+*     <td rowspan="1">6.1.0</td>
+*     <td>Add support of PSOC™ Edge E84 MCUs devices</td>
+*     <td>New device support</td>
+*   </tr>
 *   <tr>
 *     <td rowspan="1">6.0.0</td>
 *     <td>Migrate DFU middleware to the HAL Next flow</td>
@@ -483,7 +652,7 @@
 *   </tr>
 *   <tr>
 *     <td rowspan="3">4.10</td>
-*     <td>Added PSOC 4 devices support.
+*     <td>Added PSoC 4 devices support.
 *     </td>
 *     <td>Extended device support.
 *     </td>
@@ -578,7 +747,7 @@
 *             instead of the BACKUP register.</li>
 *         <li>Add support of secure application verification.</li>
 *         <li>Add support of I2C/SPI/BLE transport protocols.</li>
-*         <li>Linker scripts updated for PSOC6 Rev *A devices.</li>
+*         <li>Linker scripts updated for PSoC6 Rev *A devices.</li>
 *         <li>Made CRC default application checksum.</li>
 *       </ul>
 *     </td>
@@ -636,7 +805,7 @@ extern "C"{
 #define CY_DFU_SDK_MW_VERSION_MAJOR       (6)
 
 /** The DFU SDK minor version */
-#define CY_DFU_SDK_MW_VERSION_MINOR       (0)
+#define CY_DFU_SDK_MW_VERSION_MINOR       (1)
 
 /**
 * \defgroup group_dfu_macro_state DFU State
@@ -735,35 +904,42 @@ typedef enum
     /** Correct status, No error */
     CY_DFU_SUCCESS         =                                   0x00U,
     /** Verification failed */
-    CY_DFU_ERROR_VERIFY    = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x02U,
+    CY_DFU_ERROR_VERIFY       = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x02U,
     /** The length of the received packet is outside of the expected range */
-    CY_DFU_ERROR_LENGTH    = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x03U,
+    CY_DFU_ERROR_LENGTH       = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x03U,
     /** The data in the received packet is invalid */
-    CY_DFU_ERROR_DATA      = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x04U,
+    CY_DFU_ERROR_DATA         = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x04U,
     /** The command is not recognized */
-    CY_DFU_ERROR_CMD       = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x05U,
+    CY_DFU_ERROR_CMD          = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x05U,
     /** The checksum does not match the expected value */
-    CY_DFU_ERROR_CHECKSUM  = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x08U,
+    CY_DFU_ERROR_CHECKSUM     = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x08U,
     /** The wrong address */
-    CY_DFU_ERROR_ADDRESS   = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x0AU,
+    CY_DFU_ERROR_ADDRESS      = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x0AU,
     /** The write to external memory device failed */
-    CY_DFU_ERROR_WRITE_EXT = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x0BU,
+    CY_DFU_ERROR_WRITE_EXT    = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x0BU,
     /** The read from external memory device failed */
-    CY_DFU_ERROR_READ_EXT  = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x0CU,
+    CY_DFU_ERROR_READ_EXT     = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x0CU,
+    /** The pointer to an external memory object is not provided.
+     * Ensure that \ref Cy_DFU_AddExtMemory is called with the proper
+     * input parameters.
+     */
+    CY_DFU_ERROR_NULL_OBJ_EXT = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x0DU,
     /** The command timed out */
-    CY_DFU_ERROR_TIMEOUT   = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x40U,
+    CY_DFU_ERROR_TIMEOUT      = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x40U,
     /** One or more of input parameters are invalid */
-    CY_DFU_ERROR_BAD_PARAM = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x50U,
+    CY_DFU_ERROR_BAD_PARAM    = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x50U,
     /** An unknown DFU error, this shall not happen */
-    CY_DFU_ERROR_UNKNOWN   = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x0FU
+    CY_DFU_ERROR_UNKNOWN      = CY_DFU_ID | CY_PDL_STATUS_ERROR | 0x0FU
 } cy_en_dfu_status_t;
 
-/** Used to select one of the transport interface for the update session */
+/** Used to select one of the transport interfaces for the update session */
 typedef enum
 {
     CY_DFU_I2C     = 0x01U, /**< I2C transport interface */
     CY_DFU_UART    = 0x02U, /**< UART transport interface */
     CY_DFU_SPI     = 0x03U, /**< SPI transport interface */
+    CY_DFU_USB_CDC = 0x04U, /**< USB CDC transport interface */
+    CY_DFU_USB_HID = 0x05U, /**< USB HID transport interface */
     CY_DFU_CANFD   = 0x06U, /**< CAN FD transport interface */
 } cy_en_dfu_transport_t;
 

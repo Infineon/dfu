@@ -11,11 +11,11 @@ A project can contain the features of both types.
 
 ## Features
 
-- Reads firmware images from a host through a number of transport interfaces, e.g. UART, I2C, SPI, CANFD
+- Reads firmware images from a host through a number of transport interfaces, e.g. USB, UART, I2C, SPI, CANFD
 - Supports dynamic switching (during runtime) of the communication interfaces
-- Provides ready-for-use transport interface templates based on HAL/PDL drivers for CAT1 devices
+- Provides ready-for-use transport interface templates based on HAL/PDL drivers for PSOC Control C3 and PSE84 devices
 - Supported flow: MCUBoot compatibility
-- Device support: CAT1B (PSOC Control C3)
+- Device support: PSOC Control C3 and PSE84
 - Programs a firmware image to the specified address in internal flash, XIP region or any external memory that supports the DFU API
 - Validates applications
 - Supports encrypted image files - transfers encrypted images without decrypting in the middle
@@ -45,11 +45,11 @@ For more information, refer to the following links:
 - [DFU Middleware Library API Reference](https://infineon.github.io/dfu/html/index.html)
 - [AN213924](https://www.infineon.com/an213924) DFU SDK User Guide
 - [CE213903](https://www.infineon.com/ce213903) DFU SDK Basic Communication Code Examples
-- [CAT1 Peripheral Driver Library API Reference](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/index.html)
+- [Peripheral Driver Library API Reference](https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/index.html), Note: PDL CAT1 is used for PSOC Control C3 device only.
 - [Code Examples for ModusToolbox Software](https://github.com/Infineon/Code-Examples-for-ModusToolbox-Software)
 - [ModusToolbox Device Configurator Tool Guide](https://www.infineon.com/ModusToolboxDeviceConfig)
 - [ModusToolbox Device Firmware Update Host Tool](https://www.infineon.com/ModusToolboxDFUHostTool)
 - [Infineon Technologies AG](https://www.infineon.com)
 
 ---
-© Cypress Semiconductor Corporation (an Infineon company), 2024.
+© Cypress Semiconductor Corporation (an Infineon company), 2025.

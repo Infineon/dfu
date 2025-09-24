@@ -1,5 +1,6 @@
 var group__group__dfu__macro__config =
 [
+    [ "Functions", "group__group__dfu__functions.html", "group__group__dfu__functions" ],
     [ "CY_DFU_LOG_LEVEL", "group__group__dfu__macro__config.html#gac741694a868d101b9febd62dbea5a8a0", null ],
     [ "CY_DFU_BASIC_FLOW", "group__group__dfu__macro__config.html#ga2589c41699d15889ea6ede9961688f99", null ],
     [ "CY_DFU_MCUBOOT_FLOW", "group__group__dfu__macro__config.html#ga1fd9a1a5a6386dc3d01e9b381d97ecdb", null ],
@@ -13,5 +14,7 @@ var group__group__dfu__macro__config =
     [ "CY_DFU_OPT_SEND_DATA", "group__group__dfu__macro__config.html#gab0c72281ffb51f731d90eeea936ac916", null ],
     [ "CY_DFU_OPT_PACKET_CRC", "group__group__dfu__macro__config.html#ga143573a13abbb1bf5c430f6f663492e7", null ],
     [ "CY_DFU_OPT_CUSTOM_CMD", "group__group__dfu__macro__config.html#ga7f1f0406892d96657b1e23c78bbd0c7c", null ],
-    [ "CY_DFU_MAX_APPS", "group__group__dfu__macro__config.html#ga487852a71d1a8c882522140a17a6265e", null ]
+    [ "CY_DFU_MAX_APPS", "group__group__dfu__macro__config.html#ga487852a71d1a8c882522140a17a6265e", null ],
+    [ "CY_DFU_TRANSPORT_WRITE_TIMEOUT", "group__group__dfu__macro__config.html#gac9712f0d7a101cb3f2182ba478a92a86", null ],
+    [ "CY_DFU_OPT_EXTERNAL_MEMORY", "group__group__dfu__macro__config.html#ga91868282a9bdab7239220b837c68c628", null ]
 ];

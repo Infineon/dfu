@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['cy_5fdfu_5faddextmemory',['Cy_DFU_AddExtMemory',['../group__group__dfu__functions.html#gaa5a0026aed4c8646d36c3b80933e67d8',1,'dfu_user.h']]],
   ['cy_5fdfu_5fcontinue',['Cy_DFU_Continue',['../group__group__dfu__functions.html#ga6514a9d999be746edc406fcf764d07f5',1,'Cy_DFU_Continue(uint32_t *state, cy_stc_dfu_params_t *params):&#160;cy_dfu.c'],['../group__group__dfu__functions.html#ga6514a9d999be746edc406fcf764d07f5',1,'Cy_DFU_Continue(uint32_t *state, cy_stc_dfu_params_t *params):&#160;cy_dfu.c']]],
   ['cy_5fdfu_5fdatachecksum',['Cy_DFU_DataChecksum',['../group__group__dfu__functions.html#ga0e8abd7c08bb69765fc628249c4268fb',1,'Cy_DFU_DataChecksum(const uint8_t *address, uint32_t length, cy_stc_dfu_params_t *params):&#160;cy_dfu.c'],['../group__group__dfu__functions.html#ga0e8abd7c08bb69765fc628249c4268fb',1,'Cy_DFU_DataChecksum(const uint8_t *address, uint32_t length, cy_stc_dfu_params_t *params):&#160;cy_dfu.c']]],
   ['cy_5fdfu_5finit',['Cy_DFU_Init',['../group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30',1,'Cy_DFU_Init(uint32_t *state, cy_stc_dfu_params_t *params):&#160;cy_dfu.c'],['../group__group__dfu__functions.html#ga803512d54a676efd3ecfd12f531c2e30',1,'Cy_DFU_Init(uint32_t *state, cy_stc_dfu_params_t *params):&#160;cy_dfu.c']]],

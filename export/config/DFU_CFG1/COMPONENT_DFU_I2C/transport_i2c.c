@@ -1,13 +1,13 @@
 /***************************************************************************//**
-* \file transport_spi.c
-* \version 6.0
+* \file transport_i2c.c
+* \version 6.1.0
 *
 * This file provides the source code of the DFU communication APIs
-* for the SPI driver from HAL.
+* for the I2C driver from HAL.
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2025), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -41,27 +41,53 @@
 
 #include <string.h>
 #include "mtb_hal_system.h"
-#include "mtb_hal_spi.h"
-#include "transport_spi.h"
+#include "mtb_hal_i2c.h"
+#include "transport_i2c.h"
 
 
 /*******************************************************************************
-* Internal variable
+* User configuration of I2C device
 *******************************************************************************/
-/* The pointer to the SPI HAL object */
-static mtb_hal_spi_t *spi_target_obj;
-
-/* The pointer to callback function for initialization/de-initialization of
- * SPI hardware.
- */
-static Cy_DFU_TransportSpiCallback spi_callback;
+/* Size of Read/Write buffers for I2C DFU  */
+#ifndef DFU_I2C_TX_BUFFER_SIZE
+    #define DFU_I2C_TX_BUFFER_SIZE      (128U)
+#endif
+#ifndef DFU_I2C_RX_BUFFER_SIZE
+    #define DFU_I2C_RX_BUFFER_SIZE      (128U)
+#endif
 
 
 /*******************************************************************************
-* Function Name: Cy_DFU_TransportSpiConfig
+* Internal variables
+*******************************************************************************/
+/* The pointer to the I2C HAL object */
+static mtb_hal_i2c_t *i2c_target_obj;
+
+/* The pointer to the initialization/de-initialization callback function
+ * I2C hardware
+ */
+static Cy_DFU_TransportI2cCallback i2c_callback;
+
+/* Writes to this buffer */
+static uint8_t I2C_targetTxBuf[DFU_I2C_TX_BUFFER_SIZE];
+
+/* Reads from this buffer */
+static uint8_t I2C_targetRxBuf[DFU_I2C_RX_BUFFER_SIZE];
+
+/* Flag to release buffer to be read */
+static uint32_t I2C_applyBuffer;
+
+/*******************************************************************************
+* Internal function declarations
+*******************************************************************************/
+static void mtb_hal_i2c_event_callback(void* callback_arg, mtb_hal_i2c_event_t event);
+
+
+/*******************************************************************************
+* Function Name: Cy_DFU_TransportI2cConfig
 ****************************************************************************//**
 *
-* Configure DFU SPI Transport
+* Configure DFU I2C Transport
 *
 * Call this function in the user application to provide the HAL object and callback
 * function to DFU transport.
@@ -69,57 +95,84 @@ static Cy_DFU_TransportSpiCallback spi_callback;
 * \param config Configuration structure
 *
 *******************************************************************************/
-void Cy_DFU_TransportSpiConfig(cy_stc_dfu_transport_spi_cfg_t * config)
+void Cy_DFU_TransportI2cConfig(cy_stc_dfu_transport_i2c_cfg_t * config)
 {
-    spi_target_obj = config->spi;
-    spi_callback = config->callback;
+    CY_ASSERT(NULL != config);
+    CY_ASSERT(NULL != config->i2c);
+    CY_ASSERT(NULL != config->callback);
+
+    i2c_target_obj = config->i2c;
+    i2c_callback = config->callback;
 }
 
 
 /*******************************************************************************
-* Function Name: SPI_SpiCyBtldrCommStart
+* Function Name: I2C_I2cCyBtldrCommStart
 ****************************************************************************//**
 *
-*  Starts the SPI transport.
-*
-* \note
-*  This function calls user callback to perform HW configuration of transport.
+* Starts the I2C transport.
 *
 *******************************************************************************/
-void SPI_SpiCyBtldrCommStart(void)
+void I2C_I2cCyBtldrCommStart(void)
 {
-    spi_callback(CY_DFU_TRANSPORT_SPI_INIT);
+    CY_ASSERT(NULL != i2c_callback);
+    if (NULL != i2c_callback)
+    {
+        i2c_callback(CY_DFU_TRANSPORT_I2C_INIT);
+
+        /* Register I2C target event callback */
+        mtb_hal_i2c_register_callback(i2c_target_obj, (mtb_hal_i2c_event_callback_t)mtb_hal_i2c_event_callback, NULL);
+
+        /* Enable I2C events for target */
+        mtb_hal_i2c_enable_event(i2c_target_obj, MTB_HAL_I2C_TARGET_WRITE_EVENT, true);
+        mtb_hal_i2c_enable_event(i2c_target_obj, MTB_HAL_I2C_TARGET_READ_EVENT, true);
+        mtb_hal_i2c_enable_event(i2c_target_obj, MTB_HAL_I2C_TARGET_WR_CMPLT_EVENT, true);
+
+        /* Manage I2C Rx/Tx buffers */
+        (void)mtb_hal_i2c_target_config_write_buffer(i2c_target_obj, I2C_targetTxBuf, DFU_I2C_TX_BUFFER_SIZE);
+        (void)mtb_hal_i2c_target_config_read_buffer(i2c_target_obj, I2C_targetRxBuf, DFU_I2C_RX_BUFFER_SIZE);
+
+        I2C_applyBuffer = 0U;
+    }
 }
 
 
 /*******************************************************************************
-* Function Name: SPI_SpiCyBtldrCommStop
+* Function Name: I2C_I2cCyBtldrCommStop
 ****************************************************************************//**
 *
-*  Stops the SPI transport.
+*  Stops the I2C transport.
 *
 *******************************************************************************/
-void SPI_SpiCyBtldrCommStop(void)
+void I2C_I2cCyBtldrCommStop(void)
 {
-    spi_callback(CY_DFU_TRANSPORT_SPI_DEINIT);
+    CY_ASSERT(NULL != i2c_callback);
+    if (NULL != i2c_callback)
+    {
+        i2c_callback(CY_DFU_TRANSPORT_I2C_DEINIT);
+    }
 }
 
 
 /*******************************************************************************
-* Function Name: SPI_SpiCyBtldrCommReset
+* Function Name: I2C_I2cCyBtldrCommReset
 ****************************************************************************//**
 *
-*  Resets the receive and transmit communication buffers and the target status.
+*  Resets the receive and transmit communication buffers.
 *
 *******************************************************************************/
-void SPI_SpiCyBtldrCommReset(void)
+void I2C_I2cCyBtldrCommReset(void)
 {
-    (void) mtb_hal_spi_clear(spi_target_obj);
+    /* Manage I2C Rx/Tx buffers */
+    (void)mtb_hal_i2c_target_config_write_buffer(i2c_target_obj, I2C_targetTxBuf, DFU_I2C_TX_BUFFER_SIZE);
+    (void)mtb_hal_i2c_target_config_read_buffer(i2c_target_obj, I2C_targetRxBuf, DFU_I2C_RX_BUFFER_SIZE);
+
+    I2C_applyBuffer = 0U;
 }
 
 
 /*******************************************************************************
-* Function Name: SPI_SpiCyBtldrCommRead
+* Function Name: I2C_I2cCyBtldrCommRead
 ****************************************************************************//**
 *
 *  Allows the caller to read data from the DFU host (the host writes the
@@ -141,29 +194,35 @@ void SPI_SpiCyBtldrCommReset(void)
 *   "Return Codes" section of the System Reference Guide.
 *
 *******************************************************************************/
-cy_en_dfu_status_t SPI_SpiCyBtldrCommRead(uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout)
+cy_en_dfu_status_t I2C_I2cCyBtldrCommRead(uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout)
 {
-    cy_en_dfu_status_t statusLoc = CY_DFU_ERROR_BAD_PARAM;
+    cy_en_dfu_status_t status = CY_DFU_ERROR_BAD_PARAM;
     uint16_t dataSize;
 
     if ((pData != NULL) && (size > 0U))
     {
-        statusLoc = CY_DFU_ERROR_TIMEOUT;
+        status = CY_DFU_ERROR_TIMEOUT;
         dataSize = (uint16_t) size;
 
-        if (CY_RSLT_SUCCESS == mtb_hal_spi_target_read(spi_target_obj, pData, &dataSize, timeout))
+        if (CY_RSLT_SUCCESS == mtb_hal_i2c_target_read(i2c_target_obj, pData, &dataSize, timeout))
         {
+            status = CY_DFU_ERROR_UNKNOWN;
             *count = dataSize;
-            statusLoc = CY_DFU_SUCCESS;
+
+            /* Prepare the target buffer for next reception */
+            if (CY_RSLT_SUCCESS == mtb_hal_i2c_target_config_read_buffer(i2c_target_obj, I2C_targetRxBuf, DFU_I2C_RX_BUFFER_SIZE))
+            {
+                status = CY_DFU_SUCCESS;
+            }
         }
     }
 
-    return (statusLoc);
+    return (status);
 }
 
 
 /*******************************************************************************
-* Function Name: SPI_SpiCyBtldrCommWrite
+* Function Name: I2C_I2cCyBtldrCommWrite
 ****************************************************************************//**
 *
 *  Allows the caller to write data to the DFU host (the host reads the
@@ -186,51 +245,68 @@ cy_en_dfu_status_t SPI_SpiCyBtldrCommRead(uint8_t pData[], uint32_t size, uint32
 *   "Return Codes" section of the System Reference Guide.
 *
 *******************************************************************************/
-cy_en_dfu_status_t SPI_SpiCyBtldrCommWrite(const uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeout)
+cy_en_dfu_status_t I2C_I2cCyBtldrCommWrite(const uint8_t pData[], uint32_t size, uint32_t *count, uint32_t timeOut)
 {
-    cy_en_dfu_status_t statusLoc = CY_DFU_ERROR_BAD_PARAM;
+    cy_en_dfu_status_t status = CY_DFU_ERROR_BAD_PARAM;
+    (void)timeOut;
+
     uint16_t dataSize;
-    cy_rslt_t statusHal;
 
     if ((NULL != pData) && (size > 0U))
     {
-        statusLoc = CY_DFU_ERROR_TIMEOUT;
         dataSize = (uint16_t) size;
 
-        /* mtb_hal_spi_clear always returns success */
-        (void) mtb_hal_spi_clear(spi_target_obj);
-        /* Check if the DFU Host tool has already started the SPI transfer.
-         * The DFU Host tool starts transfer through specific periods of time.
-         * If mtb_hal_spi_target_write() is called during active data transmission,
-         * the extra byte will be read and recognized as a new DFU packet.
-         */
-        while(mtb_hal_spi_is_busy(spi_target_obj) && (timeout > 0U))
+        /* Copy response into read buffer */
+        if (CY_RSLT_SUCCESS == mtb_hal_i2c_target_write(i2c_target_obj, pData, &dataSize, 0U))
         {
-            statusHal = mtb_hal_system_delay_ms(1U);
-            CY_ASSERT(CY_RSLT_SUCCESS == statusHal);
-            /* To avoid the compiler warning in Release mode */
-            (void) statusHal;
-            timeout--;
-        }
+            /* Read buffer is ready to be released to host */
+            *count = dataSize;
+            I2C_applyBuffer = (uint32_t) count;
 
-        if (timeout > 0U)
-        {
-            if (CY_RSLT_SUCCESS == mtb_hal_spi_target_write(spi_target_obj, pData, &dataSize, timeout))
-            {
-                *count = dataSize;
-                statusLoc = CY_DFU_SUCCESS;
-            }
+            status = CY_DFU_SUCCESS;
         }
-
-        /* Clear RX buffer to delete the extra byte if the DFU Host tool
-         * starts transmission during the SPI transfer setup from the DFU middleware
-         * side in the cyhal_spi_target_write() function.
-         * mtb_hal_spi_clear always returns success.
-         */
-        (void) mtb_hal_spi_clear(spi_target_obj);
     }
 
-    return (statusLoc);
+    return (status);
+}
+
+
+/*******************************************************************************
+* Function Name: mtb_hal_i2c_event_callback
+****************************************************************************//**
+*
+*  Releases the read buffer to be read when a response is copied to the buffer
+*  and a new read transaction starts.
+*  Closes the read buffer when write transaction is started.
+*
+* \globalvars
+*  I2C_applyBuffer - the flag to release the buffer with a response
+*  to be read by the host.
+*
+*******************************************************************************/
+static void mtb_hal_i2c_event_callback(void* callback_arg, mtb_hal_i2c_event_t event)
+{
+    /* To remove unused variable warning */
+    (void)callback_arg;
+
+    if ((MTB_HAL_I2C_TARGET_READ_EVENT == event) && (0U != I2C_applyBuffer))
+    {
+        /* Address phase, host reads: release write buffer */
+        (void)mtb_hal_i2c_target_config_write_buffer(i2c_target_obj, I2C_targetTxBuf, (uint16_t) I2C_applyBuffer);
+        I2C_applyBuffer = 0U;
+    }
+    else if (MTB_HAL_I2C_TARGET_WRITE_EVENT == event)
+    {
+        /* Address phase, host writes: make read buffer empty so that host will
+         * receive only 0xFF (CY_SCB_I2C_DEFAULT_TX) until the DFU
+         * application has a valid response packet.
+         */
+        (void)mtb_hal_i2c_target_abort_read(i2c_target_obj);
+    }
+    else
+    {
+        /* No action */
+    }
 }
 
 /* [] END OF FILE */

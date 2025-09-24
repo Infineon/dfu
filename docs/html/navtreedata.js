@@ -23,7 +23,7 @@ for the JavaScript code in this file
 */
 var NAVTREE =
 [
-  [ "Device Firmware Update (DFU) Middleware Library 6.0", "index.html", [
+  [ "Device Firmware Update (DFU) Middleware Library 6.1", "index.html", [
     [ "Overview", "index.html#section_mainpage_overview", null ],
     [ "General Description", "index.html#section_dfu_general", null ],
     [ "Quick Start Guide", "index.html#section_dfu_quick_start", [
@@ -37,13 +37,20 @@ var NAVTREE =
     ] ],
     [ "Design Considerations", "index.html#section_dfu_design", [
       [ "Firmware Update via transports based on HAL-Next", "index.html#group_dfu_ucase_hal_next", [
+        [ "Dynamic switching for DFU transports", "index.html#group_dfu_transport_dyn_switch", null ],
         [ "Firmware Update via I2C", "index.html#group_dfu_ucase_i2c", null ],
         [ "Firmware Update via UART", "index.html#group_dfu_ucase_uart", null ],
         [ "Firmware Update via SPI", "index.html#group_dfu_ucase_spi", null ]
       ] ],
+      [ "Firmware Update via emUSB CDC and HID transports", "index.html#group_dfu_ucase_emusb", [
+        [ "CDC transport configuration", "index.html#group_dfu_ucase_emusb_cdc", null ],
+        [ "HID transport configuration", "index.html#group_dfu_ucase_emusb_hid", null ]
+      ] ],
       [ "Firmware Update via CAN FD transport", "index.html#group_dfu_ucase_canfd", [
         [ "Use of the Device-Configurator™ tools for CAN-FD HW initialization", "index.html#group_dfu_mtb_cfg", null ]
       ] ],
+      [ "DFU logging", "index.html#group_dfu_logging", null ],
+      [ "DFU packet size increasing (I2C, SPI, UART)", "index.html#group_dfu_packet", null ],
       [ "Change checksum types", "index.html#group_dfu_ucase_checksum", null ]
     ] ],
     [ "Changelog", "index.html#group_dfu_changelog", null ],

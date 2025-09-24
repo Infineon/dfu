@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file dfu_user.h
-* \version 6.0
+* \version 6.1.0
 *
 * This file provides declarations that can be modified by the user but
 * are used by the DFU SDK.
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2025), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -43,9 +43,11 @@
 #define DFU_USER_H
 
 #include <stdint.h> //Check if could be removed
+#include "cy_device_headers.h"
 
-#include "cy_flash.h"
-
+#ifdef CY_IP_MXS40FLASHC   /* Needed for device with internal flash present */
+    #include "cy_flash.h"
+#endif /* CY_IP_MXS40FLASHC */
 
 #if defined(__cplusplus)
 extern "C" {
@@ -82,7 +84,7 @@ extern "C" {
     #ifdef  CY_FLASH_SIZEOF_ROW
         #define CY_NVM_SIZEOF_ROW       CY_FLASH_SIZEOF_ROW
     #else
-        #define CY_NVM_SIZEOF_ROW       (512)
+        #define CY_NVM_SIZEOF_ROW       (512U)
     #endif /* CY_FLASH_SIZEOF_ROW */
 #endif /* CY_NVM_SIZEOF_ROW */
 
@@ -134,6 +136,12 @@ extern "C" {
     #define CY_DFU_OPT_CUSTOM_CMD      (0)
 #endif /* CY_DFU_OPT_CUSTOM_CMD */
 
+#if CY_DFU_OPT_CUSTOM_CMD != 0
+    #ifndef CY_DFU_USER_CMD_LAST
+        #define CY_DFU_USER_CMD_LAST  (CY_DFU_USER_CMD_END) /**< The last user command ID */
+    #endif /* CY_DFU_USER_CMD_LAST */
+#endif //* CY_DFU_OPT_CUSTOM_CMD != 0 */
+
 /**
 * The number of applications in the metadata,
 * for 512 bytes in a flash row - 63 is the maximum possible value,
@@ -145,13 +153,74 @@ extern "C" {
     #define CY_DFU_MAX_APPS            (2U)
 #endif /* CY_DFU_MAX_APPS */
 
+/** The timeout for the default Cy_DFU_TransportWrite() call in milliseconds */
+#ifndef CY_DFU_TRANSPORT_WRITE_TIMEOUT
+    #define CY_DFU_TRANSPORT_WRITE_TIMEOUT             (150U)
+#endif /* CY_DFU_TRANSPORT_WRITE_TIMEOUT */
+
 /* MCUBoot compatibility flow specific constants */
 #if (CY_DFU_FLOW == CY_DFU_MCUBOOT_FLOW) && !defined(CY_DOXYGEN)
     #if !defined CY_DFU_PRODUCT
         #define CY_DFU_PRODUCT          (0x01020304)  /**< Default value for Product ID*/
         #warning "CY_DFU_PRODUCT is set to default value"
     #endif /* !defined CY_DFU_PRODUCT */
+
+    /** A non-zero value enables usage of external memory for placement of the App */
+    #ifndef CY_DFU_OPT_EXTERNAL_MEMORY
+        #ifndef CY_IP_MXS40FLASHC
+            #define CY_DFU_OPT_EXTERNAL_MEMORY (1U)
+        #else
+            #define CY_DFU_OPT_EXTERNAL_MEMORY (0U)
+        #endif
+    #endif /* CY_DFU_OPT_EXTERNAL_MEMORY */
+
+    #if (CY_DFU_OPT_EXTERNAL_MEMORY != 0U)
+        #ifdef USE_SMIF_PDL_INIT
+            #include "cycfg_qspi_memslot.h"
+        #else
+            #include "mtb_serial_memory.h"
+        #endif
+
+        #if !defined CY_DFU_APP_ADDRESS
+            #define CY_DFU_APP_ADDRESS              (0x60000000U)
+            #warning "CY_DFU_APP_ADDRESS is set to default value"
+        #endif
+
+        #if !defined CY_DFU_APP_SIZE
+            #define CY_DFU_APP_SIZE                 (0x10000U)
+            #warning "CY_DFU_APP_SIZE is set to default value"
+        #endif
+
+    #endif /* (CY_DFU_OPT_EXTERNAL_MEMORY != 0U) */
 #endif /* CY_DFU_FLOW == CY_DFU_MCUBOOT_FLOW */
+
+/** A non-zero value enables the external memory support and
+ * automatically disables internal memory support.
+ */
+#ifndef CY_DFU_OPT_EXTERNAL_MEMORY
+    #define CY_DFU_OPT_EXTERNAL_MEMORY      (0)
+#endif /* CY_DFU_OPT_EXTERNAL_MEMORY */
+
+#if ((CY_DFU_OPT_EXTERNAL_MEMORY != 0U) && !defined (USE_SMIF_PDL_INIT)) || defined(CY_DOXYGEN)
+/**
+* \addtogroup group_dfu_functions
+* \{
+*/
+/*******************************************************************************
+* Function Name: Cy_DFU_AddExtMemory
+****************************************************************************//**
+*
+* This function receives and stores an object for external memory
+*
+* \param serialMemObj   The pointer to an object for serial memory middleware
+*
+* \note This function is applicable only when \ref CY_DFU_OPT_EXTERNAL_MEMORY
+* is not equal to zero.
+*
+*******************************************************************************/
+void Cy_DFU_AddExtMemory(mtb_serial_memory_t *serialMemObj);
+/** \} group_dfu_functions */
+#endif /* #if ((CY_DFU_OPT_EXTERNAL_MEMORY != 0U) && !defined (USE_SMIF_PDL_INIT)) || defined(CY_DOXYGEN) */
 
 /** \cond INTERNAL */
 /* Basic bootloader flow specific constants. Do not update this section */

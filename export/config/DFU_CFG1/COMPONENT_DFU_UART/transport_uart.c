@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file transport_uart.c
-* \version 6.0
+* \version 6.1.0
 *
 * This file provides the source code of the DFU communication APIs
 * for the UART driver from HAL.
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2024), Cypress Semiconductor Corporation (an Infineon company) or
+* (c) (2016-2025), Cypress Semiconductor Corporation (an Infineon company) or
 * an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ********************************************************************************
 * This software, including source code, documentation and related materials
@@ -42,6 +42,7 @@
 #include "transport_uart.h"
 #include "mtb_hal_system.h"
 #include "mtb_hal_uart.h"
+#include "cy_dfu_logging.h"
 
 #ifndef UART_BYTE_TO_BYTE_TIMEOUT_US
     #define UART_BYTE_TO_BYTE_TIMEOUT_US            (868U)
@@ -77,6 +78,10 @@ static Cy_DFU_TransportUartCallback uart_callback;
 *******************************************************************************/
 void Cy_DFU_TransportUartConfig(cy_stc_dfu_transport_uart_cfg_t * config)
 {
+    CY_ASSERT(NULL != config);
+    CY_ASSERT(NULL != config->uart);
+    CY_ASSERT(NULL != config->callback);
+
     uart_obj = config->uart;
     uart_callback = config->callback;
 }
@@ -91,7 +96,11 @@ void Cy_DFU_TransportUartConfig(cy_stc_dfu_transport_uart_cfg_t * config)
 *******************************************************************************/
 void UART_UartCyBtldrCommStart(void)
 {
-    uart_callback(CY_DFU_TRANSPORT_UART_INIT);
+    CY_ASSERT(NULL != uart_callback);
+    if (NULL != uart_callback)
+    {
+        uart_callback(CY_DFU_TRANSPORT_UART_INIT);
+    }
 }
 
 
@@ -104,7 +113,11 @@ void UART_UartCyBtldrCommStart(void)
 *******************************************************************************/
 void UART_UartCyBtldrCommStop(void)
 {
-    uart_callback(CY_DFU_TRANSPORT_UART_DEINIT);
+    CY_ASSERT(NULL != uart_callback);
+    if (NULL != uart_callback)
+    {
+        uart_callback(CY_DFU_TRANSPORT_UART_DEINIT);
+    }
 }
 
 
@@ -120,6 +133,7 @@ void UART_UartCyBtldrCommReset(void)
     (void)mtb_hal_uart_clear(uart_obj);
 }
 
+#define UART_SCB_HW_BUF_SIZE        (96U)
 
 /*******************************************************************************
 * Function Name: UART_UartCyBtldrCommRead
@@ -162,17 +176,44 @@ cy_en_dfu_status_t UART_UartCyBtldrCommRead(uint8_t pData[], uint32_t size, uint
             /* Check packet start */
             if (mtb_hal_uart_readable(uart_obj) != 0U)
             {
+                uint32_t readBytes = 0;
                 /* Wait for end of packet */
                 do
                 {
                     byteCount = mtb_hal_uart_readable(uart_obj);
+                    if(byteCount >= UART_SCB_HW_BUF_SIZE)
+                    {
+                        /* prevent write out of buffer */
+                        if((readBytes + byteCount) >= size)
+                        {
+                            status = CY_DFU_ERROR_LENGTH;
+                            CY_DFU_LOG_ERR("UART: read more data %d than size of buffer %d",
+                                                (unsigned int)(readBytes + byteCount), (unsigned int)size);
+                        }
+                        else
+                        {
+                            cy_rslt_t rslt = mtb_hal_uart_read(uart_obj, (void*)pData, &byteCount);
+                            status = (rslt == CY_RSLT_SUCCESS) ? CY_DFU_SUCCESS : CY_DFU_ERROR_UNKNOWN;
+                        }
+                        if((status == CY_DFU_ERROR_UNKNOWN) || (status == CY_DFU_ERROR_LENGTH))
+                        {
+                            break;
+                        }
+
+                        readBytes = readBytes + byteCount;
+                        pData=&pData[byteCount];
+                        byteCount=0U;
+                    }
                     mtb_hal_system_delay_us(UART_BYTE_TO_BYTE_TIMEOUT_US);
                 }
                 while (byteCount != mtb_hal_uart_readable(uart_obj));
 
                 byteCount = UART_BYTES_TO_COPY(byteCount, size);
-                *count = byteCount;
-                status = CY_DFU_SUCCESS;
+                *count = byteCount + readBytes;
+                if (status != CY_DFU_ERROR_LENGTH)
+                {
+                    status = CY_DFU_SUCCESS;
+                }
 
                 break;
             }
@@ -185,7 +226,7 @@ cy_en_dfu_status_t UART_UartCyBtldrCommRead(uint8_t pData[], uint32_t size, uint
         }
         while (timeout != 0U);
 
-        if (status == CY_DFU_SUCCESS)
+        if ((status == CY_DFU_SUCCESS) && (byteCount > 0U))
         {
             /* Get data from RX buffer into DFU buffer */
             cy_rslt_t rslt = mtb_hal_uart_read(uart_obj, (void*)pData, &byteCount);
