@@ -1,42 +1,39 @@
 /***************************************************************************//**
 * \file dfu_user.h
-* \version 6.1.0
 *
 * This file provides declarations that can be modified by the user but
 * are used by the DFU SDK.
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2025), Cypress Semiconductor Corporation (an Infineon company) or
-* an affiliate of Cypress Semiconductor Corporation. All rights reserved.
+* (c) (2016-2026), Infineon Technologies AG, or an affiliate of Infineon
+* Technologies AG. All rights reserved.
 ********************************************************************************
-* This software, including source code, documentation and related materials
-* ("Software") is owned by Cypress Semiconductor Corporation or one of its
-* affiliates ("Cypress") and is protected by and subject to worldwide patent
-* protection (United States and foreign), United States copyright laws and
-* international treaty provisions. Therefore, you may use this Software only
-* as provided in the license agreement accompanying the software package from
-* which you obtained this Software ("EULA").
+* This software, associated documentation and materials ("Software") is
+* owned by Infineon Technologies AG or one of its affiliates ("Infineon")
+* and is protected by and subject to worldwide patent protection, worldwide
+* copyright laws, and international treaty provisions. Therefore, you may use
+* this Software only as provided in the license agreement accompanying the
+* software package from which you obtained this Software. If no license
+* agreement applies, then any use, reproduction, modification, translation, or
+* compilation of this Software is prohibited without the express written
+* permission of Infineon.
 *
-* If no EULA applies, Cypress hereby grants you a personal, non-exclusive,
-* non-transferable license to copy, modify, and compile the Software source
-* code solely for use in connection with Cypress's integrated circuit products.
-* Any reproduction, modification, translation, compilation, or representation
-* of this Software except as specified above is prohibited without the express
-* written permission of Cypress.
-*
-* Disclaimer: THIS SOFTWARE IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, NONINFRINGEMENT, IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. Cypress
-* reserves the right to make changes to the Software without notice. Cypress
-* does not assume any liability arising out of the application or use of the
-* Software or any product or circuit described in the Software. Cypress does
-* not authorize its products for use in any products where a malfunction or
-* failure of the Cypress product may reasonably be expected to result in
-* significant property damage, injury or death ("High Risk Product"). By
-* including Cypress's product in a High Risk Product, the manufacturer of such
-* system or application assumes all risk of such use and in doing so agrees to
-* indemnify Cypress against all liability.
+* Disclaimer: UNLESS OTHERWISE EXPRESSLY AGREED WITH INFINEON, THIS SOFTWARE
+* IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+* INCLUDING, BUT NOT LIMITED TO, ALL WARRANTIES OF NON-INFRINGEMENT OF
+* THIRD-PARTY RIGHTS AND IMPLIED WARRANTIES SUCH AS WARRANTIES OF FITNESS FOR A
+* SPECIFIC USE/PURPOSE OR MERCHANTABILITY.
+* Infineon reserves the right to make changes to the Software without notice.
+* You are responsible for properly designing, programming, and testing the
+* functionality and safety of your intended application of the Software, as
+* well as complying with any legal requirements related to its use. Infineon
+* does not guarantee that the Software will be free from intrusion, data theft
+* or loss, or other breaches ("Security Breaches"), and Infineon shall have
+* no liability arising out of any Security Breaches. Unless otherwise
+* explicitly approved by Infineon, the Software may not be used in any
+* application where a failure of the Product or any consequences of the use
+* thereof can reasonably be expected to result in personal injury.
 *******************************************************************************/
 
 #if !defined(DFU_USER_H)
@@ -180,17 +177,6 @@ extern "C" {
         #else
             #include "mtb_serial_memory.h"
         #endif
-
-        #if !defined CY_DFU_APP_ADDRESS
-            #define CY_DFU_APP_ADDRESS              (0x60000000U)
-            #warning "CY_DFU_APP_ADDRESS is set to default value"
-        #endif
-
-        #if !defined CY_DFU_APP_SIZE
-            #define CY_DFU_APP_SIZE                 (0x10000U)
-            #warning "CY_DFU_APP_SIZE is set to default value"
-        #endif
-
     #endif /* (CY_DFU_OPT_EXTERNAL_MEMORY != 0U) */
 #endif /* CY_DFU_FLOW == CY_DFU_MCUBOOT_FLOW */
 
@@ -200,6 +186,8 @@ extern "C" {
 #ifndef CY_DFU_OPT_EXTERNAL_MEMORY
     #define CY_DFU_OPT_EXTERNAL_MEMORY      (0)
 #endif /* CY_DFU_OPT_EXTERNAL_MEMORY */
+
+/** \} group_dfu_macro_config */
 
 #if ((CY_DFU_OPT_EXTERNAL_MEMORY != 0U) && !defined (USE_SMIF_PDL_INIT)) || defined(CY_DOXYGEN)
 /**
@@ -299,8 +287,6 @@ void Cy_DFU_AddExtMemory(mtb_serial_memory_t *serialMemObj);
     #endif /* defined(__CC_ARM) */
 #endif /* (CY_DFU_FLOW == CY_DFU_BASIC_FLOW) && defined(CY_DOXYGEN) */
 /** \endcond*/
-
-/** \} group_dfu_macro_config */
 
 #if defined(__cplusplus)
 }

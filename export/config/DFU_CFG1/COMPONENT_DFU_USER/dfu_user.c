@@ -1,6 +1,5 @@
 /***************************************************************************//**
 * \file dfu_user.c
-* \version 6.1.0
 *
 * This file provides the custom API for a firmware application with
 * DFU SDK.
@@ -9,36 +8,34 @@
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2025), Cypress Semiconductor Corporation (an Infineon company) or
-* an affiliate of Cypress Semiconductor Corporation. All rights reserved.
+* (c) (2016-2026), Infineon Technologies AG, or an affiliate of Infineon
+* Technologies AG. All rights reserved.
 ********************************************************************************
-* This software, including source code, documentation and related materials
-* ("Software") is owned by Cypress Semiconductor Corporation or one of its
-* affiliates ("Cypress") and is protected by and subject to worldwide patent
-* protection (United States and foreign), United States copyright laws and
-* international treaty provisions. Therefore, you may use this Software only
-* as provided in the license agreement accompanying the software package from
-* which you obtained this Software ("EULA").
+* This software, associated documentation and materials ("Software") is
+* owned by Infineon Technologies AG or one of its affiliates ("Infineon")
+* and is protected by and subject to worldwide patent protection, worldwide
+* copyright laws, and international treaty provisions. Therefore, you may use
+* this Software only as provided in the license agreement accompanying the
+* software package from which you obtained this Software. If no license
+* agreement applies, then any use, reproduction, modification, translation, or
+* compilation of this Software is prohibited without the express written
+* permission of Infineon.
 *
-* If no EULA applies, Cypress hereby grants you a personal, non-exclusive,
-* non-transferable license to copy, modify, and compile the Software source
-* code solely for use in connection with Cypress's integrated circuit products.
-* Any reproduction, modification, translation, compilation, or representation
-* of this Software except as specified above is prohibited without the express
-* written permission of Cypress.
-*
-* Disclaimer: THIS SOFTWARE IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, NONINFRINGEMENT, IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. Cypress
-* reserves the right to make changes to the Software without notice. Cypress
-* does not assume any liability arising out of the application or use of the
-* Software or any product or circuit described in the Software. Cypress does
-* not authorize its products for use in any products where a malfunction or
-* failure of the Cypress product may reasonably be expected to result in
-* significant property damage, injury or death ("High Risk Product"). By
-* including Cypress's product in a High Risk Product, the manufacturer of such
-* system or application assumes all risk of such use and in doing so agrees to
-* indemnify Cypress against all liability.
+* Disclaimer: UNLESS OTHERWISE EXPRESSLY AGREED WITH INFINEON, THIS SOFTWARE
+* IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+* INCLUDING, BUT NOT LIMITED TO, ALL WARRANTIES OF NON-INFRINGEMENT OF
+* THIRD-PARTY RIGHTS AND IMPLIED WARRANTIES SUCH AS WARRANTIES OF FITNESS FOR A
+* SPECIFIC USE/PURPOSE OR MERCHANTABILITY.
+* Infineon reserves the right to make changes to the Software without notice.
+* You are responsible for properly designing, programming, and testing the
+* functionality and safety of your intended application of the Software, as
+* well as complying with any legal requirements related to its use. Infineon
+* does not guarantee that the Software will be free from intrusion, data theft
+* or loss, or other breaches ("Security Breaches"), and Infineon shall have
+* no liability arising out of any Security Breaches. Unless otherwise
+* explicitly approved by Infineon, the Software may not be used in any
+* application where a failure of the Product or any consequences of the use
+* thereof can reasonably be expected to result in personal injury.
 *******************************************************************************/
 
 #include <string.h>
@@ -79,11 +76,23 @@
     #include "transport_canfd.h"
 #endif  /* COMPONENT_DFU_CANFD */
 
+#ifdef COMPONENT_DFU_PMBUS
+    #include "transport_pmbus.h"
+#endif  /* COMPONENT_DFU_PMBUS */
+
+#ifdef COMPONENT_DFU_HOST_I2C
+    #include "host_transport_i2c.h"
+#endif /* COMPONENT_DFU_HOST_I2C */
+
+#ifdef COMPONENT_DFU_HOST_UART
+    #include "host_transport_uart.h"
+#endif /* COMPONENT_DFU_HOST_UART */
+
 #if !defined(COMPONENT_DFU_I2C) && !defined(COMPONENT_DFU_UART) && !defined(COMPONENT_DFU_SPI) &&\
     !defined(COMPONENT_DFU_USB_CDC) && !defined(COMPONENT_DFU_EMUSB_CDC) && !defined(COMPONENT_DFU_EMUSB_HID) &&\
-    !defined(COMPONENT_DFU_CANFD)
+    !defined(COMPONENT_DFU_CANFD) && !defined(COMPONENT_DFU_PMBUS)
     #warning "Select at least one of the DFU transports."
-#endif /* !defined(COMPONENT_DFU_I2C) ... !defined(COMPONENT_DFU_CANFD) */
+#endif /* !defined(COMPONENT_DFU_I2C) ... !defined(COMPONENT_DFU_PMBUS) */
 
 #if (CY_DFU_OPT_EXTERNAL_MEMORY != 0U)
     #ifndef CY_EXT_NVM0_BASE
@@ -96,12 +105,9 @@
     #endif /* CY_EXT_NVM1_BASE */
 #endif /* CY_DFU_OPT_EXTERNAL_MEMORY != 0U */
 
-
 /* Global NVM object */
 #if (CY_DFU_OPT_EXTERNAL_MEMORY == 0U)
-    #if !defined CY_IP_MXS40SSRSS || !defined COMPONENT_NON_SECURE_DEVICE
-        static mtb_hal_nvm_t nvm_obj;
-    #endif /* !defined CY_IP_MXS40SSRSS || !defined COMPONENT_NON_SECURE_DEVICE */
+    static mtb_hal_nvm_t nvm_obj;
 #endif /* (CY_DFU_OPT_EXTERNAL_MEMORY == 0U) */
 
 #if (CY_DFU_OPT_EXTERNAL_MEMORY != 0U)
@@ -114,6 +120,9 @@ void Cy_DFU_AddExtMemory(mtb_serial_memory_t *serialMemObj)
 #endif /* #if (CY_DFU_OPT_EXTERNAL_MEMORY != 0U) */
 
 static cy_en_dfu_transport_t selectedInterface = CY_DFU_UART;
+#if (CY_DFU_OPT_HOST_MODE != 0U) && (defined(COMPONENT_DFU_HOST_I2C) || defined(COMPONENT_DFU_HOST_UART))
+static cy_en_dfu_transport_t selectedHostInterface = CY_DFU_NONE;
+#endif /* CY_DFU_OPT_HOST_MODE && COMPONENT_DFU_HOST_I2C */
 
 #ifdef CY_IP_M7CPUSS
     static const mtb_hal_nvm_region_info_t* blocks_info;
@@ -279,6 +288,7 @@ static bool AddressValid(uint32_t address, cy_stc_dfu_params_t *params)
 
         size_t eraseBlockSize;
         size_t eraseBlockStart;
+
         uint32_t extmemAddress = address - CY_EXT_NVM0_BASE;
 
         if (serialMemObjPtr == NULL)
@@ -301,31 +311,61 @@ static bool AddressValid(uint32_t address, cy_stc_dfu_params_t *params)
             }
             else /* Write command */
             {
-
             #ifndef CY_DFU_DISABLE_EXTMEM_ERASE
-                /* Check if the address to write is the beginning of a new application */
-                if ((CY_DFU_APP_ADDRESS - CY_EXT_NVM0_BASE) == extmemAddress)
-                {
-                    eraseBlockStart = mtb_serial_memory_get_sector_start_address(serialMemObjPtr, extmemAddress);
+                /* Erase all at once */
+                #if defined (CY_DFU_APP_ADDRESS) && defined (CY_DFU_APP_SIZE)
+                    /* Check if the address to write is the beginning of a new application */
+                    if ((CY_DFU_APP_ADDRESS - CY_EXT_NVM0_BASE) == extmemAddress)
+                    {
+                        eraseBlockStart = mtb_serial_memory_get_sector_start_address(serialMemObjPtr, extmemAddress);
 
-                    /* The size of memory to erase:
-                     * the last sector address - the first sector address + the last sector size
-                     */
-                    eraseBlockSize = (size_t)mtb_serial_memory_get_sector_start_address(serialMemObjPtr, extmemAddress + (CY_DFU_APP_SIZE - 1U)) -
-                                    extmemAddress + mtb_serial_memory_get_erase_size(serialMemObjPtr, extmemAddress + (CY_DFU_APP_SIZE - 1U));
+                        /* The size of memory to erase:
+                         * the last sector address - the first sector address + the last sector size
+                         */
+                        eraseBlockSize = (size_t)mtb_serial_memory_get_sector_start_address(serialMemObjPtr, extmemAddress + (CY_DFU_APP_SIZE - 1U)) -
+                                           extmemAddress + mtb_serial_memory_get_erase_size(serialMemObjPtr, extmemAddress + (CY_DFU_APP_SIZE - 1U));
 
-                    cy_rslt_t extstatus = mtb_serial_memory_erase(serialMemObjPtr, eraseBlockStart, eraseBlockSize);
-                    status = (extstatus == CY_RSLT_SUCCESS) ? CY_DFU_SUCCESS : CY_DFU_ERROR_WRITE_EXT;
-                }
+                        cy_rslt_t extstatus = mtb_serial_memory_erase(serialMemObjPtr, eraseBlockStart, eraseBlockSize);
+                        status = (extstatus == CY_RSLT_SUCCESS) ? CY_DFU_SUCCESS : CY_DFU_ERROR_WRITE_EXT;
+                    }
+                #else /* if defined (CY_DFU_APP_ADDRESS) && defined (CY_DFU_APP_SIZE) */
+                    /* Only erase the block for the current writing */
+                    static size_t lastErasedBlockStart = 0U;
+                    static size_t lastErasedBlockEnd = 0U;
+
+                    /* Check and erase the memory */
+                    if (!((lastErasedBlockStart <= extmemAddress) && ((extmemAddress + length) <= lastErasedBlockEnd)))
+                    {
+                        eraseBlockStart = mtb_serial_memory_get_sector_start_address(serialMemObjPtr, extmemAddress);
+
+                        /* The size of memory to erase:
+                         * the last sector address - the first sector address + the last sector size */
+                        eraseBlockSize = (size_t)mtb_serial_memory_get_sector_start_address(serialMemObjPtr, extmemAddress + (length - 1U)) -
+                                           extmemAddress + mtb_serial_memory_get_erase_size(serialMemObjPtr, extmemAddress + (length - 1U));
+
+                        cy_rslt_t extstatus = mtb_serial_memory_erase(serialMemObjPtr, eraseBlockStart, eraseBlockSize);
+                        if (extstatus == CY_RSLT_SUCCESS)
+                        {
+                            status = CY_DFU_SUCCESS;
+                            /* Remember details of the block erased */
+                            lastErasedBlockStart = eraseBlockStart;
+                            lastErasedBlockEnd = eraseBlockStart + eraseBlockSize;
+                        }
+                        else
+                        {
+                            status = CY_DFU_ERROR_WRITE_EXT;
+                        }
+                    }
+                #endif /* if defined (CY_DFU_APP_ADDRESS) && defined (CY_DFU_APP_SIZE) */
             #endif /* !define CY_DFU_DISABLE_EXTMEM_ERASE */
 
-                if (status == CY_DFU_SUCCESS)
-                {
-                    cy_rslt_t extstatus = mtb_serial_memory_write(serialMemObjPtr, extmemAddress, length, params->dataBuffer);
-                    status = (extstatus == CY_RSLT_SUCCESS) ? CY_DFU_SUCCESS : CY_DFU_ERROR_WRITE_EXT;
-                }
+            if (status == CY_DFU_SUCCESS)
+            {
+                cy_rslt_t extstatus = mtb_serial_memory_write(serialMemObjPtr, extmemAddress, length, params->dataBuffer);
+                status = (extstatus == CY_RSLT_SUCCESS) ? CY_DFU_SUCCESS : CY_DFU_ERROR_WRITE_EXT;
             }
         }
+    }
 
         return status;
     }
@@ -376,7 +416,10 @@ cy_en_dfu_status_t Cy_DFU_WriteData (uint32_t address, uint32_t length, uint32_t
     cy_en_dfu_status_t status = CY_DFU_SUCCESS;
 
     /* Check if the address is inside the valid range */
-    if(!AddressValid(address, params))
+    #if (defined (SECURE_ALIAS_OFFSET) && defined (CY_DEVICE_PSE84))
+       address &= ~(SECURE_ALIAS_OFFSET);
+    #endif
+    if (!AddressValid(address, params))
     {
         status = CY_DFU_ERROR_ADDRESS;
     }
@@ -464,7 +507,7 @@ cy_en_dfu_status_t Cy_DFU_WriteData (uint32_t address, uint32_t length, uint32_t
             mtb_hal_system_critical_section_exit(int_status);
         #else
             #if defined CY_IP_MXS40SSRSS && defined COMPONENT_NON_SECURE_DEVICE
-                #error "Add custom non-secure application NVM erase and NVM write calls"
+                #warning "Add custom non-secure application NVM erase and NVM write calls"
             #else
                 uint32_t int_status = mtb_hal_system_critical_section_enter();
 CY_MISRA_DEVIATE_LINE('MISRA C-2012 Rule 11.3','Casting uint8_t* to uint32_t* is safe as input address is always valid and aligned.');
@@ -509,7 +552,10 @@ cy_en_dfu_status_t Cy_DFU_ReadData (uint32_t address, uint32_t length, uint32_t 
     }
 
     /* Check if the address is inside the valid range */
-    if(!AddressValid(address, params))
+    #if (defined (SECURE_ALIAS_OFFSET) && defined (CY_DEVICE_PSE84))
+        address &= ~(SECURE_ALIAS_OFFSET);
+    #endif
+    if (!AddressValid(address, params))
     {
         status = CY_DFU_ERROR_ADDRESS;
     }
@@ -522,7 +568,7 @@ cy_en_dfu_status_t Cy_DFU_ReadData (uint32_t address, uint32_t length, uint32_t 
         #if (CY_DFU_OPT_EXTERNAL_MEMORY != 0U)
             status = Ext_Flash_ReadRow(address, length, params->dataBuffer);
         #elif defined CY_IP_MXS40SSRSS && defined COMPONENT_NON_SECURE_DEVICE
-            (void)memcpy(params->dataBuffer, (const void*)address, (size_t)length);
+            (void)memcpy(params->dataBuffer, (const uint8_t*)address, (size_t)length);
             status = CY_DFU_SUCCESS;
         #else
             cy_rslt_t fstatus = mtb_hal_nvm_read(&nvm_obj, address, params->dataBuffer, length);
@@ -566,7 +612,7 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport)
 #if (CY_DFU_OPT_EXTERNAL_MEMORY == 0U)
     /* Initialize NVM object */
     #if defined CY_IP_MXS40SSRSS && defined COMPONENT_NON_SECURE_DEVICE
-        #error "Add custom non-secure application NVM initialization call"
+        #warning "Add custom non-secure application NVM initialization call"
     #endif /* defined CY_IP_MXS40SSRSS && defined COMPONENT_NON_SECURE_DEVICE */
 #endif /* (CY_DFU_OPT_EXTERNAL_MEMORY == 0U) */
 
@@ -576,7 +622,7 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport)
     Cy_Flashc_MainWriteEnable();
 
     /* Get NVM characteristics */
-    ntb_hal_nvm_get_info(&nvm_obj, &nvm_info);
+    mtb_hal_nvm_get_info(&nvm_obj, &nvm_info);
     blocks_info = nvm_info.regions;
     blocks_count = nvm_info.region_count;
 #endif
@@ -619,6 +665,11 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport)
             CANFD_CanfdCyBtldrCommStart();
             break;
     #endif /* COMPONENT_DFU_CANFD */
+    #ifdef COMPONENT_DFU_PMBUS
+        case CY_DFU_PMBUS:
+            PMBUS_CyBtldrCommStart();
+            break;
+    #endif /* COMPONENT_DFU_PMBUS */
 
         default:
             /* Selected interface in not applicable */
@@ -626,6 +677,42 @@ void Cy_DFU_TransportStart(cy_en_dfu_transport_t transport)
             break;
     }
 }
+
+#if (CY_DFU_OPT_HOST_MODE != 0U)
+/*******************************************************************************
+* Function Name: Cy_DFU_HostTransportStart
+****************************************************************************//**
+*
+* This function documentation is part of the DFU SDK API, see the
+* cy_dfu.h file or DFU SDK API Reference Manual for details.
+*
+*******************************************************************************/
+void Cy_DFU_HostTransportStart(cy_en_dfu_transport_t transport)
+{
+    selectedHostInterface = transport;
+
+    #ifdef COMPONENT_DFU_HOST_I2C
+    if (transport == CY_DFU_I2C)
+    {
+        Host_I2cStart();
+    }
+    else
+    #endif /* COMPONENT_DFU_HOST_I2C */
+    #ifdef COMPONENT_DFU_HOST_UART
+    if (transport == CY_DFU_UART)
+    {
+        Host_UartStart();
+    }
+    else
+    #endif /* COMPONENT_DFU_HOST_UART */
+    {
+        /* Selected interface in not applicable */
+        CY_DFU_LOG_ERR("Selected interface in not applicable");
+        CY_ASSERT(false);
+        (void)transport;
+    }
+}
+#endif /* CY_DFU_OPT_HOST_MODE */
 
 
 /*******************************************************************************
@@ -676,6 +763,11 @@ void Cy_DFU_TransportStop(void)
             CANFD_CanfdCyBtldrCommStop();
             break;
     #endif /* COMPONENT_DFU_CANFD */
+    #ifdef COMPONENT_DFU_PMBUS
+        case CY_DFU_PMBUS:
+            PMBUS_CyBtldrCommStop();
+            break;
+    #endif /* COMPONENT_DFU_PMBUS */
 
         default:
             /* Selected interface in not applicable */
@@ -684,6 +776,40 @@ void Cy_DFU_TransportStop(void)
     }
 }
 
+#if (CY_DFU_OPT_HOST_MODE != 0U)
+/*******************************************************************************
+* Function Name: Cy_DFU_HostTransportStop
+****************************************************************************//**
+*
+* This function documentation is part of the DFU SDK API, see the
+* cy_dfu.h file or DFU SDK API Reference Manual for details.
+*
+*******************************************************************************/
+void Cy_DFU_HostTransportStop(void)
+{
+    #ifdef COMPONENT_DFU_HOST_I2C
+    if (selectedHostInterface == CY_DFU_I2C)
+    {
+        Host_I2cStop();
+    }
+    else
+    #endif /* COMPONENT_DFU_HOST_I2C */
+    #ifdef COMPONENT_DFU_HOST_UART
+    if (selectedHostInterface == CY_DFU_UART)
+    {
+        Host_UartStop();
+    }
+    else
+    #endif /* COMPONENT_DFU_HOST_UART */
+    {
+        /* Selected interface in not applicable */
+        CY_DFU_LOG_ERR("Selected interface in not applicable");
+        CY_ASSERT(false);
+    }
+
+    selectedHostInterface = CY_DFU_NONE;
+}
+#endif /* CY_DFU_OPT_HOST_MODE */
 
 /*******************************************************************************
 * Function Name: Cy_DFU_TransportReset
@@ -733,6 +859,11 @@ void Cy_DFU_TransportReset(void)
             CANFD_CanfdCyBtldrCommReset();
             break;
     #endif /* COMPONENT_DFU_CANFD */
+    #ifdef COMPONENT_DFU_PMBUS
+        case CY_DFU_PMBUS:
+            PMBUS_CyBtldrCommReset();
+            break;
+    #endif /* COMPONENT_DFU_PMBUS */
 
         default:
             /* Selected interface in not applicable */
@@ -741,6 +872,38 @@ void Cy_DFU_TransportReset(void)
     }
 }
 
+#if (CY_DFU_OPT_HOST_MODE != 0U)
+/*******************************************************************************
+* Function Name: Cy_DFU_HostTransportReset
+****************************************************************************//**
+*
+* This function documentation is part of the DFU SDK API, see the
+* cy_dfu.h file or DFU SDK API Reference Manual for details.
+*
+*******************************************************************************/
+void Cy_DFU_HostTransportReset(void)
+{
+    #ifdef COMPONENT_DFU_HOST_I2C
+    if (selectedHostInterface == CY_DFU_I2C)
+    {
+        Host_I2cReset();
+    }
+    else
+    #endif /* COMPONENT_DFU_HOST_I2C */
+    #ifdef COMPONENT_DFU_HOST_UART
+    if (selectedHostInterface == CY_DFU_UART)
+    {
+        Host_UartReset();
+    }
+    else
+    #endif /* COMPONENT_DFU_HOST_UART */
+    {
+        /* Selected interface in not applicable */
+        CY_DFU_LOG_ERR("Selected interface in not applicable");
+        CY_ASSERT(false);
+    }
+}
+#endif /* CY_DFU_OPT_HOST_MODE */
 
 /*******************************************************************************
 * Function Name: Cy_DFU_TransportRead
@@ -792,6 +955,11 @@ cy_en_dfu_status_t Cy_DFU_TransportRead(uint8_t buffer[], uint32_t size, uint32_
             status = CANFD_CanfdCyBtldrCommRead(buffer, size, count, timeout);
             break;
     #endif /* COMPONENT_DFU_CANFD */
+    #ifdef COMPONENT_DFU_PMBUS
+        case CY_DFU_PMBUS:
+            status = PMBUS_CyBtldrCommRead(buffer, size, count, timeout);
+            break;
+    #endif /* COMPONENT_DFU_PMBUS */
 
         default:
             /* Selected interface in not applicable */
@@ -802,6 +970,49 @@ cy_en_dfu_status_t Cy_DFU_TransportRead(uint8_t buffer[], uint32_t size, uint32_
     return status;
 }
 
+#if (CY_DFU_OPT_HOST_MODE != 0U)
+/*******************************************************************************
+* Function Name: Cy_DFU_HostTransportRead
+****************************************************************************//**
+*
+* This function documentation is part of the DFU SDK API, see the
+* cy_dfu.h file or DFU SDK API Reference Manual for details.
+*
+*******************************************************************************/
+cy_en_dfu_status_t Cy_DFU_HostTransportRead(uint8_t buffer[], uint32_t size, uint32_t *count, uint32_t timeout)
+{
+    cy_en_dfu_status_t status = CY_DFU_ERROR_UNKNOWN;
+
+    CY_ASSERT(selectedHostInterface != CY_DFU_NONE);
+
+    #ifdef COMPONENT_DFU_HOST_I2C
+    if (selectedHostInterface == CY_DFU_I2C)
+    {
+        status = Host_I2cRead(buffer, size, count, timeout);
+    }
+    else
+    #endif /* COMPONENT_DFU_HOST_I2C */
+    #ifdef COMPONENT_DFU_HOST_UART
+    if (selectedHostInterface == CY_DFU_UART)
+    {
+        status = Host_UartRead(buffer, size, count, timeout);
+    }
+    else
+    #endif /* COMPONENT_DFU_HOST_UART */
+    {
+        /* Selected interface in not applicable */
+        CY_DFU_LOG_ERR("Selected interface in not applicable");
+        CY_ASSERT(false);
+
+        (void)buffer;
+        (void)size;
+        (void)count;
+        (void)timeout;
+    }
+
+    return status;
+}
+#endif /* CY_DFU_OPT_HOST_MODE */
 
 /*******************************************************************************
 * Function Name: Cy_DFU_TransportWrite
@@ -853,6 +1064,11 @@ cy_en_dfu_status_t Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size, uint32
             status = CANFD_CanfdCyBtldrCommWrite(buffer, size, count, timeout);
             break;
     #endif /* COMPONENT_DFU_CANFD */
+    #ifdef COMPONENT_DFU_PMBUS
+        case CY_DFU_PMBUS:
+            status = PMBUS_CyBtldrCommWrite(buffer, size, count, timeout);
+            break;
+    #endif /* COMPONENT_DFU_PMBUS */
 
         default:
             /* Selected interface in not applicable */
@@ -863,5 +1079,48 @@ cy_en_dfu_status_t Cy_DFU_TransportWrite(uint8_t buffer[], uint32_t size, uint32
     return status;
 }
 
+#if (CY_DFU_OPT_HOST_MODE != 0U)
+/*******************************************************************************
+* Function Name: Cy_DFU_HostTransportWrite
+****************************************************************************//**
+*
+* This function documentation is part of the DFU SDK API, see the
+* cy_dfu.h file or DFU SDK API Reference Manual for details.
+*
+*******************************************************************************/
+cy_en_dfu_status_t Cy_DFU_HostTransportWrite(uint8_t buffer[], uint32_t size, uint32_t *count, uint32_t timeout)
+{
+    cy_en_dfu_status_t status = CY_DFU_ERROR_UNKNOWN;
+
+    CY_ASSERT(selectedHostInterface != CY_DFU_NONE);
+
+    #ifdef COMPONENT_DFU_HOST_I2C
+    if (selectedHostInterface == CY_DFU_I2C)
+    {
+        status = Host_I2cWrite(buffer, size, count, timeout);
+    }
+    else
+    #endif /* COMPONENT_DFU_HOST_I2C */
+    #ifdef COMPONENT_DFU_HOST_UART
+    if (selectedHostInterface == CY_DFU_UART)
+    {
+        status = Host_UartWrite(buffer, size, count, timeout);
+    }
+    else
+    #endif /* COMPONENT_DFU_HOST_UART */
+    {
+        /* Selected interface in not applicable */
+        CY_DFU_LOG_ERR("Selected interface in not applicable");
+        CY_ASSERT(false);
+
+        (void)buffer;
+        (void)size;
+        (void)count;
+        (void)timeout;
+    }
+
+    return status;
+}
+#endif /* CY_DFU_OPT_HOST_MODE */
 
 /* [] END OF FILE */

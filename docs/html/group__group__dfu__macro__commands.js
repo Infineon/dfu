@@ -12,6 +12,8 @@ var group__group__dfu__macro__commands =
     [ "CY_DFU_CMD_SET_APP_META", "group__group__dfu__macro__commands.html#gac36e608a3343309f5c0a80c806a654a0", null ],
     [ "CY_DFU_CMD_GET_METADATA", "group__group__dfu__macro__commands.html#ga684f282c762894a5e4a785fc54dc65b1", null ],
     [ "CY_DFU_CMD_SET_EIVECTOR", "group__group__dfu__macro__commands.html#ga84d59b1fe91358caf8ae4cb4a50c12ea", null ],
+    [ "CY_DFU_CMD_ENTER_HOST_MODE", "group__group__dfu__macro__commands.html#gad5c71175b7697e48d799b66431a0a6ea", null ],
+    [ "CY_DFU_CMD_EXIT_HOST_MODE", "group__group__dfu__macro__commands.html#gada4a0deba400bb1f65d3a949e4eb1b6c", null ],
     [ "CY_DFU_USER_CMD_START", "group__group__dfu__macro__commands.html#ga9b031f406a26092bf0a9b1981f2a32ae", null ],
     [ "CY_DFU_USER_CMD_END", "group__group__dfu__macro__commands.html#gaec1b36ea08795d56ba3f63af46fdb280", null ]
 ];

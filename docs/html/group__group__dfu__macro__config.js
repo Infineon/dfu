@@ -1,6 +1,5 @@
 var group__group__dfu__macro__config =
 [
-    [ "Functions", "group__group__dfu__functions.html", "group__group__dfu__functions" ],
     [ "CY_DFU_LOG_LEVEL", "group__group__dfu__macro__config.html#gac741694a868d101b9febd62dbea5a8a0", null ],
     [ "CY_DFU_BASIC_FLOW", "group__group__dfu__macro__config.html#ga2589c41699d15889ea6ede9961688f99", null ],
     [ "CY_DFU_MCUBOOT_FLOW", "group__group__dfu__macro__config.html#ga1fd9a1a5a6386dc3d01e9b381d97ecdb", null ],

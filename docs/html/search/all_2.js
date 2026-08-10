@@ -1,9 +1,6 @@
 var searchData=
 [
-  ['databuffer',['dataBuffer',['../group__group__dfu__data__structs.html#af8a1cf06e15fae5ed56840b92938e176',1,'cy_stc_dfu_params_t']]],
-  ['dataoffset',['dataOffset',['../group__group__dfu__data__structs.html#ae93116a573d35a278c7630f68c904c43',1,'cy_stc_dfu_params_t']]],
-  ['data_20structures',['Data Structures',['../group__group__dfu__data__structs.html',1,'']]],
-  ['dfu_20commands',['DFU Commands',['../group__group__dfu__macro__commands.html',1,'']]],
-  ['dfu_20log_20levels',['DFU Log Levels',['../group__group__dfu__macro__log.html',1,'']]],
-  ['dfu_20state',['DFU State',['../group__group__dfu__macro__state.html',1,'']]]
+  ['appid_0',['appId',['../group__group__dfu__data__structs.html#ac1ea5832fe23467ea98d2760f0d87a6b',1,'cy_stc_dfu_params_t']]],
+  ['application_20management_1',['Application Management',['../group__group__dfu__functions__app.html',1,'']]],
+  ['appverified_2',['appVerified',['../group__group__dfu__data__structs.html#aa316309fbc14b2984aea6f9545e2c995',1,'cy_stc_dfu_params_t']]]
 ];

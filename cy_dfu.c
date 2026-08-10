@@ -1,41 +1,38 @@
 /***************************************************************************//**
 * \file cy_dfu.c
-* \version 6.1.0
 *
 *  This file provides the implementation of DFU Middleware.
 *
 ********************************************************************************
 * \copyright
-* (c) (2016-2025), Cypress Semiconductor Corporation (an Infineon company) or
-* an affiliate of Cypress Semiconductor Corporation. All rights reserved.
+* (c) (2016-2026), Infineon Technologies AG, or an affiliate of Infineon
+* Technologies AG. All rights reserved.
 ********************************************************************************
-* This software, including source code, documentation and related materials
-* ("Software") is owned by Cypress Semiconductor Corporation or one of its
-* affiliates ("Cypress") and is protected by and subject to worldwide patent
-* protection (United States and foreign), United States copyright laws and
-* international treaty provisions. Therefore, you may use this Software only
-* as provided in the license agreement accompanying the software package from
-* which you obtained this Software ("EULA").
+* This software, associated documentation and materials ("Software") is
+* owned by Infineon Technologies AG or one of its affiliates ("Infineon")
+* and is protected by and subject to worldwide patent protection, worldwide
+* copyright laws, and international treaty provisions. Therefore, you may use
+* this Software only as provided in the license agreement accompanying the
+* software package from which you obtained this Software. If no license
+* agreement applies, then any use, reproduction, modification, translation, or
+* compilation of this Software is prohibited without the express written
+* permission of Infineon.
 *
-* If no EULA applies, Cypress hereby grants you a personal, non-exclusive,
-* non-transferable license to copy, modify, and compile the Software source
-* code solely for use in connection with Cypress's integrated circuit products.
-* Any reproduction, modification, translation, compilation, or representation
-* of this Software except as specified above is prohibited without the express
-* written permission of Cypress.
-*
-* Disclaimer: THIS SOFTWARE IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, NONINFRINGEMENT, IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. Cypress
-* reserves the right to make changes to the Software without notice. Cypress
-* does not assume any liability arising out of the application or use of the
-* Software or any product or circuit described in the Software. Cypress does
-* not authorize its products for use in any products where a malfunction or
-* failure of the Cypress product may reasonably be expected to result in
-* significant property damage, injury or death ("High Risk Product"). By
-* including Cypress's product in a High Risk Product, the manufacturer of such
-* system or application assumes all risk of such use and in doing so agrees to
-* indemnify Cypress against all liability.
+* Disclaimer: UNLESS OTHERWISE EXPRESSLY AGREED WITH INFINEON, THIS SOFTWARE
+* IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+* INCLUDING, BUT NOT LIMITED TO, ALL WARRANTIES OF NON-INFRINGEMENT OF
+* THIRD-PARTY RIGHTS AND IMPLIED WARRANTIES SUCH AS WARRANTIES OF FITNESS FOR A
+* SPECIFIC USE/PURPOSE OR MERCHANTABILITY.
+* Infineon reserves the right to make changes to the Software without notice.
+* You are responsible for properly designing, programming, and testing the
+* functionality and safety of your intended application of the Software, as
+* well as complying with any legal requirements related to its use. Infineon
+* does not guarantee that the Software will be free from intrusion, data theft
+* or loss, or other breaches ("Security Breaches"), and Infineon shall have
+* no liability arising out of any Security Breaches. Unless otherwise
+* explicitly approved by Infineon, the Software may not be used in any
+* application where a failure of the Product or any consequences of the use
+* thereof can reasonably be expected to result in personal injury.
 *******************************************************************************/
 
 #include <string.h>
@@ -2191,7 +2188,7 @@ static cy_en_dfu_status_t CommandSetEIVector(uint8_t *packet, uint32_t *rspSize,
     if (( (size == 0U) ||  (size == DATA_PACKET_SIZE_8BYTES)
         || (size == DATA_PACKET_SIZE_16BYTES) ) && (params->encryptionVector != NULL))
     {
-CY_MISRA_FP_LINE('MISRA C-2012 Rule 21.18','Per C99 standard (7.21.1/2) 0 value is allowed with no undefined behaviour. ');
+CY_MISRA_FP_LINE('MISRA C-2012 Rule 21.18','Per C99 standard (7.21.1/2) 0 value is allowed with no undefined behavior. ');
         (void) memcpy((void*)params->encryptionVector, (const void*)GetPacketData(packet, PACKET_DATA_NO_OFFSET), size);
     }
     else
@@ -2341,6 +2338,105 @@ static cy_en_dfu_status_t ContinueHelper(uint32_t command, uint8_t *packet, uint
     return (status);
 }
 
+#if (CY_DFU_OPT_HOST_MODE != 0U)
+/*******************************************************************************
+* Function Name: ContinueBridgingMode
+****************************************************************************//**
+*
+* The function processes Host Commands according to Host Command/Response
+* Protocol for the Companion device in bridging mode.
+* The Target device acts as the master, while the Companion device acts as the slave.
+*
+* \param command    The DFU packet command value.
+* \param packet     The pointer to the DFU packet buffer.
+* \param rspSize    The pointer to a response packet size.
+* \param params     The pointer to a DFU parameters structure.
+*                   See \ref cy_stc_dfu_params_t .
+* \param noResponse The pointer to a variable that states whether to send
+*                    a response back to a DFU Host or not.
+*
+* \return See \ref cy_en_dfu_status_t
+*
+*******************************************************************************/
+static cy_en_dfu_status_t ContinueBridgingMode(uint32_t command, uint8_t *packet, uint32_t *rspSize,
+                                               cy_stc_dfu_params_t *params, bool *noResponse)
+{
+    cy_en_dfu_status_t status = CY_DFU_ERROR_UNKNOWN; /* Give a value to a close warning */
+
+    uint32_t numberBytes = GetPacketDSize(packet) + CY_DFU_PACKET_MIN_SIZE;
+    uint32_t actualBytes = 0U;
+
+    status = Cy_DFU_HostTransportWrite(packet, numberBytes, &actualBytes, params->timeout);
+
+    if ((status == CY_DFU_SUCCESS) && (numberBytes == actualBytes))
+    {
+        if ((command != CY_DFU_CMD_SEND_DATA_WR) && (command != CY_DFU_CMD_SYNC)
+              && (command != CY_DFU_CMD_EXIT) )
+        {
+            uint32_t packetDataSize = 0U;
+            uint32_t timeOut = 0U;
+            (void)memset(packet, 0xFF, CY_DFU_SIZEOF_CMD_BUFFER);
+
+            while ((packet[PACKET_SOP_IDX] != PACKET_SOP_VALUE) && (timeOut++ < TRANSPORT_REPLY_TIMEOUT_MS))
+            {
+                mtb_hal_system_delay_us(CY_DFU_TRANSPORT_REPLY_DELAY_US);
+                (void)Cy_DFU_HostTransportRead(packet, PACKET_HEADER_SIZE, &actualBytes, params->timeout);
+            }
+
+            if (timeOut++ < TRANSPORT_REPLY_TIMEOUT_MS)
+            {
+                packetDataSize = GetPacketDSize(packet);
+
+                status = Cy_DFU_HostTransportRead(packet + PACKET_HEADER_SIZE,
+                                                  packetDataSize + PACKET_FOOTER_SIZE,
+                                                  &actualBytes,
+                                                  params->timeout);
+            }
+            else
+            {
+                status = CY_DFU_ERROR_TIMEOUT;
+            }
+
+            if ((status == CY_DFU_SUCCESS) && (packetDataSize + PACKET_FOOTER_SIZE == actualBytes))
+            {
+                *rspSize = GetPacketDSize(packet);
+            }
+            else if (status == CY_DFU_ERROR_TIMEOUT)
+            {
+                *noResponse = true;
+            }
+            else
+            {
+                /* Empty */
+            }
+        }
+        else
+        {
+            if (command == CY_DFU_CMD_SYNC)
+            {
+                params->dataOffset = 0U;
+            }
+            else if (command == CY_DFU_CMD_EXIT)
+            {
+                (void)memset(packet, 0xFF, CY_DFU_SIZEOF_CMD_BUFFER);
+                (void)Cy_DFU_HostTransportRead(packet, PACKET_HEADER_SIZE, &actualBytes, params->timeout);
+            }
+
+            *noResponse = true;
+        }
+    }
+    else if (status == CY_DFU_ERROR_TIMEOUT)
+    {
+        *noResponse = true;
+    }
+    else
+    {
+        /* Empty */
+    }
+
+    return status;
+}
+#endif /* CY_DFU_OPT_HOST_MODE */
 
 /*******************************************************************************
 * Function Name: Cy_DFU_Continue
@@ -2363,43 +2459,121 @@ static cy_en_dfu_status_t ContinueHelper(uint32_t command, uint8_t *packet, uint
 *******************************************************************************/
 cy_en_dfu_status_t Cy_DFU_Continue(uint32_t *state, cy_stc_dfu_params_t *params)
 {
+    CY_ASSERT(params->timeout != 0U);
+    CY_ASSERT(params->dataBuffer != NULL);
+    CY_ASSERT(params->packetBuffer != NULL);
+
     cy_en_dfu_status_t status = CY_DFU_ERROR_UNKNOWN; /* Give a value to a close warning */
     uint8_t *packet = params->packetBuffer; /* Receive/Transmit buffer */
 
     uint32_t rspSize = CY_DFU_RSP_SIZE_0;
     bool noResponse = false;        /* Indicates whether to send a response packet back to the Host */
 
-    CY_ASSERT(params->timeout != 0U);
-    CY_ASSERT(params->dataBuffer != NULL);
-    CY_ASSERT(params->packetBuffer != NULL);
-
-
-    if ( (*state == CY_DFU_STATE_NONE) || (*state == CY_DFU_STATE_UPDATING) )
+    if ((*state == CY_DFU_STATE_NONE) || (*state == CY_DFU_STATE_UPDATING)
+#if (CY_DFU_OPT_HOST_MODE != 0U)
+        || (*state == CY_DFU_STATE_BRIDGING)
+#endif /* CY_DFU_OPT_HOST_MODE */
+       )
     {
         status = ReadVerifyPacket(packet, &noResponse, params->timeout);
         if (status == CY_DFU_SUCCESS)
         {
             uint32_t command = GetPacketCommand(packet);
 
-            if      (command == CY_DFU_CMD_ENTER)
+            if (command == CY_DFU_CMD_ENTER)
             {
                 CY_DFU_LOG_INF("Receive Start command");
+#if (CY_DFU_OPT_HOST_MODE != 0U)
+                if (*state == CY_DFU_STATE_BRIDGING)
+                {
+                    status = ContinueBridgingMode(command, packet, &rspSize, params, &noResponse);
+                }
+                else
+                {
+                    status = CommandEnter(packet, &rspSize, state, params);
+                }
+#else
                 status = CommandEnter(packet, &rspSize, state, params);
+#endif /* CY_DFU_OPT_HOST_MODE */
             }
             else if (command == CY_DFU_CMD_EXIT)
             {
+#if (CY_DFU_OPT_HOST_MODE != 0U)
                 CY_DFU_LOG_INF("Receive Exit command");
+                if (*state == CY_DFU_STATE_BRIDGING)
+                {
+                    status = ContinueBridgingMode(command, packet, &rspSize, params, &noResponse);
+                }
+                else
+                {
+                    *state = CY_DFU_STATE_FINISHED;
+                    noResponse = true;
+                }
+#else
+                *state = CY_DFU_STATE_FINISHED;
+                noResponse = true;
+#endif /* CY_DFU_OPT_HOST_MODE */
+
+            }
+#if (CY_DFU_OPT_HOST_MODE != 0U)
+            else if (command == CY_DFU_CMD_ENTER_HOST_MODE)
+            {
+                CY_DFU_LOG_INF("Enter Host mode:");
+                noResponse = true;
+
+                if (*GetPacketData(packet, HOST_MODE_CMD_MODE_IDX) == HOST_MODE_CMD_MODE_BRIDGING)
+                {
+                    switch (*GetPacketData(packet, HOST_MODE_INTERFACE_IDX))
+                    {
+                        #ifdef COMPONENT_DFU_HOST_I2C
+                        case (HOST_MODE_INTERFACE_I2C):
+                            *state = CY_DFU_STATE_BRIDGING;
+                            CY_DFU_LOG_INF("BRIDGING I2C");
+                            Cy_DFU_HostTransportStart(CY_DFU_I2C);
+                            break;
+                        #endif /* DFU_HOST_I2C */
+                        #ifdef COMPONENT_DFU_HOST_UART
+                        case (HOST_MODE_INTERFACE_UART):
+                            *state = CY_DFU_STATE_BRIDGING;
+                            CY_DFU_LOG_INF("BRIDGING UART");
+                            Cy_DFU_HostTransportStart(CY_DFU_UART);
+                            break;
+                        #endif /* DFU_HOST_UART */
+                        default:
+                            /* Invalid interface - no transport started */
+                            CY_DFU_LOG_ERR("Invalid host mode interface");
+                            break;
+                    }
+                }
+                else
+                {
+                    /* Empty */
+                }
+
+            }
+            else if (command == CY_DFU_CMD_EXIT_HOST_MODE)
+            {
+                CY_DFU_LOG_INF("Receive Exit Host mode");
+
+                /* Stop DEFAULT Host transport */
+                Cy_DFU_HostTransportStop();
+
                 *state = CY_DFU_STATE_FINISHED;
                 noResponse = true;
             }
-            else if (*state != CY_DFU_STATE_UPDATING)
+            else if (*state == CY_DFU_STATE_BRIDGING)
             {
-                CY_DFU_LOG_INF("Receive Unexpected command in current state");
-                status = CY_DFU_ERROR_CMD;
+                status = ContinueBridgingMode(command, packet, &rspSize, params, &noResponse);
+            }
+#endif /* CY_DFU_OPT_HOST_MODE */
+            else if (*state == CY_DFU_STATE_UPDATING)
+            {
+                status = ContinueHelper(command, packet, &rspSize, params, &noResponse);
             }
             else
             {
-                status = ContinueHelper(command, packet, &rspSize, params, &noResponse);
+                CY_DFU_LOG_INF("Receive Unexpected command in current state");
+                status = CY_DFU_ERROR_CMD;
             }
         }
 
@@ -2412,6 +2586,7 @@ cy_en_dfu_status_t Cy_DFU_Continue(uint32_t *state, cy_stc_dfu_params_t *params)
     {
         /* empty */
     }
+
     return (status);
 }
 

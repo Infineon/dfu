@@ -3,6 +3,7 @@ var group__group__dfu__macro =
     [ "User Config Macros", "group__group__dfu__macro__config.html", "group__group__dfu__macro__config" ],
     [ "DFU State", "group__group__dfu__macro__state.html", "group__group__dfu__macro__state" ],
     [ "DFU Commands", "group__group__dfu__macro__commands.html", "group__group__dfu__macro__commands" ],
+    [ "Host Mode Macros", "group__group__dfu__macro__host__mode.html", "group__group__dfu__macro__host__mode" ],
     [ "Read/Write Data IO Control Values", "group__group__dfu__macro__ioctl.html", "group__group__dfu__macro__ioctl" ],
     [ "Response Size", "group__group__dfu__macro__response__size.html", "group__group__dfu__macro__response__size" ],
     [ "DFU Log Levels", "group__group__dfu__macro__log.html", "group__group__dfu__macro__log" ],

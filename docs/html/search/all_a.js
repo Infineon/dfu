@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['read_2fwrite_20data_20io_20control_20values',['Read/Write Data IO Control Values',['../group__group__dfu__macro__ioctl.html',1,'']]],
-  ['response_20size',['Response Size',['../group__group__dfu__macro__response__size.html',1,'']]]
+  ['levels_0',['DFU Log Levels',['../group__group__dfu__macro__log.html',1,'']]],
+  ['library_206_202_1',['Device Firmware Update (DFU) Middleware Library 6.2',['../index.html',1,'']]],
+  ['log_20levels_2',['DFU Log Levels',['../group__group__dfu__macro__log.html',1,'']]]
 ];
